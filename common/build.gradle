@@ -1,6 +1,35 @@
-// Phase 2 (custom vanilla setup) will replace this stub.
-// For now, common compiles as plain Java with no Minecraft deps.
+import wd40.vaakx.lubricant.buildscript.SetupVanillaMinecraftTask
+
+// The 'common' module compiles against vanilla Minecraft only.
+// Loader-specific code lives in :fabric, :forge, :neoforge.
+
+def vanillaMcJar = layout.buildDirectory.file("minecraft/minecraft-${minecraft_version}-mojmap.jar")
+
+tasks.register('setupVanillaMinecraft', SetupVanillaMinecraftTask) {
+    mcVersion = project.minecraft_version
+    outputJar = vanillaMcJar
+}
+
+// All compile/test tasks need MC ready first.
+tasks.named('compileJava').configure {
+    dependsOn 'setupVanillaMinecraft'
+}
 
 dependencies {
-    // empty
+    // Vanilla MC is a compile-only classpath entry. Loader modules add their own MC
+    // (with mappings their loader expects) when they consume :common.
+    compileOnly files(vanillaMcJar)
+}
+
+// Make the vanilla MC jar available to other subprojects that depend on :common.
+configurations {
+    vanillaMc {
+        canBeConsumed = true
+        canBeResolved = false
+    }
+}
+artifacts {
+    vanillaMc(vanillaMcJar) {
+        builtBy tasks.named('setupVanillaMinecraft')
+    }
 }

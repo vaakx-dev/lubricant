@@ -1,0 +1,27 @@
+// buildSrc is a Gradle convention: code here gets compiled and put on the classpath
+// of every other build.gradle in this project. Lets us write Gradle tasks in plain Java.
+
+plugins {
+    id 'java-gradle-plugin'
+}
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(21)
+}
+
+repositories {
+    mavenCentral()
+    maven { url = "https://maven.fabricmc.net/" }
+}
+
+dependencies {
+    // FabricMC's mapping reader. Handles ProGuard format (Mojang's format) and tiny v2.
+    implementation 'net.fabricmc:mapping-io:0.6.1'
+
+    // FabricMC's remapper. Rewrites class/field/method references in a jar from one
+    // namespace (e.g. obfuscated) to another (e.g. Mojang names).
+    implementation 'net.fabricmc:tiny-remapper:0.10.4'
+
+    // For parsing Mojang's launcher manifest JSON.
+    implementation 'com.google.code.gson:gson:2.11.0'
+}
