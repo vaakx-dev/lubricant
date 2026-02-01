@@ -1,0 +1,5 @@
+// Phase 5 will fill this in with neoforged moddev.
+
+dependencies {
+    implementation project(':common')
+}

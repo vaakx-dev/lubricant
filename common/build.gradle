@@ -1,0 +1,6 @@
+// Phase 2 (custom vanilla setup) will replace this stub.
+// For now, common compiles as plain Java with no Minecraft deps.
+
+dependencies {
+    // empty
+}

@@ -1,0 +1,5 @@
+// Phase 4 will fill this in with ForgeGradle.
+
+dependencies {
+    implementation project(':common')
+}
