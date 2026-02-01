@@ -1,57 +1,103 @@
 package wd40.vaakx.lubricant.buildscript;
 
 import org.gradle.api.DefaultTask;
+import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Input;
+import org.gradle.api.tasks.InputFiles;
+import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.OutputFile;
+import org.gradle.api.tasks.PathSensitive;
+import org.gradle.api.tasks.PathSensitivity;
 import org.gradle.api.tasks.TaskAction;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
-// Gradle task that produces a Mojang-named Minecraft client jar at the configured
-// output location. Downloads + remap happens once per (mcVersion, gradle user home)
-// and is shared across projects via the gradle user cache.
+// Gradle task that produces a Mojang-named (and optionally Parchment-overlaid,
+// access-widened) Minecraft client jar at the configured output location.
+//
+// Caching strategy:
+//   ~/.gradle/caches/lubricant-mc/<mc>/client.jar              (Mojang download, sha1-verified)
+//   ~/.gradle/caches/lubricant-mc/<mc>/client_mappings.txt     (Mojang download, sha1-verified)
+//   ~/.gradle/caches/lubricant-mc/<mc>/parchment-<v>.json      (ParchmentMC download)
+//   ~/.gradle/caches/lubricant-mc/<mc>/minecraft-mojmap-p<v>.jar (remapped, parchment-overlaid)
+//   <project>/build/minecraft/...-mojmap.jar                   (above + AW applied; @OutputFile)
+//
+// AW is applied per build into the project-local file because the AW list is per-project.
 
 public abstract class SetupVanillaMinecraftTask extends DefaultTask {
 
     @Input
     public abstract Property<String> getMcVersion();
 
+    @Input @Optional
+    public abstract Property<String> getParchmentVersion();
+
+    @Input @Optional
+    public abstract Property<String> getParchmentMcVersion();
+
+    @InputFiles @Optional @PathSensitive(PathSensitivity.RELATIVE)
+    public abstract ConfigurableFileCollection getAccessWideners();
+
     @OutputFile
     public abstract RegularFileProperty getOutputJar();
 
     @TaskAction
     public void run() throws Exception {
-        String version = getMcVersion().get();
+        String mc = getMcVersion().get();
 
-        // Shared cache across all projects on this machine, keyed by MC version.
         Path cache = getProject().getGradle().getGradleUserHomeDir().toPath()
-                .resolve("caches").resolve("lubricant-mc").resolve(version);
+                .resolve("caches").resolve("lubricant-mc").resolve(mc);
         Files.createDirectories(cache);
 
-        // Download vanilla bits if not already cached + verified.
-        VanillaDownloader.Result downloaded = new VanillaDownloader().fetch(version, cache);
+        // 1. Vanilla.
+        VanillaDownloader.Result vanilla = new VanillaDownloader().fetch(mc, cache);
 
-        Path target = getOutputJar().get().getAsFile().toPath();
-
-        // If a remapped jar already exists in cache and our target points to it (or matches),
-        // we can skip the remap. Check by comparing modification times against inputs.
-        Path cachedRemapped = cache.resolve("minecraft-mojmap.jar");
-        if (Files.exists(cachedRemapped)
-                && Files.getLastModifiedTime(cachedRemapped).toMillis()
-                    > Files.getLastModifiedTime(downloaded.clientJar()).toMillis()) {
-            getLogger().lifecycle("Lubricant: cached mojmap jar is up to date.");
-        } else {
-            getLogger().lifecycle("Lubricant: remapping {} -> Mojang names...", downloaded.clientJar().getFileName());
-            new MojangMappingsRemapper().remap(downloaded.clientJar(), downloaded.mappings(), cachedRemapped);
+        // 2. Parchment (optional).
+        String pv = getParchmentVersion().getOrNull();
+        String pmc = getParchmentMcVersion().getOrElse(mc);
+        Path parchmentJson = null;
+        if (pv != null && !pv.isBlank()) {
+            getLogger().lifecycle("Lubricant: fetching Parchment {}-{}", pmc, pv);
+            parchmentJson = new ParchmentDownloader().fetch(pmc, pv, cache);
         }
 
-        // Copy/link the cached jar to the project-local output location declared as @OutputFile.
-        // Gradle uses this for up-to-date checks against downstream tasks.
+        // 3. Remap obf -> mojang(+parchment), cached per (mc, parchment version).
+        String mojmapName = pv != null && !pv.isBlank()
+                ? "minecraft-mojmap-parchment-" + pmc + "-" + pv + ".jar"
+                : "minecraft-mojmap.jar";
+        Path cachedMojmap = cache.resolve(mojmapName);
+
+        boolean mojmapStale = !Files.exists(cachedMojmap)
+                || Files.getLastModifiedTime(cachedMojmap).toMillis()
+                    < Files.getLastModifiedTime(vanilla.clientJar()).toMillis()
+                || (parchmentJson != null
+                    && Files.getLastModifiedTime(cachedMojmap).toMillis()
+                        < Files.getLastModifiedTime(parchmentJson).toMillis());
+
+        if (mojmapStale) {
+            getLogger().lifecycle("Lubricant: remapping {} -> Mojang names{}",
+                    vanilla.clientJar().getFileName(),
+                    parchmentJson != null ? " + Parchment" : "");
+            new MojangMappingsRemapper().remap(vanilla.clientJar(), vanilla.mappings(), parchmentJson, cachedMojmap);
+        } else {
+            getLogger().lifecycle("Lubricant: cached mojmap jar is up to date.");
+        }
+
+        // 4. Apply access wideners (if any) to a project-local copy.
+        Path target = getOutputJar().get().getAsFile().toPath();
         Files.createDirectories(target.getParent());
-        Files.copy(cachedRemapped, target, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-        getLogger().lifecycle("Lubricant: vanilla MC {} ready at {}", version, target);
+        List<Path> awFiles = getAccessWideners().getFiles().stream()
+                .map(java.io.File::toPath)
+                .toList();
+        new AccessWidenerApplier().apply(cachedMojmap, awFiles, target);
+
+        getLogger().lifecycle("Lubricant: vanilla MC {} ready at {}{}{}",
+                mc, target,
+                pv != null ? " [parchment " + pv + "]" : "",
+                !awFiles.isEmpty() ? " [aw: " + awFiles.size() + " file(s)]" : "");
     }
 }

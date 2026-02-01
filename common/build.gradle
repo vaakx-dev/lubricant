@@ -7,6 +7,9 @@ def vanillaMcJar = layout.buildDirectory.file("minecraft/minecraft-${minecraft_v
 
 tasks.register('setupVanillaMinecraft', SetupVanillaMinecraftTask) {
     mcVersion = project.minecraft_version
+    parchmentVersion = project.parchment_mappings_version
+    parchmentMcVersion = project.parchment_minecraft_version
+    accessWideners.from(fileTree('src/main/resources') { include '*.accesswidener' })
     outputJar = vanillaMcJar
 }
 

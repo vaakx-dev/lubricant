@@ -1,0 +1,11 @@
+accessWidener v2 named
+
+# Add lines here when you need to widen access to vanilla MC members from common code.
+# Format reference: https://wiki.fabricmc.net/tutorial:accesswideners
+#
+# Examples:
+#   accessible class net/minecraft/world/entity/Entity
+#   accessible method net/minecraft/world/entity/Entity setPos (DDD)V
+#   mutable    field  net/minecraft/world/entity/Entity removalReason Lnet/minecraft/world/entity/Entity$RemovalReason;
+#
+# When this file changes, run :common:setupVanillaMinecraft (or any compile task) to re-apply.

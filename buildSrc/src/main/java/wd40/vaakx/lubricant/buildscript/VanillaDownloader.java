@@ -26,6 +26,7 @@ public final class VanillaDownloader {
 
     private final HttpClient http = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(15))
+            .followRedirects(HttpClient.Redirect.NORMAL)
             .build();
     private final Gson gson = new Gson();
 

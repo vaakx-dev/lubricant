@@ -12,16 +12,24 @@ java {
 repositories {
     mavenCentral()
     maven { url = "https://maven.fabricmc.net/" }
+    maven { url = "https://maven.parchmentmc.org/" }
 }
 
 dependencies {
-    // FabricMC's mapping reader. Handles ProGuard format (Mojang's format) and tiny v2.
+    // FabricMC's mapping reader. Handles ProGuard (Mojang) format, Tiny v2, and Parchment JSON.
     implementation 'net.fabricmc:mapping-io:0.6.1'
 
-    // FabricMC's remapper. Rewrites class/field/method references in a jar from one
-    // namespace (e.g. obfuscated) to another (e.g. Mojang names).
+    // FabricMC's remapper. Rewrites class/field/method/parameter refs in a jar.
     implementation 'net.fabricmc:tiny-remapper:0.10.4'
+
+    // FabricMC's access widener: parses .accesswidener files and applies them via ASM.
+    implementation 'net.fabricmc:access-widener:2.1.0'
 
     // For parsing Mojang's launcher manifest JSON.
     implementation 'com.google.code.gson:gson:2.11.0'
+
+    // ASM for the access widener visitor pipeline.
+    implementation 'org.ow2.asm:asm:9.7'
+    implementation 'org.ow2.asm:asm-commons:9.7'
+    implementation 'org.ow2.asm:asm-tree:9.7'
 }
