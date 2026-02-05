@@ -1,5 +1,64 @@
-// Phase 5 will fill this in with neoforged moddev.
+import wd40.vaakx.lubricant.buildscript.AccessWidenerToTransformerConverter
 
-dependencies {
-    implementation project(':common')
+plugins {
+    id 'net.neoforged.moddev' version '2.0.141'
+}
+
+base {
+    archivesName = "${mod_id}-neoforge"
+}
+
+// Share common's source + resource dirs.
+sourceSets.main.java.srcDir rootProject.file('common/src/main/java')
+sourceSets.main.resources.srcDir rootProject.file('common/src/main/resources')
+
+// Convert AW -> AT at config time. Same converter as forge/.
+def awFile = rootProject.file('common/src/main/resources/lubricant.accesswidener')
+def generatedResources = file("${buildDir}/generated/resources")
+def atFile = new File(generatedResources, 'META-INF/accesstransformer.cfg')
+AccessWidenerToTransformerConverter.writeAt(awFile.toPath(), atFile.toPath())
+sourceSets.main.resources.srcDir generatedResources
+
+neoForge {
+    version = project.neoforge_version
+
+    parchment {
+        mappingsVersion = project.parchment_mappings_version
+        minecraftVersion = project.parchment_minecraft_version
+    }
+
+    accessTransformers.from(atFile)
+
+    runs {
+        client {
+            client()
+        }
+        server {
+            server()
+            programArgument '--nogui'
+        }
+        configureEach {
+            logLevel = org.slf4j.event.Level.DEBUG
+        }
+    }
+
+    mods {
+        "${mod_id}" {
+            sourceSet(sourceSets.main)
+        }
+    }
+}
+
+processResources {
+    inputs.property 'version', project.mod_version
+    inputs.property 'mc_version', project.minecraft_version
+    inputs.property 'neoforge_version', project.neoforge_version
+
+    filesMatching('META-INF/neoforge.mods.toml') {
+        expand([
+                version         : project.mod_version,
+                mc_version      : project.minecraft_version,
+                neoforge_version: project.neoforge_version
+        ])
+    }
 }

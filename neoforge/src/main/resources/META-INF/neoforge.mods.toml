@@ -1,0 +1,24 @@
+modLoader = "javafml"
+loaderVersion = "[4,)"
+license = "MIT"
+
+[[mods]]
+modId = "lubricant"
+version = "${version}"
+displayName = "Lubricant"
+authors = "vaakx"
+description = '''Cross-loader platform abstractions for vaakx mods.'''
+
+[[dependencies.lubricant]]
+    modId = "neoforge"
+    type = "required"
+    versionRange = "[${neoforge_version},)"
+    ordering = "NONE"
+    side = "BOTH"
+
+[[dependencies.lubricant]]
+    modId = "minecraft"
+    type = "required"
+    versionRange = "[${mc_version}]"
+    ordering = "NONE"
+    side = "BOTH"
