@@ -1,0 +1,25 @@
+modLoader = "javafml"
+loaderVersion = "[52,)"
+license = "MIT"
+issueTrackerURL = ""
+
+[[mods]]
+modId = "lubricant"
+version = "${version}"
+displayName = "Lubricant"
+authors = "vaakx"
+description = '''Cross-loader platform abstractions for vaakx mods.'''
+
+[[dependencies.lubricant]]
+    modId = "forge"
+    mandatory = true
+    versionRange = "[${forge_version},)"
+    ordering = "NONE"
+    side = "BOTH"
+
+[[dependencies.lubricant]]
+    modId = "minecraft"
+    mandatory = true
+    versionRange = "[${mc_version}]"
+    ordering = "NONE"
+    side = "BOTH"

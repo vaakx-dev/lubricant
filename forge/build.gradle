@@ -1,5 +1,61 @@
-// Phase 4 will fill this in with ForgeGradle.
+plugins {
+    id 'net.minecraftforge.gradle' version '6.0.27'
+    id 'org.parchmentmc.librarian.forgegradle' version '1.+'
+}
+
+base {
+    archivesName = "${mod_id}-forge"
+}
+
+// Share common's source + resource dirs.
+sourceSets.main.java.srcDir rootProject.file('common/src/main/java')
+sourceSets.main.resources.srcDir rootProject.file('common/src/main/resources')
+
+minecraft {
+    // Mojang names with Parchment overlay (parameter names + javadoc).
+    // Channel 'parchment' is provided by the librarian-forgegradle plugin above.
+    mappings channel: 'parchment',
+             version: "${parchment_mappings_version}-${parchment_minecraft_version}"
+
+    runs {
+        client {
+            workingDirectory project.file('runs/client')
+            mods { lubricant { source sourceSets.main } }
+        }
+        server {
+            workingDirectory project.file('runs/server')
+            mods { lubricant { source sourceSets.main } }
+        }
+    }
+}
 
 dependencies {
-    implementation project(':common')
+    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+}
+
+processResources {
+    inputs.property 'version', project.mod_version
+    inputs.property 'mc_version', project.minecraft_version
+    inputs.property 'forge_version', project.forge_version
+
+    filesMatching('META-INF/mods.toml') {
+        expand([
+                version      : project.mod_version,
+                mc_version   : project.minecraft_version,
+                forge_version: project.forge_version
+        ])
+    }
+}
+
+jar {
+    manifest {
+        attributes([
+                'Specification-Title'     : project.mod_id,
+                'Specification-Vendor'    : project.mod_authors,
+                'Specification-Version'   : '1',
+                'Implementation-Title'    : project.mod_id,
+                'Implementation-Version'  : project.mod_version,
+                'Implementation-Vendor'   : project.mod_authors
+        ])
+    }
 }
