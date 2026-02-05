@@ -1,5 +1,39 @@
-// Phase 3 will fill this in with fabric-loom.
+plugins {
+    id 'fabric-loom' version '1.7.4'
+}
+
+base {
+    archivesName = "${mod_id}-fabric"
+}
+
+// Pull common's sources + resources into this project's source set so they're compiled
+// + packaged together. Common stays a single shared source folder rather than a separate jar.
+sourceSets.main.java.srcDir rootProject.file('common/src/main/java')
+sourceSets.main.resources.srcDir rootProject.file('common/src/main/resources')
+
+loom {
+    accessWidenerPath.set(project.rootProject.file('common/src/main/resources/lubricant.accesswidener'))
+}
 
 dependencies {
-    implementation project(':common')
+    minecraft "com.mojang:minecraft:${minecraft_version}"
+    mappings loom.layered {
+        officialMojangMappings()
+        parchment("org.parchmentmc.data:parchment-${parchment_minecraft_version}:${parchment_mappings_version}@zip")
+    }
+    modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
+}
+
+processResources {
+    inputs.property 'version', project.mod_version
+    inputs.property 'mc_version', project.minecraft_version
+    inputs.property 'fabric_loader_version', project.fabric_loader_version
+
+    filesMatching(['fabric.mod.json', 'quilt.mod.json']) {
+        expand([
+                version              : project.mod_version,
+                mc_version           : project.minecraft_version,
+                fabric_loader_version: project.fabric_loader_version
+        ])
+    }
 }

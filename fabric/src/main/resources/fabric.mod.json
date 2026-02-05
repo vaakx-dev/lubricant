@@ -1,0 +1,19 @@
+{
+    "schemaVersion": 1,
+    "id": "lubricant",
+    "version": "${version}",
+    "name": "Lubricant",
+    "description": "Cross-loader platform abstractions for vaakx mods.",
+    "authors": ["vaakx"],
+    "license": "MIT",
+    "environment": "*",
+    "entrypoints": {
+        "main": ["wd40.vaakx.lubricant.fabric.LubricantFabric"]
+    },
+    "accessWidener": "lubricant.accesswidener",
+    "depends": {
+        "fabricloader": ">=${fabric_loader_version}",
+        "minecraft": "~${mc_version}",
+        "java": ">=21"
+    }
+}

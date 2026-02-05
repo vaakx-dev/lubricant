@@ -1,0 +1,23 @@
+{
+    "schema_version": 1,
+    "quilt_loader": {
+        "group": "wd40.vaakx",
+        "id": "lubricant",
+        "version": "${version}",
+        "metadata": {
+            "name": "Lubricant",
+            "description": "Cross-loader platform abstractions for vaakx mods.",
+            "contributors": { "vaakx": "Owner" },
+            "license": "MIT"
+        },
+        "intermediate_mappings": "net.fabricmc:intermediary",
+        "entrypoints": {
+            "init": "wd40.vaakx.lubricant.fabric.LubricantFabric"
+        },
+        "depends": [
+            { "id": "quilt_loader", "versions": ">=0.20.0" },
+            { "id": "minecraft", "versions": "~${mc_version}" }
+        ]
+    },
+    "access_widener": "lubricant.accesswidener"
+}
