@@ -1,4 +1,4 @@
-import wd40.vaakx.lubricant.buildscript.AccessWidenerToTransformerConverter
+import wd40.lubricant.buildscript.AccessWidenerToTransformerConverter
 
 plugins {
     id 'net.neoforged.moddev' version '2.0.141'

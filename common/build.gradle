@@ -1,4 +1,4 @@
-import wd40.vaakx.lubricant.buildscript.SetupVanillaMinecraftTask
+import wd40.lubricant.buildscript.SetupVanillaMinecraftTask
 
 // The 'common' module compiles against vanilla Minecraft only.
 // Loader-specific code lives in :fabric, :forge, :neoforge.
