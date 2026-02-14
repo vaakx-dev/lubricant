@@ -13,6 +13,21 @@ sourceSets.main.resources.srcDir rootProject.file('common/src/main/resources')
 
 loom {
     accessWidenerPath.set(project.rootProject.file('common/src/main/resources/lubricant.accesswidener'))
+
+    // Dev runs load both lubricant AND cog as separate mods so we can test cog's items.
+    mods {
+        lubricant {
+            sourceSet sourceSets.main
+        }
+        cog {
+            sourceSet project(':example:cog:fabric').sourceSets.main
+        }
+    }
+}
+
+// Cog must be compiled before the dev game launches.
+tasks.matching { it.name == 'runClient' || it.name == 'runServer' }.configureEach {
+    dependsOn ':example:cog:fabric:classes', ':example:cog:fabric:processResources'
 }
 
 dependencies {

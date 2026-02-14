@@ -25,3 +25,17 @@ allprojects {
         maven { url = "https://maven.parchmentmc.org" }
     }
 }
+
+// Aggregate runner tasks. ./gradlew runAllClients launches all 3 dev clients
+// sequentially: close one to advance to the next.
+tasks.register('runAllClients') {
+    group = 'lubricant'
+    description = 'Run fabric, forge, and neoforge dev clients sequentially'
+    dependsOn ':fabric:runClient', ':forge:runClient', ':neoforge:runClient'
+}
+
+tasks.register('runAllServers') {
+    group = 'lubricant'
+    description = 'Run fabric, forge, and neoforge dev servers sequentially'
+    dependsOn ':fabric:runServer', ':forge:runServer', ':neoforge:runServer'
+}

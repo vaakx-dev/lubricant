@@ -46,7 +46,14 @@ neoForge {
         "${mod_id}" {
             sourceSet(sourceSets.main)
         }
+        cog {
+            sourceSet(project(':example:cog:neoforge').sourceSets.main)
+        }
     }
+}
+
+tasks.matching { it.name == 'runClient' || it.name == 'runServer' }.configureEach {
+    dependsOn ':example:cog:neoforge:classes', ':example:cog:neoforge:processResources'
 }
 
 processResources {

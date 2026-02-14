@@ -30,13 +30,23 @@ minecraft {
     runs {
         client {
             workingDirectory project.file('runs/client')
-            mods { lubricant { source sourceSets.main } }
+            mods {
+                lubricant { source sourceSets.main }
+                cog { source project(':example:cog:forge').sourceSets.main }
+            }
         }
         server {
             workingDirectory project.file('runs/server')
-            mods { lubricant { source sourceSets.main } }
+            mods {
+                lubricant { source sourceSets.main }
+                cog { source project(':example:cog:forge').sourceSets.main }
+            }
         }
     }
+}
+
+tasks.matching { it.name == 'runClient' || it.name == 'runServer' }.configureEach {
+    dependsOn ':example:cog:forge:classes', ':example:cog:forge:processResources'
 }
 
 dependencies {
