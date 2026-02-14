@@ -1,0 +1,23 @@
+import wd40.lubricant.buildscript.SetupVanillaMinecraftTask
+
+// Cog's common module. Same vanilla setup as lubricant/common, plus depends on
+// lubricant's common so we can see ItemRegistry / Init.
+
+def vanillaMcJar = layout.buildDirectory.file("minecraft/minecraft-${minecraft_version}-mojmap.jar")
+
+tasks.register('setupVanillaMinecraft', SetupVanillaMinecraftTask) {
+    mcVersion = project.minecraft_version
+    parchmentVersion = project.parchment_mappings_version
+    parchmentMcVersion = project.parchment_minecraft_version
+    outputJar = vanillaMcJar
+}
+
+tasks.named('compileJava').configure {
+    dependsOn 'setupVanillaMinecraft'
+}
+
+dependencies {
+    compileOnly files(vanillaMcJar).builtBy('setupVanillaMinecraft')
+    // Lubricant common's compiled classes (Init, ItemRegistry, etc.).
+    compileOnly rootProject.project(':common').sourceSets.main.output
+}

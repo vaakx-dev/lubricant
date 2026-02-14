@@ -1,13 +1,19 @@
 package wd40.lubricant.fabric;
 
 import net.fabricmc.api.ModInitializer;
-import wd40.lubricant.Lubricant;
+import wd40.lubricant.internal.Bootstrap;
 
 public final class LubricantFabric implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        // Phase 6 will register Fabric-specific Service implementations here.
-        System.out.println("[" + Lubricant.MOD_ID + "] loaded on Fabric");
+        // Force-load every consuming mod's Init class. Their static init queues
+        // ItemRegistry.create() + register() calls into FabricRegistryHelper.ALL_ITEMS.
+        Bootstrap.loadAllInit();
+
+        // Now bind every queued registry - registers the items to vanilla's registries.
+        for (FabricItemRegistry r : FabricRegistryHelper.ALL_ITEMS) {
+            r.bind();
+        }
     }
 }

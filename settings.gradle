@@ -17,3 +17,13 @@ include 'common'
 include 'fabric'
 include 'forge'
 include 'neoforge'
+
+// Example mod that consumes lubricant. Verifies the api end-to-end at build time.
+include 'example:cog:common'
+include 'example:cog:fabric'
+include 'example:cog:forge'
+include 'example:cog:neoforge'
+project(':example:cog:common').projectDir   = file('example/cog/common')
+project(':example:cog:fabric').projectDir   = file('example/cog/fabric')
+project(':example:cog:forge').projectDir    = file('example/cog/forge')
+project(':example:cog:neoforge').projectDir = file('example/cog/neoforge')

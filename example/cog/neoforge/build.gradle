@@ -1,0 +1,43 @@
+plugins {
+    id 'net.neoforged.moddev' version '2.0.141'
+}
+
+base {
+    archivesName = "cog-neoforge"
+}
+
+sourceSets.main.java.srcDir rootProject.file('example/cog/common/src/main/java')
+sourceSets.main.resources.srcDir rootProject.file('example/cog/common/src/main/resources')
+
+neoForge {
+    version = project.neoforge_version
+
+    parchment {
+        mappingsVersion = project.parchment_mappings_version
+        minecraftVersion = project.parchment_minecraft_version
+    }
+
+    mods {
+        cog {
+            sourceSet sourceSets.main
+        }
+    }
+}
+
+dependencies {
+    compileOnly rootProject.project(':common').sourceSets.main.output
+}
+
+processResources {
+    inputs.property 'version', '1.0.0'
+    inputs.property 'mc_version', project.minecraft_version
+    inputs.property 'neoforge_version', project.neoforge_version
+
+    filesMatching('META-INF/neoforge.mods.toml') {
+        expand([
+                version         : '1.0.0',
+                mc_version      : project.minecraft_version,
+                neoforge_version: project.neoforge_version
+        ])
+    }
+}
