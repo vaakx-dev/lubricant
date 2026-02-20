@@ -26,16 +26,16 @@ allprojects {
     }
 }
 
-// Aggregate runner tasks. ./gradlew runAllClients launches all 3 dev clients
+// Aggregate runner tasks. ./gradlew runAllClients launches both dev clients
 // sequentially: close one to advance to the next.
 tasks.register('runAllClients') {
     group = 'lubricant'
-    description = 'Run fabric, forge, and neoforge dev clients sequentially'
-    dependsOn ':fabric:runClient', ':forge:runClient', ':neoforge:runClient'
+    description = 'Run fabric and neoforge dev clients sequentially'
+    dependsOn ':fabric:runClient', ':neoforge:runClient'
 }
 
 tasks.register('runAllServers') {
     group = 'lubricant'
-    description = 'Run fabric, forge, and neoforge dev servers sequentially'
-    dependsOn ':fabric:runServer', ':forge:runServer', ':neoforge:runServer'
+    description = 'Run fabric and neoforge dev servers sequentially'
+    dependsOn ':fabric:runServer', ':neoforge:runServer'
 }
