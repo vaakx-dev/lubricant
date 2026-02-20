@@ -32,10 +32,12 @@ neoForge {
     runs {
         client {
             client()
+            gameDirectory = rootProject.file('runs/client')
         }
         server {
             server()
             programArgument '--nogui'
+            gameDirectory = rootProject.file('runs/server')
         }
         configureEach {
             logLevel = org.slf4j.event.Level.DEBUG

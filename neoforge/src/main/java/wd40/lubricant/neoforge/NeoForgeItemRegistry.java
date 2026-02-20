@@ -6,10 +6,11 @@ import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import wd40.lubricant.api.ItemRegistry;
 
+import java.util.function.Function;
 import java.util.function.Supplier;
 
-// NeoForge implementation. Wraps NeoForge's DeferredRegister.Items. DeferredItem<Item>
-// implements Supplier<Item>, so the public API contract holds.
+// NeoForge implementation. NeoForge's DeferredRegister.Items.registerItem takes a
+// Function<Item.Properties, ? extends Item> directly - it handles setId internally.
 final class NeoForgeItemRegistry implements ItemRegistry {
 
     final String modId;
@@ -21,8 +22,8 @@ final class NeoForgeItemRegistry implements ItemRegistry {
     }
 
     @Override
-    public Supplier<Item> register(String path, Supplier<Item> factory) {
-        DeferredItem<Item> ref = deferred.register(path, factory);
+    public Supplier<Item> register(String path, Function<Item.Properties, Item> factory) {
+        DeferredItem<Item> ref = deferred.registerItem(path, factory);
         return ref;
     }
 

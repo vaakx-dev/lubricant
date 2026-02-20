@@ -9,11 +9,12 @@ import wd40.lubricant.api.ItemRegistry;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
-// Fabric implementation. Holds register() calls in a queue until bind() runs them
-// against vanilla's BuiltInRegistries.ITEM. Bind is called by LubricantFabric's
-// onInitialize after Bootstrap.loadAllInit completes.
+// Fabric implementation. Constructs the item via the user's factory, then registers
+// it to BuiltInRegistries.ITEM. Relies on fabric-api delaying the registry freeze
+// past mod load - without fabric-api on the classpath this would crash on freeze.
 final class FabricItemRegistry implements ItemRegistry {
 
     private final String modId;
@@ -24,11 +25,12 @@ final class FabricItemRegistry implements ItemRegistry {
     }
 
     @Override
-    public Supplier<Item> register(String path, Supplier<Item> factory) {
+    public Supplier<Item> register(String path, Function<Item.Properties, Item> factory) {
         AtomicReference<Item> ref = new AtomicReference<>();
         queued.add(() -> {
             ResourceLocation id = ResourceLocation.fromNamespaceAndPath(modId, path);
-            Item item = Registry.register(BuiltInRegistries.ITEM, id, factory.get());
+            Item item = factory.apply(new Item.Properties());
+            Registry.register(BuiltInRegistries.ITEM, id, item);
             ref.set(item);
         });
         return () -> {
@@ -39,6 +41,14 @@ final class FabricItemRegistry implements ItemRegistry {
             }
             return v;
         };
+    }
+
+    String modId() {
+        return modId;
+    }
+
+    int queuedSize() {
+        return queued.size();
     }
 
     void bind() {

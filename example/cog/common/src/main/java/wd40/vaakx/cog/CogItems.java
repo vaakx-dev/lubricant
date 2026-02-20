@@ -10,10 +10,10 @@ public final class CogItems implements Init {
     public static final ItemRegistry ITEMS = ItemRegistry.create(CogMod.ID);
 
     public static final Supplier<Item> COG = ITEMS.register("cog",
-            () -> new Item(new Item.Properties().stacksTo(64)));
+            props -> new Item(props.stacksTo(64)));
 
     public static final Supplier<Item> GREASED_COG = ITEMS.register("greased_cog",
-            () -> new Item(new Item.Properties().stacksTo(1).fireResistant()));
+            props -> new Item(props.stacksTo(1).fireResistant()));
 
     public CogItems() {}
 }

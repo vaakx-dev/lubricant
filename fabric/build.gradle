@@ -11,23 +11,72 @@ base {
 sourceSets.main.java.srcDir rootProject.file('common/src/main/java')
 sourceSets.main.resources.srcDir rootProject.file('common/src/main/resources')
 
+// Dev-only source set that aliases the cog example mod's sources. Loom will treat this
+// as a SEPARATE mod for dev runs, but the production lubricant-fabric.jar excludes it.
+// Without this, fabric-loader's mod scan never sees cog's fabric.mod.json (loom can't
+// pull source sets from other Gradle projects into its mods block reliably).
+sourceSets {
+    cogExample {
+        java.srcDirs = [
+                rootProject.file('example/cog/common/src/main/java'),
+                rootProject.file('example/cog/fabric/src/main/java')
+        ]
+        resources.srcDirs = [
+                rootProject.file('example/cog/common/src/main/resources'),
+                rootProject.file('example/cog/fabric/src/main/resources')
+        ]
+        compileClasspath += sourceSets.main.compileClasspath + sourceSets.main.output
+        runtimeClasspath += sourceSets.main.runtimeClasspath + sourceSets.main.output
+    }
+}
+
+// Treat cogExample resources as plain files (no template expansion of ${version} etc).
+// Cog's fabric.mod.json uses placeholders that example/cog/fabric/build.gradle would expand;
+// here we expand them inline.
+processResources.dependsOn 'processCogExampleResources'
+tasks.named('processCogExampleResources') {
+    inputs.property 'version', '1.0.0'
+    inputs.property 'mc_version', project.minecraft_version
+    inputs.property 'fabric_loader_version', project.fabric_loader_version
+
+    filesMatching(['fabric.mod.json', 'quilt.mod.json']) {
+        expand([
+                version              : '1.0.0',
+                mc_version           : project.minecraft_version,
+                fabric_loader_version: project.fabric_loader_version
+        ])
+    }
+}
+
 loom {
     accessWidenerPath.set(project.rootProject.file('common/src/main/resources/lubricant.accesswidener'))
 
-    // Dev runs load both lubricant AND cog as separate mods so we can test cog's items.
     mods {
         lubricant {
             sourceSet sourceSets.main
         }
         cog {
-            sourceSet project(':example:cog:fabric').sourceSets.main
+            sourceSet sourceSets.cogExample
+        }
+    }
+
+    runs {
+        configureEach {
+            runDir = '../runs/client'
         }
     }
 }
 
-// Cog must be compiled before the dev game launches.
-tasks.matching { it.name == 'runClient' || it.name == 'runServer' }.configureEach {
-    dependsOn ':example:cog:fabric:classes', ':example:cog:fabric:processResources'
+// loom.mods declares cog conceptually but doesn't always add the source set's output to the
+// dev run classpath. Force it onto main's runtime classpath so fabric-loader scans it for
+// fabric.mod.json. Production jar still excludes cogExample (jar uses sourceSets.main.output).
+afterEvaluate {
+    sourceSets.main.runtimeClasspath = sourceSets.main.runtimeClasspath + sourceSets.cogExample.output
+}
+
+// Production jar excludes the example mod sources.
+jar {
+    from sourceSets.main.output
 }
 
 dependencies {
@@ -37,6 +86,11 @@ dependencies {
         parchment("org.parchmentmc.data:parchment-${parchment_minecraft_version}:${parchment_mappings_version}@zip")
     }
     modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
+
+    // Fabric API: required for mod-side item registration. Without it, MC freezes
+    // BuiltInRegistries.ITEM during Bootstrap (before onInitialize fires) and our
+    // new Item(...) calls hit "registry can't create intrusive holders".
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
 }
 
 processResources {
