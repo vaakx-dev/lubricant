@@ -10,26 +10,30 @@ import wd40.lubricant.internal.Bootstrap;
 public final class LubricantNeoForge {
 
     public LubricantNeoForge(IEventBus lubricantBus) {
-        // Force-load every mod's Init class - fills NeoForgeRegistryHelper.ALL_ITEMS.
+        // Force-load every mod's Init class - fills the ALL_X lists in NeoForgeRegistryHelper.
         Bootstrap.loadAllInit();
 
-        // For each queued NeoForgeItemRegistry, find that mod's event bus and attach.
-        // NeoForge's ModContainer.getEventBus() is public, so no reflection needed.
-        for (NeoForgeItemRegistry r : NeoForgeRegistryHelper.ALL_ITEMS) {
-            IEventBus bus;
-            if ("lubricant".equals(r.modId)) {
-                bus = lubricantBus;
-            } else {
-                ModContainer container = ModList.get().getModContainerById(r.modId)
-                        .orElseThrow(() -> new IllegalStateException(
-                                "lubricant: no NeoForge mod container for modId=" + r.modId));
-                bus = container.getEventBus();
-                if (bus == null) {
-                    throw new IllegalStateException(
-                            "lubricant: mod " + r.modId + " has no event bus yet");
-                }
-            }
-            r.attach(bus);
+        // For each queued registry, find that mod's event bus and attach the
+        // underlying DeferredRegister to it. NeoForge's ModContainer.getEventBus() is
+        // public, so no reflection needed.
+        for (NeoForgeBlockRegistry r : NeoForgeRegistryHelper.ALL_BLOCKS) {
+            r.attach(busFor(r.modId, lubricantBus));
         }
+        for (NeoForgeItemRegistry r : NeoForgeRegistryHelper.ALL_ITEMS) {
+            r.attach(busFor(r.modId, lubricantBus));
+        }
+    }
+
+    private static IEventBus busFor(String modId, IEventBus lubricantBus) {
+        if ("lubricant".equals(modId)) return lubricantBus;
+        ModContainer container = ModList.get().getModContainerById(modId)
+                .orElseThrow(() -> new IllegalStateException(
+                        "lubricant: no NeoForge mod container for modId=" + modId));
+        IEventBus bus = container.getEventBus();
+        if (bus == null) {
+            throw new IllegalStateException(
+                    "lubricant: mod " + modId + " has no event bus yet");
+        }
+        return bus;
     }
 }
