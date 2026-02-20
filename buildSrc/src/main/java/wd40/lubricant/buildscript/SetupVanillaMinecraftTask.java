@@ -22,6 +22,7 @@ import java.util.List;
 // Caching strategy:
 //   ~/.gradle/caches/lubricant-mc/<mc>/client.jar              (Mojang download, sha1-verified)
 //   ~/.gradle/caches/lubricant-mc/<mc>/client_mappings.txt     (Mojang download, sha1-verified)
+//   ~/.gradle/caches/lubricant-mc/<mc>/client-stripped.jar     (META-INF dropped)
 //   ~/.gradle/caches/lubricant-mc/<mc>/parchment-<v>.json      (ParchmentMC download)
 //   ~/.gradle/caches/lubricant-mc/<mc>/minecraft-mojmap-p<v>.jar (remapped, parchment-overlaid)
 //   <project>/build/minecraft/...-mojmap.jar                   (above + AW applied; @OutputFile)
@@ -56,6 +57,16 @@ public abstract class SetupVanillaMinecraftTask extends DefaultTask {
         // 1. Vanilla.
         VanillaDownloader.Result vanilla = new VanillaDownloader().fetch(mc, cache);
 
+        // 1a. Strip META-INF (signing junk that's invalid after remap, ~6 MB savings).
+        Path stripped = cache.resolve("client-stripped.jar");
+        boolean strippedStale = !Files.exists(stripped)
+                || Files.getLastModifiedTime(stripped).toMillis()
+                    < Files.getLastModifiedTime(vanilla.clientJar()).toMillis();
+        if (strippedStale) {
+            getLogger().lifecycle("Lubricant: stripping META-INF from {}", vanilla.clientJar().getFileName());
+            MinecraftJarFilter.filter(vanilla.clientJar(), stripped);
+        }
+
         // 2. Parchment (optional).
         String pv = getParchmentVersion().getOrNull();
         String pmc = getParchmentMcVersion().getOrElse(mc);
@@ -73,16 +84,16 @@ public abstract class SetupVanillaMinecraftTask extends DefaultTask {
 
         boolean mojmapStale = !Files.exists(cachedMojmap)
                 || Files.getLastModifiedTime(cachedMojmap).toMillis()
-                    < Files.getLastModifiedTime(vanilla.clientJar()).toMillis()
+                    < Files.getLastModifiedTime(stripped).toMillis()
                 || (parchmentJson != null
                     && Files.getLastModifiedTime(cachedMojmap).toMillis()
                         < Files.getLastModifiedTime(parchmentJson).toMillis());
 
         if (mojmapStale) {
             getLogger().lifecycle("Lubricant: remapping {} -> Mojang names{}",
-                    vanilla.clientJar().getFileName(),
+                    stripped.getFileName(),
                     parchmentJson != null ? " + Parchment" : "");
-            new MojangMappingsRemapper().remap(vanilla.clientJar(), vanilla.mappings(), parchmentJson, cachedMojmap);
+            new MojangMappingsRemapper().remap(stripped, vanilla.mappings(), parchmentJson, cachedMojmap);
         } else {
             getLogger().lifecycle("Lubricant: cached mojmap jar is up to date.");
         }

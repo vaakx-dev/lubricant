@@ -1,29 +1,35 @@
-# Bundled Mojang dependencies in client.jar
+# Mojang client.jar contents and our filter
 
-The MC client.jar Mojang ships contains a few non-Minecraft classes alongside `net/minecraft/*`:
+What's actually inside Mojang's client.jar for MC 1.21.1:
 
-- `com/mojang/authlib/...` - account/profile classes
-- `com/mojang/blocklist/...` - the public-suffix blocklist
-- `com/mojang/datafixers/...` - data-fixer infrastructure
-- A handful of vendored utility classes
+| Path | Size | Notes |
+|---|---|---|
+| `net/minecraft/**` | ~17 MB | Minecraft itself |
+| `com/mojang/blaze3d/**` | ~0.5 MB | Mojang's rendering layer; ships WITH MC, not as a separate dep |
+| `assets/**` | ~3 MB | Vanilla resource pack content |
+| `data/**` | ~2 MB | Vanilla data pack content |
+| `META-INF/MANIFEST.MF` | 3.18 MB | Per-class digest entries used for jar signing |
+| `META-INF/MOJANGCS.SF` | 3.18 MB | Signed digest list (same content, signed) |
+| `META-INF/MOJANGCS.RSA` | ~5 KB | Signing certificate |
+| `pack.mcmeta`, `version.json` | tiny | Misc metadata |
 
-These get carried through our remap pipeline unchanged (only `net/minecraft/*` is in the Mojang mappings file). They're harmless on the compile classpath but pollute auto-completion.
+**Surprise:** the bundled libraries some old guides talk about (authlib, datafixers, brigadier, slf4j, etc.) are NOT inside client.jar in MC 1.21.1. They're separate jars listed in Mojang's launcher manifest and downloaded alongside.
 
-## When you'd want to strip them
+So there's nothing useful to strip code-wise. Only `META-INF/*` is dead weight.
 
-- IDE auto-complete shows `com.mojang.authlib.GameProfile` when you didn't ask for it
-- The mojmap jar is ~30 MB; stripping cuts a few MB
-- A future Mojang change bundles something that conflicts with a real dep
+## What we strip
 
-## How to strip (when needed)
+`MinecraftJarFilter.filter()` drops `META-INF/*` entirely:
+- The MANIFEST.MF and MOJANGCS.SF signing data is invalid the moment TinyRemapper rewrites a single class
+- A compile-time MC jar doesn't need a manifest
 
-In `MojangMappingsRemapper.remap()`, before passing the input jar to `TinyRemapper.readInputs(...)`, filter the input. Either:
+Result: ~6 MB shaved off the input to TinyRemapper. The final mojmap jar drops from ~33 MB to ~30 MB.
 
-1. **Pre-filter the input jar.** Walk the input jar, copy only entries matching `^net/minecraft/.*\.class$|^[^/]+\.class$|^pack\.mcmeta$|^assets/.*|^data/.*` to a temp jar, feed that to TinyRemapper.
-2. **Filter via TinyRemapper input tag.** TinyRemapper supports input tags + `IMappingProvider` filtering, but pre-filtering is simpler.
+## What we keep
 
-Likely an extra ~30 lines in `buildSrc/src/main/java/wd40/vaakx/lubricant/buildscript/`. Add a `MinecraftJarFilter.java` step between download and remap.
+Everything else: `net/minecraft/**`, `com/mojang/blaze3d/**`, `assets/**`, `data/**`, `pack.mcmeta`. All of these are referenced by MC code or used by mod authors.
 
-## Why this isn't done yet
+## When to revisit
 
-It's purely cosmetic until something concrete breaks. Mojang's bundled set is small and stable. fabric-loom doesn't strip them either. Defer until needed.
+- If a future MC version starts bundling more libs in client.jar, audit `com/**` paths to decide what to keep.
+- If we want to slim the dev jar further (~5 MB more), we could strip `assets/**` and `data/**` since the compiler doesn't need them - but loom-equivalent dev runs DO need them for in-IDE testing, so keep them on for now.
