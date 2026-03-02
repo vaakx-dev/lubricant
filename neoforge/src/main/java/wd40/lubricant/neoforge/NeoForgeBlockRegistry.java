@@ -10,25 +10,34 @@ import wd40.lubricant.api.BlockRegistry;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-// NeoForge implementation. Wraps DeferredRegister.Blocks - registerBlock takes the
-// factory directly, including ResourceKey injection.
+// NeoForge implementation. Wraps DeferredRegister.Blocks for blocks and a separate
+// DeferredRegister.Items for the BlockItems we create alongside.
 final class NeoForgeBlockRegistry implements BlockRegistry {
 
     final String modId;
-    final DeferredRegister.Blocks deferred;
+    final DeferredRegister.Blocks blocks;
+    final DeferredRegister.Items blockItems;
 
     NeoForgeBlockRegistry(String modId) {
         this.modId = modId;
-        this.deferred = DeferredRegister.createBlocks(modId);
+        this.blocks = DeferredRegister.createBlocks(modId);
+        this.blockItems = DeferredRegister.createItems(modId);
     }
 
     @Override
     public Supplier<Block> register(String path, Function<BlockBehaviour.Properties, Block> factory) {
-        DeferredBlock<Block> ref = deferred.registerBlock(path, factory);
-        return ref;
+        DeferredBlock<Block> block = blocks.registerBlock(path, factory);
+        blockItems.registerSimpleBlockItem(block);
+        return block;
+    }
+
+    @Override
+    public Supplier<Block> registerNoItem(String path, Function<BlockBehaviour.Properties, Block> factory) {
+        return blocks.registerBlock(path, factory);
     }
 
     void attach(IEventBus modBus) {
-        deferred.register(modBus);
+        blocks.register(modBus);
+        blockItems.register(modBus);
     }
 }

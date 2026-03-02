@@ -3,6 +3,8 @@ package wd40.lubricant.fabric;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import wd40.lubricant.api.BlockRegistry;
@@ -13,9 +15,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-// Fabric implementation. Constructs the block via the user's factory, then registers
-// it to BuiltInRegistries.BLOCK. Relies on fabric-api delaying the registry freeze
-// past mod load.
+// Fabric implementation. Each register() queues a block+item pair (or just a block
+// for registerNoItem). Both are executed against the vanilla registries during bind().
 final class FabricBlockRegistry implements BlockRegistry {
 
     private final String modId;
@@ -27,6 +28,22 @@ final class FabricBlockRegistry implements BlockRegistry {
 
     @Override
     public Supplier<Block> register(String path, Function<BlockBehaviour.Properties, Block> factory) {
+        Supplier<Block> blockRef = registerBlock(path, factory);
+        // Also queue a BlockItem with the same id.
+        queued.add(() -> {
+            ResourceLocation id = ResourceLocation.fromNamespaceAndPath(modId, path);
+            Item item = new BlockItem(blockRef.get(), new Item.Properties());
+            Registry.register(BuiltInRegistries.ITEM, id, item);
+        });
+        return blockRef;
+    }
+
+    @Override
+    public Supplier<Block> registerNoItem(String path, Function<BlockBehaviour.Properties, Block> factory) {
+        return registerBlock(path, factory);
+    }
+
+    private Supplier<Block> registerBlock(String path, Function<BlockBehaviour.Properties, Block> factory) {
         AtomicReference<Block> ref = new AtomicReference<>();
         queued.add(() -> {
             ResourceLocation id = ResourceLocation.fromNamespaceAndPath(modId, path);
