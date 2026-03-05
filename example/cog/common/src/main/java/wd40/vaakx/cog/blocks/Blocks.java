@@ -3,7 +3,7 @@ package wd40.vaakx.cog.blocks;
 import net.minecraft.world.level.block.Block;
 import wd40.lubricant.api.BlockRegistry;
 import wd40.lubricant.api.Init;
-import wd40.vaakx.cog.CogMod;
+import wd40.vaakx.cog.Cog;
 
 import java.util.function.Supplier;
 
@@ -41,7 +41,7 @@ import java.util.function.Supplier;
 public final class Blocks implements Init {
 
     /** Per-mod block-registry handle. */
-    public static final BlockRegistry BLOCKS = BlockRegistry.create(CogMod.ID);
+    public static final BlockRegistry BLOCKS = BlockRegistry.create(Cog.ID);
 
     /**
      * Standard block: registers both the block and a BlockItem at {@code cog:gear}.

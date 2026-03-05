@@ -18,10 +18,19 @@ tasks.named('compileJava').configure {
     dependsOn 'setupVanillaMinecraft'
 }
 
+repositories {
+    // Mojang's library repo - hosts brigadier and other MC-bundled libs not on Maven Central.
+    maven { url = "https://libraries.minecraft.net" }
+}
+
 dependencies {
     // Vanilla MC is a compile-only classpath entry. Loader modules add their own MC
     // (with mappings their loader expects) when they consume :common.
     compileOnly files(vanillaMcJar)
+    // Brigadier ships separately from the MC jar (see MinecraftJarFilter note). The public
+    // Events API exposes CommandDispatcher in commands(), so common needs it on the
+    // compile classpath. Loader modules already bring their own copy at runtime.
+    compileOnly "com.mojang:brigadier:1.2.9"
 }
 
 // Make the vanilla MC jar available to other subprojects that depend on :common.

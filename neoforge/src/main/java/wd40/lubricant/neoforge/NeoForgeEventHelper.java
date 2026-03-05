@@ -1,0 +1,61 @@
+package wd40.lubricant.neoforge;
+
+import com.mojang.brigadier.CommandDispatcher;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionResult;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.server.ServerStartingEvent;
+import net.neoforged.neoforge.event.server.ServerStoppingEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import wd40.lubricant.api.Event;
+import wd40.lubricant.api.ItemUseListener;
+import wd40.lubricant.internal.BridgedEvent;
+import wd40.lubricant.internal.EventHelper;
+
+import java.util.function.Consumer;
+
+// NeoForge impl of EventHelper. All seven of these events live on the global
+// NeoForge.EVENT_BUS (the "game bus"), not on per-mod buses, so we don't need any
+// modId/bus lookup like the registry path does.
+public final class NeoForgeEventHelper implements EventHelper {
+
+    private final Event<Consumer<MinecraftServer>> serverTick = new BridgedEvent<>(
+            l -> NeoForge.EVENT_BUS.addListener((ServerTickEvent.Post e) -> l.accept(e.getServer())));
+
+    private final Event<Consumer<MinecraftServer>> serverStart = new BridgedEvent<>(
+            l -> NeoForge.EVENT_BUS.addListener((ServerStartingEvent e) -> l.accept(e.getServer())));
+
+    private final Event<Consumer<MinecraftServer>> serverStop = new BridgedEvent<>(
+            l -> NeoForge.EVENT_BUS.addListener((ServerStoppingEvent e) -> l.accept(e.getServer())));
+
+    private final Event<Consumer<ServerPlayer>> playerJoin = new BridgedEvent<>(
+            l -> NeoForge.EVENT_BUS.addListener((PlayerEvent.PlayerLoggedInEvent e) -> l.accept((ServerPlayer) e.getEntity())));
+
+    private final Event<Consumer<ServerPlayer>> playerLeave = new BridgedEvent<>(
+            l -> NeoForge.EVENT_BUS.addListener((PlayerEvent.PlayerLoggedOutEvent e) -> l.accept((ServerPlayer) e.getEntity())));
+
+    private final Event<Consumer<CommandDispatcher<CommandSourceStack>>> commands = new BridgedEvent<>(
+            l -> NeoForge.EVENT_BUS.addListener((RegisterCommandsEvent e) -> l.accept(e.getDispatcher())));
+
+    private final Event<ItemUseListener> itemUse = new BridgedEvent<>(
+            l -> NeoForge.EVENT_BUS.addListener((PlayerInteractEvent.RightClickItem e) -> {
+                InteractionResult r = l.onUse(e.getEntity(), e.getLevel(), e.getHand());
+                if (r != InteractionResult.PASS) {
+                    e.setCanceled(true);
+                    e.setCancellationResult(r);
+                }
+            }));
+
+    @Override public Event<Consumer<MinecraftServer>> serverTick()  { return serverTick; }
+    @Override public Event<Consumer<MinecraftServer>> serverStart() { return serverStart; }
+    @Override public Event<Consumer<MinecraftServer>> serverStop()  { return serverStop; }
+    @Override public Event<Consumer<ServerPlayer>>    playerJoin()  { return playerJoin; }
+    @Override public Event<Consumer<ServerPlayer>>    playerLeave() { return playerLeave; }
+    @Override public Event<Consumer<CommandDispatcher<CommandSourceStack>>> commands() { return commands; }
+    @Override public Event<ItemUseListener>           itemUse()     { return itemUse; }
+}

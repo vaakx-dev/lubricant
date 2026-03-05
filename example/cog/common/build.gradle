@@ -20,4 +20,6 @@ dependencies {
     compileOnly files(vanillaMcJar).builtBy('setupVanillaMinecraft')
     // Lubricant common's compiled classes (Init, ItemRegistry, etc.).
     compileOnly rootProject.project(':common').sourceSets.main.output
+    // slf4j is provided at runtime by both Fabric and NeoForge - compile-only here.
+    compileOnly "org.slf4j:slf4j-api:2.0.9"
 }
