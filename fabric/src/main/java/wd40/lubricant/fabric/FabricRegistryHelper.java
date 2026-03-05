@@ -1,7 +1,7 @@
 package wd40.lubricant.fabric;
 
-import wd40.lubricant.api.BlockRegistry;
-import wd40.lubricant.api.ItemRegistry;
+import wd40.lubricant.api.registry.BlockRegistry;
+import wd40.lubricant.api.registry.ItemRegistry;
 import wd40.lubricant.internal.RegistryHelper;
 
 import java.util.ArrayList;

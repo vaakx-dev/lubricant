@@ -1,4 +1,4 @@
-package wd40.lubricant.api;
+package wd40.lubricant.api.registry;
 
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;

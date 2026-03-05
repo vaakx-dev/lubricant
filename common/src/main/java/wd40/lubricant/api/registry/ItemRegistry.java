@@ -1,4 +1,4 @@
-package wd40.lubricant.api;
+package wd40.lubricant.api.registry;
 
 import net.minecraft.world.item.Item;
 import wd40.lubricant.internal.Services;

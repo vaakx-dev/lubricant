@@ -16,10 +16,20 @@ tasks.named('compileJava').configure {
     dependsOn 'setupVanillaMinecraft'
 }
 
+repositories {
+    // Mojang's library repo - hosts brigadier and DataFixerUpper, both needed at
+    // compile time when StreamCodec.composite overloads are referenced.
+    maven { url = "https://libraries.minecraft.net" }
+}
+
 dependencies {
     compileOnly files(vanillaMcJar).builtBy('setupVanillaMinecraft')
     // Lubricant common's compiled classes (Init, ItemRegistry, etc.).
     compileOnly rootProject.project(':common').sourceSets.main.output
     // slf4j is provided at runtime by both Fabric and NeoForge - compile-only here.
     compileOnly "org.slf4j:slf4j-api:2.0.9"
+    // DFU for StreamCodec.composite (Function3..Function6 are referenced by the multi-arg overloads).
+    compileOnly "com.mojang:datafixerupper:8.0.16"
+    // Netty's ByteBuf - StreamCodec.composite touches it via ByteBufCodecs return types.
+    compileOnly "io.netty:netty-buffer:4.1.97.Final"
 }

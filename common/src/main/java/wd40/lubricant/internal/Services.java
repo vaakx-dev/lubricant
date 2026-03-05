@@ -9,6 +9,7 @@ public final class Services {
 
     private static volatile RegistryHelper REGISTRY;
     private static volatile EventHelper EVENTS;
+    private static volatile NetHelper NET;
 
     public static RegistryHelper registry() {
         RegistryHelper local = REGISTRY;
@@ -28,6 +29,17 @@ public final class Services {
                     .orElseThrow(() -> new IllegalStateException(
                             "No lubricant EventHelper service found - is the lubricant loader module on the classpath?"));
             EVENTS = local;
+        }
+        return local;
+    }
+
+    public static NetHelper net() {
+        NetHelper local = NET;
+        if (local == null) {
+            local = ServiceLoader.load(NetHelper.class).findFirst()
+                    .orElseThrow(() -> new IllegalStateException(
+                            "No lubricant NetHelper service found - is the lubricant loader module on the classpath?"));
+            NET = local;
         }
         return local;
     }

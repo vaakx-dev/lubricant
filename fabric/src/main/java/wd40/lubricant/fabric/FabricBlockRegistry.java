@@ -7,7 +7,7 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
-import wd40.lubricant.api.BlockRegistry;
+import wd40.lubricant.api.registry.BlockRegistry;
 
 import java.util.ArrayList;
 import java.util.List;

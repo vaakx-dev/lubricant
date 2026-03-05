@@ -1,4 +1,4 @@
-package wd40.lubricant.api;
+package wd40.lubricant.api.events;
 
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.commands.CommandSourceStack;

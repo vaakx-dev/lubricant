@@ -2,7 +2,7 @@ package wd40.vaakx.cog.items;
 
 import net.minecraft.world.item.Item;
 import wd40.lubricant.api.Init;
-import wd40.lubricant.api.ItemRegistry;
+import wd40.lubricant.api.registry.ItemRegistry;
 import wd40.vaakx.cog.Cog;
 
 import java.util.function.Supplier;

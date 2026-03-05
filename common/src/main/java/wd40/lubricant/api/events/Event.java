@@ -1,4 +1,4 @@
-package wd40.lubricant.api;
+package wd40.lubricant.api.events;
 
 // One subscription point for a specific kind of event. The type parameter L is the
 // listener shape (typically a Consumer<...> over a vanilla MC type, or a custom

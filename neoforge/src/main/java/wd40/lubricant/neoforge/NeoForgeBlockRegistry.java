@@ -5,7 +5,7 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredRegister;
-import wd40.lubricant.api.BlockRegistry;
+import wd40.lubricant.api.registry.BlockRegistry;
 
 import java.util.function.Function;
 import java.util.function.Supplier;

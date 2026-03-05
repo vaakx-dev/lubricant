@@ -1,7 +1,7 @@
 package wd40.lubricant.internal;
 
-import wd40.lubricant.api.BlockRegistry;
-import wd40.lubricant.api.ItemRegistry;
+import wd40.lubricant.api.registry.BlockRegistry;
+import wd40.lubricant.api.registry.ItemRegistry;
 
 // Service interface implemented once per loader. Each loader's META-INF/services file
 // points at its own implementation:

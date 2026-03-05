@@ -1,4 +1,4 @@
-package wd40.lubricant.api;
+package wd40.lubricant.api.events;
 
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;

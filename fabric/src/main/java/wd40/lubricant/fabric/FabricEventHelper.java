@@ -11,8 +11,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
-import wd40.lubricant.api.Event;
-import wd40.lubricant.api.ItemUseListener;
+import wd40.lubricant.api.events.Event;
+import wd40.lubricant.api.events.ItemUseListener;
 import wd40.lubricant.internal.BridgedEvent;
 import wd40.lubricant.internal.EventHelper;
 
