@@ -1,0 +1,15 @@
+package wd40.lubricant.api.data;
+
+/**
+ * Mod-side entry point for lubricant's datagen. Each implementor is loaded via
+ * JDK ServiceLoader at datagen time (not normal mod boot) and called once with
+ * a {@link LubricantData} facade.
+ *
+ * <p>Discovery: list the FQN under
+ * {@code META-INF/services/wd40.lubricant.api.data.DataInit}.</p>
+ *
+ * <p><a href="https://github.com/vaakxxx/lubricant/wiki/Datagen">Datagen wiki</a></p>
+ */
+public interface DataInit {
+    void onData(LubricantData d);
+}

@@ -1,9 +1,12 @@
 package wd40.lubricant.api.registry;
 
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import wd40.lubricant.internal.Services;
 
+import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -26,4 +29,10 @@ public interface BlockRegistry {
     Supplier<Block> register(String path, Function<BlockBehaviour.Properties, Block> factory);
 
     Supplier<Block> registerNoItem(String path, Function<BlockBehaviour.Properties, Block> factory);
+
+    /** Every block id (from both {@link #register} and {@link #registerNoItem}). */
+    List<ResourceLocation> ids();
+
+    /** Subset of {@link #ids()} registered via {@link #registerNoItem} - skip BlockItem assets. */
+    Set<ResourceLocation> noItemIds();
 }

@@ -31,6 +31,13 @@ dependencies {
     // Events API exposes CommandDispatcher in commands(), so common needs it on the
     // compile classpath. Loader modules already bring their own copy at runtime.
     compileOnly "com.mojang:brigadier:1.2.9"
+    // Gson + Guava are bundled with MC at runtime - compile-only here for the
+    // datagen JSON builder in LubricantDataProvider.
+    compileOnly "com.google.code.gson:gson:2.11.0"
+    compileOnly "com.google.guava:guava:33.3.1-jre"
+    // DFU brings com.mojang.serialization.Codec - DataProvider.saveStable signature
+    // touches it (CompletableFuture<?> saveStable(CachedOutput, Codec<T>, T, Path)).
+    compileOnly "com.mojang:datafixerupper:8.0.16"
 }
 
 // Make the vanilla MC jar available to other subprojects that depend on :common.

@@ -10,7 +10,9 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import wd40.lubricant.api.registry.BlockRegistry;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -21,6 +23,8 @@ final class FabricBlockRegistry implements BlockRegistry {
 
     private final String modId;
     private final List<Runnable> queued = new ArrayList<>();
+    private final List<ResourceLocation> ids = new ArrayList<>();
+    private final Set<ResourceLocation> noItem = new HashSet<>();
 
     FabricBlockRegistry(String modId) {
         this.modId = modId;
@@ -40,13 +44,15 @@ final class FabricBlockRegistry implements BlockRegistry {
 
     @Override
     public Supplier<Block> registerNoItem(String path, Function<BlockBehaviour.Properties, Block> factory) {
+        noItem.add(ResourceLocation.fromNamespaceAndPath(modId, path));
         return registerBlock(path, factory);
     }
 
     private Supplier<Block> registerBlock(String path, Function<BlockBehaviour.Properties, Block> factory) {
         AtomicReference<Block> ref = new AtomicReference<>();
+        ResourceLocation id = ResourceLocation.fromNamespaceAndPath(modId, path);
+        ids.add(id);
         queued.add(() -> {
-            ResourceLocation id = ResourceLocation.fromNamespaceAndPath(modId, path);
             Block block = factory.apply(BlockBehaviour.Properties.of());
             Registry.register(BuiltInRegistries.BLOCK, id, block);
             ref.set(block);
@@ -63,6 +69,16 @@ final class FabricBlockRegistry implements BlockRegistry {
 
     String modId() {
         return modId;
+    }
+
+    @Override
+    public List<ResourceLocation> ids() {
+        return List.copyOf(ids);
+    }
+
+    @Override
+    public Set<ResourceLocation> noItemIds() {
+        return Set.copyOf(noItem);
     }
 
     void bind() {

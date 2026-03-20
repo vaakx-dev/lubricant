@@ -19,6 +19,7 @@ final class FabricItemRegistry implements ItemRegistry {
 
     private final String modId;
     private final List<Runnable> queued = new ArrayList<>();
+    private final List<ResourceLocation> ids = new ArrayList<>();
 
     FabricItemRegistry(String modId) {
         this.modId = modId;
@@ -27,8 +28,9 @@ final class FabricItemRegistry implements ItemRegistry {
     @Override
     public Supplier<Item> register(String path, Function<Item.Properties, Item> factory) {
         AtomicReference<Item> ref = new AtomicReference<>();
+        ResourceLocation id = ResourceLocation.fromNamespaceAndPath(modId, path);
+        ids.add(id);
         queued.add(() -> {
-            ResourceLocation id = ResourceLocation.fromNamespaceAndPath(modId, path);
             Item item = factory.apply(new Item.Properties());
             Registry.register(BuiltInRegistries.ITEM, id, item);
             ref.set(item);
@@ -49,6 +51,11 @@ final class FabricItemRegistry implements ItemRegistry {
 
     int queuedSize() {
         return queued.size();
+    }
+
+    @Override
+    public List<ResourceLocation> ids() {
+        return List.copyOf(ids);
     }
 
     void bind() {
