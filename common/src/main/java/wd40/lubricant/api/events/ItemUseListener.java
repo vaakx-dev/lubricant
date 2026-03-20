@@ -6,15 +6,11 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
 /**
- * Listener shape for {@link Events#itemUse()}. Fires on right-click-with-item.
+ * Right-click-with-item listener. Return {@link InteractionResult#PASS} to let
+ * other handlers and vanilla continue; any other result short-circuits.
  *
- * <p>Return {@link InteractionResult#PASS} to let other handlers and vanilla
- * continue. Any other result short-circuits further handling and applies that
- * result to the interaction.</p>
- *
- * <p>Fires server-side on NeoForge and on both sides on Fabric. If you only
- * want one side, check {@code level.isClientSide()} and return {@code PASS}
- * on the side you don't care about.</p>
+ * <p>Fires server-side on NeoForge, both sides on Fabric - check
+ * {@code level.isClientSide()} if you only want one.</p>
  */
 @FunctionalInterface
 public interface ItemUseListener {
