@@ -52,6 +52,10 @@ import wd40.vaakx.cog.Cog;
  * so it's safe to touch the GUI, the world, the player, etc. directly. Same for
  * the {@link Net#toServer} handler on the server thread. Lubricant does the
  * {@code enqueueWork} hop on NeoForge internally to make this guarantee uniform.
+ *
+ * <p>See <a href="https://github.com/vaakxxx/lubricant/wiki/Networking">the
+ * Networking wiki page</a> for full reference, codec patterns, and the
+ * per-loader bridge diagram.</p>
  */
 public final class Channel implements Init {
 

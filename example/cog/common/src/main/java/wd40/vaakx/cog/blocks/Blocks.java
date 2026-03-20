@@ -10,33 +10,40 @@ import java.util.function.Supplier;
 /**
  * All of cog's blocks (and their auto-generated BlockItems).
  *
- * Same lifecycle as {@link wd40.vaakx.cog.items.Items}: implements {@link Init},
+ * <p>Same lifecycle as {@link wd40.vaakx.cog.items.Items}: implements {@link Init},
  * declared in the META-INF services file, force-loaded by lubricant during
- * loader startup. Static fields run at that moment, queueing block (+ optional
- * BlockItem) registrations.
+ * startup. Static fields run at that moment, queueing block (+ optional
+ * BlockItem) registrations.</p>
+ *
+ * <p>See <a href="https://github.com/vaakxxx/lubricant/wiki/Blocks">the Blocks
+ * wiki page</a> for full reference.</p>
  *
  * <h3>Two register variants</h3>
  *
- * {@code register} - registers the block AND a BlockItem at the same id. This
- * is what most blocks want: the block exists in the world, and {@code /give} or
- * the creative inventory can hand out an item that places it.
+ * <p>{@code register} - registers the block AND a BlockItem at the same id.
+ * What most blocks want: the block exists in the world, and {@code /give} or
+ * the creative inventory can hand out an item that places it.</p>
  *
- * {@code registerNoItem} - registers ONLY the block. Use when:
- *   - the block is the secondary half of a multi-block (head of bed, top half
- *     of a tall plant, upper of a door). The "main" block has the BlockItem;
- *     placing it spawns the secondary block via vanilla logic.
- *   - the block is unobtainable by design (vanilla's end_portal, nether_portal,
- *     piston_head, command_block-without-creative). Worldgen / commands /
- *     other blocks place it; you never carry it in inventory.
+ * <p>{@code registerNoItem} - registers ONLY the block. Use when:</p>
+ * <ul>
+ *   <li>The block is the secondary half of a multi-block (head of bed, top
+ *       half of a tall plant, upper of a door). The "main" block has the
+ *       BlockItem; placing it spawns the secondary block via vanilla logic.</li>
+ *   <li>The block is unobtainable by design (vanilla's {@code end_portal},
+ *       {@code nether_portal}, {@code piston_head}). Worldgen / commands /
+ *       other blocks place it; you never carry it in inventory.</li>
+ * </ul>
  *
  * <h3>BlockBehaviour.Properties</h3>
  *
- * The factory receives a fresh Properties. Common builder methods:
- *   - {@code strength(hardness, resistance)} - mining time + blast resistance
- *   - {@code destroyTime(t)} - hardness only
- *   - {@code requiresCorrectToolForDrops()} - won't drop without proper pickaxe
- *   - {@code mapColor(MapColor)} - color shown on maps
- *   - {@code sound(SoundType)} - footstep / break / place sounds
+ * <p>The factory receives a fresh Properties. Common builder methods:</p>
+ * <ul>
+ *   <li>{@code strength(hardness, resistance)} - mining time + blast resistance</li>
+ *   <li>{@code destroyTime(t)} - hardness only</li>
+ *   <li>{@code requiresCorrectToolForDrops()} - won't drop without proper pickaxe</li>
+ *   <li>{@code mapColor(MapColor)} - color shown on maps</li>
+ *   <li>{@code sound(SoundType)} - footstep / break / place sounds</li>
+ * </ul>
  */
 public final class Blocks implements Init {
 

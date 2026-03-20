@@ -9,9 +9,20 @@ import wd40.lubricant.api.events.ItemUseListener;
 
 import java.util.function.Consumer;
 
-// Loader-specific service interface backing the public Events API. One impl per loader
-// (FabricEventHelper, NeoForgeEventHelper), discovered via JDK ServiceLoader from
-// META-INF/services/wd40.lubricant.internal.EventHelper.
+/**
+ * Loader-specific source of {@link Event} instances backing the public
+ * {@code Events} API. One implementation per loader, discovered via JDK
+ * {@link java.util.ServiceLoader}:
+ *
+ * <ul>
+ *   <li>Fabric: {@code wd40.lubricant.fabric.FabricEventHelper}</li>
+ *   <li>NeoForge: {@code wd40.lubricant.neoforge.NeoForgeEventHelper}</li>
+ * </ul>
+ *
+ * <p>Each impl constructs {@link BridgedEvent}s that wire subscribers into the
+ * loader's underlying event system - Fabric API callback registries on Fabric,
+ * {@code NeoForge.EVENT_BUS} listeners on NeoForge.</p>
+ */
 public interface EventHelper {
     Event<Consumer<MinecraftServer>> serverTick();
     Event<Consumer<MinecraftServer>> serverStart();

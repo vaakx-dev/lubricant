@@ -13,30 +13,37 @@ import java.util.function.Supplier;
  *
  * <h3>How lubricant picks this up</h3>
  *
- * The {@code implements Init} marker plus an entry in
- * {@code META-INF/services/wd40.lubricant.api.Init} tells lubricant to
- * force-load this class during its own startup. The static fields below run
- * at that moment, queueing each {@link ItemRegistry#register} call into
- * lubricant's per-mod registry. Lubricant then commits the queue to vanilla's
- * {@code BuiltInRegistries.ITEM} (Fabric) or attaches it to NeoForge's
- * registry event (NeoForge) at the loader-correct lifecycle moment.
+ * <p>Two pieces wire this class to lubricant's startup:</p>
+ * <ol>
+ *   <li>{@code implements Init} marks it as something lubricant should force-load.</li>
+ *   <li>{@code META-INF/services/wd40.lubricant.api.Init} (in this mod's resources)
+ *       lists this class's FQN so JDK ServiceLoader can find it.</li>
+ * </ol>
+ *
+ * <p>At lubricant boot, ServiceLoader instantiates this class, which runs its
+ * {@code <clinit>} - the static field initializers below. Each
+ * {@link ItemRegistry#register} call queues into lubricant's per-mod registry,
+ * and lubricant commits the queue to vanilla's {@code BuiltInRegistries.ITEM}
+ * (Fabric) or to NeoForge's DeferredRegister event at the right loader phase.</p>
+ *
+ * <p>See <a href="https://github.com/vaakxxx/lubricant/wiki/How-It-Works">How It
+ * Works</a> for the end-to-end pipeline, or
+ * <a href="https://github.com/vaakxxx/lubricant/wiki/Items">the Items wiki page</a>
+ * for full reference.</p>
  *
  * <h3>The factory pattern</h3>
  *
- * Each {@code register} takes:
- *   - a path string (becomes "{@code cog:<path>}")
- *   - a {@code Function<Item.Properties, Item>} that builds the Item
+ * <p>Each {@code register} takes a path string (becomes {@code cog:<path>}) and
+ * a {@code Function<Item.Properties, Item>} that builds the Item. Lubricant calls
+ * the factory once during bind, with a fresh {@code Item.Properties}. Add
+ * settings via builder methods ({@code stacksTo}, {@code fireResistant},
+ * {@code food}, etc.) and construct your {@code Item} (or a subclass).</p>
  *
- * Lubricant calls the factory once during bind, with a fresh {@code Item.Properties}.
- * Add settings via the builder methods on {@code props} - {@code stacksTo},
- * {@code fireResistant}, {@code food}, etc. - then construct your {@code Item}
- * (or subclass) and return it.
+ * <h3>The Supplier reference</h3>
  *
- * <h3>The Supplier&lt;Item&gt; reference</h3>
- *
- * The static field is a {@code Supplier<Item>} so it's safe to declare at class
- * load time before lubricant has bound anything. Calling {@code COG.get()} after
- * bind returns the registered Item; calling it before bind throws.
+ * <p>The static field is a {@code Supplier<Item>} so it's safe to declare at
+ * class-load time, before the actual Item exists. Calling {@code COG.get()}
+ * after bind returns the registered Item; calling it before bind throws.</p>
  */
 public final class Items implements Init {
 

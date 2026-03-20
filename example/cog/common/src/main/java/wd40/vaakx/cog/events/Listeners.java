@@ -35,6 +35,9 @@ import wd40.vaakx.cog.Cog;
  * Listeners run on the main game thread on both Fabric and NeoForge - lubricant
  * does the {@code enqueueWork} hop on NeoForge internally. Safe to mutate world
  * state, send packets, etc. without further synchronization.
+ *
+ * <p>See <a href="https://github.com/vaakxxx/lubricant/wiki/Events">the Events
+ * wiki page</a> for full reference and the per-loader bridge diagram.</p>
  */
 public final class Listeners implements Init {
 

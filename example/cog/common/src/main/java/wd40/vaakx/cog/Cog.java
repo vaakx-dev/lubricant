@@ -4,23 +4,25 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Mod-wide constants. Any time you need the mod id, reference {@link #ID} -
- * never hardcode the string elsewhere. Convention is to keep this class tiny
- * and put it at the package root so every other class reaches it via one
- * import.
+ * Mod-wide constants for cog (the lubricant example mod). One file per mod at
+ * the package root holding two statics: {@link #ID} and {@link #LOG}.
  *
- * The string here MUST match:
- *   - fabric.mod.json's "id"
- *   - quilt.mod.json's quilt_loader.id
- *   - neoforge.mods.toml's [[mods]].modId
- *   - the @Mod annotation in your CogNeoForge entry class
- *   - the META-INF/services/wd40.lubricant.api.Init filename's lookup
+ * <p>Reference {@code Cog.ID} everywhere a mod id is needed. The string MUST
+ * match:</p>
+ * <ul>
+ *   <li>{@code fabric.mod.json} -&gt; {@code "id"}</li>
+ *   <li>{@code neoforge.mods.toml} -&gt; {@code [[mods]].modId}</li>
+ *   <li>The {@code @Mod(...)} annotation on {@code CogNeoForge}</li>
+ *   <li>The lookup namespace in {@code META-INF/services/wd40.lubricant.api.Init}
+ *       paths and resource locations like {@code cog:wrench}</li>
+ * </ul>
  *
- * If they get out of sync, things break in subtle ways.
+ * <p>If any of these drift out of sync, the mod loads but registrations land
+ * under the wrong namespace - subtle bugs, no obvious errors.</p>
  *
- * {@link #LOG} is the mod-wide slf4j logger - tagged with the mod id so log
- * lines render as {@code [cog/INFO]}. Reuse it everywhere instead of creating
- * per-class loggers.
+ * <p>{@link #LOG} is the mod-wide slf4j {@link Logger} tagged with the mod id,
+ * so log lines render as {@code [cog/INFO] message}. Use it everywhere instead
+ * of creating per-class loggers.</p>
  */
 public final class Cog {
     public static final String ID = "cog";
