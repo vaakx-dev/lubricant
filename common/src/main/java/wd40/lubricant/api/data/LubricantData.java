@@ -16,10 +16,10 @@ import wd40.lubricant.api.registry.ItemRegistry;
 public interface LubricantData {
 
     /** Default item model + lang entry for every id in the registry. */
-    void defaults(ItemRegistry registry);
+    void defaults(ItemRegistry items);
 
     /** Default blockstate, block model, item model (unless no-item), and lang. */
-    void defaults(BlockRegistry registry);
+    void defaults(BlockRegistry blocks);
 
     void itemModel(ResourceLocation id, String parent, ResourceLocation layer0);
 

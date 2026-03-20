@@ -20,6 +20,11 @@ repositories {
     // Mojang's library repo - hosts brigadier and DataFixerUpper, both needed at
     // compile time when StreamCodec.composite overloads are referenced.
     maven { url = "https://libraries.minecraft.net" }
+    mavenCentral()
+}
+
+configurations {
+    datagenRuntime
 }
 
 dependencies {
@@ -32,4 +37,46 @@ dependencies {
     compileOnly "com.mojang:datafixerupper:8.0.16"
     // Netty's ByteBuf - StreamCodec.composite touches it via ByteBufCodecs return types.
     compileOnly "io.netty:netty-buffer:4.1.97.Final"
+
+    // Datagen runtime classpath: same vanilla MC + lubricant common + cog common,
+    // plus their transitive runtime deps. JavaExec needs these resolvable.
+    datagenRuntime files(vanillaMcJar).builtBy('setupVanillaMinecraft')
+    datagenRuntime rootProject.project(':common').sourceSets.main.output
+    datagenRuntime "org.slf4j:slf4j-api:2.0.9"
+    datagenRuntime "org.slf4j:slf4j-simple:2.0.9"
+    datagenRuntime "com.mojang:datafixerupper:8.0.16"
+    datagenRuntime "com.mojang:brigadier:1.2.9"
+    datagenRuntime "com.mojang:authlib:6.0.54"
+    datagenRuntime "com.mojang:logging:1.2.7"
+    datagenRuntime "io.netty:netty-buffer:4.1.97.Final"
+    datagenRuntime "io.netty:netty-common:4.1.97.Final"
+    datagenRuntime "io.netty:netty-codec:4.1.97.Final"
+    datagenRuntime "io.netty:netty-handler:4.1.97.Final"
+    datagenRuntime "io.netty:netty-transport:4.1.97.Final"
+    datagenRuntime "io.netty:netty-resolver:4.1.97.Final"
+    datagenRuntime "com.google.code.gson:gson:2.11.0"
+    datagenRuntime "com.google.guava:guava:33.3.1-jre"
+    datagenRuntime "it.unimi.dsi:fastutil:8.5.12"
+    datagenRuntime "org.apache.commons:commons-lang3:3.14.0"
+    datagenRuntime "commons-io:commons-io:2.15.1"
+    datagenRuntime "org.apache.logging.log4j:log4j-api:2.22.1"
+    datagenRuntime "org.apache.logging.log4j:log4j-core:2.22.1"
+    datagenRuntime "org.joml:joml:1.10.5"
 }
+
+// One-task datagen. Runs LubricantDataMain on a stripped JVM (vanilla MC + lubricant
+// common + cog common). Output is loader-agnostic JSON under
+// src/main/generated/resources/assets/<modId>/... - both cog-fabric and cog-neoforge
+// pick it up via the resources srcDir below.
+def generatedResources = file("src/main/generated/resources")
+
+tasks.register('runDatagen', JavaExec) {
+    dependsOn 'compileJava', 'processResources', ':common:compileJava'
+    classpath = configurations.datagenRuntime + sourceSets.main.output
+    mainClass = 'wd40.lubricant.internal.LubricantDataMain'
+    args generatedResources.absolutePath
+    // Bypass any host-side log4j config from elsewhere on the classpath.
+    systemProperty 'log4j2.disable.jmx', 'true'
+}
+
+sourceSets.main.resources.srcDir generatedResources

@@ -11,5 +11,5 @@ package wd40.lubricant.api.data;
  * <p><a href="https://github.com/vaakxxx/lubricant/wiki/Datagen">Datagen wiki</a></p>
  */
 public interface DataInit {
-    void onData(LubricantData d);
+    void onData(LubricantData data);
 }

@@ -18,21 +18,8 @@ import java.util.ServiceLoader;
  */
 public final class Services {
 
-    private static volatile RegistryHelper REGISTRY;
     private static volatile EventHelper EVENTS;
     private static volatile NetHelper NET;
-
-    /** The loader-specific {@link RegistryHelper}, used by {@code ItemRegistry} / {@code BlockRegistry}. */
-    public static RegistryHelper registry() {
-        RegistryHelper local = REGISTRY;
-        if (local == null) {
-            local = ServiceLoader.load(RegistryHelper.class).findFirst()
-                    .orElseThrow(() -> new IllegalStateException(
-                            "No lubricant RegistryHelper service found - is the lubricant loader module on the classpath?"));
-            REGISTRY = local;
-        }
-        return local;
-    }
 
     /** The loader-specific {@link EventHelper}, used by {@code Events}. */
     public static EventHelper events() {

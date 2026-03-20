@@ -18,9 +18,9 @@ import wd40.vaakx.cog.items.Items;
 public final class CogData implements DataInit {
 
     @Override
-    public void onData(LubricantData d) {
-        d.defaults(Items.ITEMS);
-        d.defaults(Blocks.BLOCKS);
+    public void onData(LubricantData data) {
+        data.defaults(Items.ITEMS);
+        data.defaults(Blocks.BLOCKS);
     }
 
     public CogData() {}

@@ -19,19 +19,11 @@ import java.util.TreeMap;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * Vanilla {@link DataProvider} that drives lubricant datagen. Loaders plug it
- * into their datagen pipeline (Fabric: {@code Pack#addProvider}; NeoForge:
- * {@code GatherDataEvent.getGenerator().addProvider}). At run time it:
+ * Vanilla {@link DataProvider} that drives lubricant datagen.
  *
- * <ol>
- *   <li>Loads every {@link DataInit} service.</li>
- *   <li>Calls each with a {@link LubricantData} impl that buffers JSON.</li>
- *   <li>Writes buffered JSON via the provided {@link CachedOutput}.</li>
- * </ol>
- *
- * <p>Existing modder files in {@code src/main/resources/assets/...} are not
- * touched - the lang-merge pass folds modder keys over generated keys before
- * writing.</p>
+ * <p>Invoked from {@link LubricantDataMain} via a tiny path-backed
+ * {@link CachedOutput} - no loader involvement. Loads every {@link DataInit}
+ * service, calls each with a {@link LubricantData} buffer, then flushes JSON.</p>
  */
 public final class LubricantDataProvider implements DataProvider {
 
@@ -57,7 +49,7 @@ public final class LubricantDataProvider implements DataProvider {
         for (var lang : buf.langByModId.entrySet()) {
             JsonObject merged = new JsonObject();
             for (var kv : lang.getValue().entrySet()) merged.addProperty(kv.getKey(), kv.getValue());
-            Path p = assetsRoot.resolve("assets/" + lang.getKey() + "/lang/en_us.json");
+            Path p = assetsRoot.resolve(lang.getKey() + "/lang/en_us.json");
             writes.add(DataProvider.saveStable(cache, merged, p));
         }
         return CompletableFuture.allOf(writes.toArray(CompletableFuture[]::new));
@@ -96,7 +88,7 @@ public final class LubricantDataProvider implements DataProvider {
                     JsonObject m = new JsonObject();
                     m.addProperty("parent", modelId.toString());
                     entries.add(new Entry(
-                            "assets/" + id.getNamespace() + "/models/item/" + id.getPath() + ".json", m));
+                            id.getNamespace() + "/models/item/" + id.getPath() + ".json", m));
                 }
                 lang("block." + id.getNamespace() + "." + id.getPath(), titleCase(id.getPath()));
             }
@@ -110,7 +102,7 @@ public final class LubricantDataProvider implements DataProvider {
             tex.addProperty("layer0", layer0.toString());
             json.add("textures", tex);
             entries.add(new Entry(
-                    "assets/" + id.getNamespace() + "/models/item/" + id.getPath() + ".json", json));
+                    id.getNamespace() + "/models/item/" + id.getPath() + ".json", json));
         }
 
         @Override
@@ -122,7 +114,7 @@ public final class LubricantDataProvider implements DataProvider {
             JsonObject json = new JsonObject();
             json.add("variants", variants);
             entries.add(new Entry(
-                    "assets/" + id.getNamespace() + "/blockstates/" + id.getPath() + ".json", json));
+                    id.getNamespace() + "/blockstates/" + id.getPath() + ".json", json));
         }
 
         @Override
@@ -133,7 +125,7 @@ public final class LubricantDataProvider implements DataProvider {
             tex.addProperty("all", textureAll.toString());
             json.add("textures", tex);
             entries.add(new Entry(
-                    "assets/" + id.getNamespace() + "/models/block/" + id.getPath() + ".json", json));
+                    id.getNamespace() + "/models/block/" + id.getPath() + ".json", json));
         }
 
         @Override
