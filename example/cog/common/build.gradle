@@ -1,3 +1,4 @@
+import wd40.lubricant.buildscript.MojangLibraries
 import wd40.lubricant.buildscript.SetupVanillaMinecraftTask
 
 // Cog's common module. Same vanilla setup as lubricant/common, plus depends on
@@ -17,8 +18,7 @@ tasks.named('compileJava').configure {
 }
 
 repositories {
-    // Mojang's library repo - hosts brigadier and DataFixerUpper, both needed at
-    // compile time when StreamCodec.composite overloads are referenced.
+    // Mojang's own Maven - hosts brigadier, DFU, authlib, logging.
     maven { url = "https://libraries.minecraft.net" }
     mavenCentral()
 }
@@ -26,6 +26,13 @@ repositories {
 configurations {
     datagenRuntime
 }
+
+// Resolve MC's library set from Mojang's launcher manifest. Cached on disk so
+// the HTTP fetch happens once per gradle user dir per MC version. This replaces
+// a brittle hand-pinned list that drifted out of sync on every MC bump.
+def mcLibraries = MojangLibraries.resolve(
+        project.minecraft_version,
+        gradle.gradleUserHomeDir.toPath().resolve("caches/lubricant"))
 
 dependencies {
     compileOnly files(vanillaMcJar).builtBy('setupVanillaMinecraft')
@@ -38,36 +45,18 @@ dependencies {
     // Netty's ByteBuf - StreamCodec.composite touches it via ByteBufCodecs return types.
     compileOnly "io.netty:netty-buffer:4.1.97.Final"
 
-    // Datagen runtime classpath: same vanilla MC + lubricant common + cog common,
-    // plus their transitive runtime deps. JavaExec needs these resolvable.
+    // Datagen runtime classpath: vanilla MC + lubricant common + every library
+    // Mojang's launcher pairs with this MC version (resolved above). One coord
+    // per line, identical set the production game uses, so there's no drift risk.
     datagenRuntime files(vanillaMcJar).builtBy('setupVanillaMinecraft')
     datagenRuntime rootProject.project(':common').sourceSets.main.output
-    datagenRuntime "org.slf4j:slf4j-api:2.0.9"
-    datagenRuntime "org.slf4j:slf4j-simple:2.0.9"
-    datagenRuntime "com.mojang:datafixerupper:8.0.16"
-    datagenRuntime "com.mojang:brigadier:1.2.9"
-    datagenRuntime "com.mojang:authlib:6.0.54"
-    datagenRuntime "com.mojang:logging:1.2.7"
-    datagenRuntime "io.netty:netty-buffer:4.1.97.Final"
-    datagenRuntime "io.netty:netty-common:4.1.97.Final"
-    datagenRuntime "io.netty:netty-codec:4.1.97.Final"
-    datagenRuntime "io.netty:netty-handler:4.1.97.Final"
-    datagenRuntime "io.netty:netty-transport:4.1.97.Final"
-    datagenRuntime "io.netty:netty-resolver:4.1.97.Final"
-    datagenRuntime "com.google.code.gson:gson:2.11.0"
-    datagenRuntime "com.google.guava:guava:33.3.1-jre"
-    datagenRuntime "it.unimi.dsi:fastutil:8.5.12"
-    datagenRuntime "org.apache.commons:commons-lang3:3.14.0"
-    datagenRuntime "commons-io:commons-io:2.15.1"
-    datagenRuntime "org.apache.logging.log4j:log4j-api:2.22.1"
-    datagenRuntime "org.apache.logging.log4j:log4j-core:2.22.1"
-    datagenRuntime "org.joml:joml:1.10.5"
+    mcLibraries.each { coord -> datagenRuntime coord }
 }
 
-// One-task datagen. Runs LubricantDataMain on a stripped JVM (vanilla MC + lubricant
-// common + cog common). Output is loader-agnostic JSON under
-// src/main/generated/resources/assets/<modId>/... - both cog-fabric and cog-neoforge
-// pick it up via the resources srcDir below.
+// One-task datagen. Runs LubricantDataMain on a stripped JVM (vanilla MC + every
+// MC-runtime library + lubricant common + cog common). Output is loader-agnostic
+// JSON under src/main/generated/resources/assets/<modId>/... - both cog-fabric
+// and cog-neoforge pick it up via the resources srcDir below.
 def generatedResources = file("src/main/generated/resources")
 
 tasks.register('runDatagen', JavaExec) {
@@ -75,8 +64,6 @@ tasks.register('runDatagen', JavaExec) {
     classpath = configurations.datagenRuntime + sourceSets.main.output
     mainClass = 'wd40.lubricant.internal.LubricantDataMain'
     args generatedResources.absolutePath
-    // Bypass any host-side log4j config from elsewhere on the classpath.
-    systemProperty 'log4j2.disable.jmx', 'true'
 }
 
 sourceSets.main.resources.srcDir generatedResources

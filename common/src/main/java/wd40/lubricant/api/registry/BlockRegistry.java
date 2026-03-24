@@ -5,6 +5,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -26,9 +27,9 @@ public final class BlockRegistry {
 
     public static final List<BlockRegistry> ALL = new CopyOnWriteArrayList<>();
 
-    public final String modId;
-    public final List<Entry> entries = new ArrayList<>();
-    public final Set<String> noItemPaths = new HashSet<>();
+    private final String modId;
+    private final List<Entry> entries = new ArrayList<>();
+    private final Set<String> noItemPaths = new HashSet<>();
 
     public record Entry(String path, Function<BlockBehaviour.Properties, Block> factory, AtomicReference<Block> ref) {}
 
@@ -62,6 +63,19 @@ public final class BlockRegistry {
             }
             return block;
         };
+    }
+
+    public String modId() {
+        return modId;
+    }
+
+    public List<Entry> entries() {
+        return Collections.unmodifiableList(entries);
+    }
+
+    /** Whether {@code register} for this path was {@code registerNoItem} (skip the BlockItem). */
+    public boolean isNoItem(String path) {
+        return noItemPaths.contains(path);
     }
 
     public List<ResourceLocation> ids() {

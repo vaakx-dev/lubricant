@@ -73,7 +73,7 @@ public final class LubricantDataProvider implements DataProvider {
         public void defaults(ItemRegistry registry) {
             for (ResourceLocation id : registry.ids()) {
                 itemModel(id, "item/generated", id.withPrefix("item/"));
-                lang("item." + id.getNamespace() + "." + id.getPath(), titleCase(id.getPath()));
+                lang(id.getNamespace(), "item." + id.getNamespace() + "." + id.getPath(), titleCase(id.getPath()));
             }
         }
 
@@ -90,7 +90,7 @@ public final class LubricantDataProvider implements DataProvider {
                     entries.add(new Entry(
                             id.getNamespace() + "/models/item/" + id.getPath() + ".json", m));
                 }
-                lang("block." + id.getNamespace() + "." + id.getPath(), titleCase(id.getPath()));
+                lang(id.getNamespace(), "block." + id.getNamespace() + "." + id.getPath(), titleCase(id.getPath()));
             }
         }
 
@@ -129,8 +129,7 @@ public final class LubricantDataProvider implements DataProvider {
         }
 
         @Override
-        public void lang(String key, String value) {
-            String modId = key.substring(key.indexOf('.') + 1, key.indexOf('.', key.indexOf('.') + 1));
+        public void lang(String modId, String key, String value) {
             langByModId.computeIfAbsent(modId, k -> new TreeMap<>()).put(key, value);
         }
 

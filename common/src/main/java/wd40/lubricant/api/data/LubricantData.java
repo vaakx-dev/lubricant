@@ -27,5 +27,6 @@ public interface LubricantData {
 
     void blockModel(ResourceLocation id, String parent, ResourceLocation textureAll);
 
-    void lang(String key, String value);
+    /** Add a translation key under {@code modId}'s en_us.json. {@code modId} disambiguates output file. */
+    void lang(String modId, String key, String value);
 }

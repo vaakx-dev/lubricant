@@ -2,7 +2,6 @@ package wd40.lubricant.neoforge;
 
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
@@ -23,25 +22,25 @@ public final class LubricantNeoForge {
         lubricantBus.addListener(NeoForgeNetHelper.INSTANCE::onRegister);
 
         for (BlockRegistry registry : BlockRegistry.ALL) {
-            attachBlocks(registry, busFor(registry.modId, lubricantBus));
+            attachBlocks(registry, busFor(registry.modId(), lubricantBus));
         }
         for (ItemRegistry registry : ItemRegistry.ALL) {
-            attachItems(registry, busFor(registry.modId, lubricantBus));
+            attachItems(registry, busFor(registry.modId(), lubricantBus));
         }
     }
 
     private static void attachBlocks(BlockRegistry registry, IEventBus bus) {
-        DeferredRegister.Blocks blocks = DeferredRegister.createBlocks(registry.modId);
-        DeferredRegister.Items blockItems = DeferredRegister.createItems(registry.modId);
-        for (BlockRegistry.Entry entry : registry.entries) {
-            // Wrap the factory so we capture the Block instance into the entry's AtomicReference
-            // when NeoForge fires the registry event.
+        DeferredRegister.Blocks blocks = DeferredRegister.createBlocks(registry.modId());
+        DeferredRegister.Items blockItems = DeferredRegister.createItems(registry.modId());
+        for (BlockRegistry.Entry entry : registry.entries()) {
+            // The lambda runs once during the registry event; capture the result into entry.ref
+            // so user code reading the Supplier<Block> sees the live Block.
             var deferred = blocks.registerBlock(entry.path(), props -> {
                 Block block = entry.factory().apply(props);
                 entry.ref().set(block);
                 return block;
-            }, BlockBehaviour.Properties.of());
-            if (!registry.noItemPaths.contains(entry.path())) {
+            });
+            if (!registry.isNoItem(entry.path())) {
                 blockItems.registerSimpleBlockItem(deferred);
             }
         }
@@ -50,8 +49,8 @@ public final class LubricantNeoForge {
     }
 
     private static void attachItems(ItemRegistry registry, IEventBus bus) {
-        DeferredRegister.Items items = DeferredRegister.createItems(registry.modId);
-        for (ItemRegistry.Entry entry : registry.entries) {
+        DeferredRegister.Items items = DeferredRegister.createItems(registry.modId());
+        for (ItemRegistry.Entry entry : registry.entries()) {
             items.registerItem(entry.path(), props -> {
                 Item item = entry.factory().apply(props);
                 entry.ref().set(item);

@@ -22,22 +22,23 @@ public final class LubricantFabric implements ModInitializer {
     public void onInitialize() {
         Bootstrap.loadAllInit();
 
-        // Bind blocks before items so item factories can reference Blocks.X.get()
-        // when constructing BlockItems.
+        // Bind blocks before items so item factories may reference Blocks.X.get().
         for (BlockRegistry registry : BlockRegistry.ALL) {
-            for (BlockRegistry.Entry entry : registry.entries) {
-                ResourceLocation id = ResourceLocation.fromNamespaceAndPath(registry.modId, entry.path());
+            String modId = registry.modId();
+            for (BlockRegistry.Entry entry : registry.entries()) {
+                ResourceLocation id = ResourceLocation.fromNamespaceAndPath(modId, entry.path());
                 Block block = entry.factory().apply(BlockBehaviour.Properties.of());
                 Registry.register(BuiltInRegistries.BLOCK, id, block);
                 entry.ref().set(block);
-                if (!registry.noItemPaths.contains(entry.path())) {
+                if (!registry.isNoItem(entry.path())) {
                     Registry.register(BuiltInRegistries.ITEM, id, new BlockItem(block, new Item.Properties()));
                 }
             }
         }
         for (ItemRegistry registry : ItemRegistry.ALL) {
-            for (ItemRegistry.Entry entry : registry.entries) {
-                ResourceLocation id = ResourceLocation.fromNamespaceAndPath(registry.modId, entry.path());
+            String modId = registry.modId();
+            for (ItemRegistry.Entry entry : registry.entries()) {
+                ResourceLocation id = ResourceLocation.fromNamespaceAndPath(modId, entry.path());
                 Item item = entry.factory().apply(new Item.Properties());
                 Registry.register(BuiltInRegistries.ITEM, id, item);
                 entry.ref().set(item);

@@ -16,7 +16,7 @@ public final class MojangManifest {
             String sha1
     ) {}
 
-    public record VersionDetail(Downloads downloads) {}
+    public record VersionDetail(Downloads downloads, List<Library> libraries) {}
 
     public record Downloads(
             Download client,
@@ -24,6 +24,16 @@ public final class MojangManifest {
     ) {}
 
     public record Download(String url, String sha1, long size) {}
+
+    public record Library(String name, LibraryDownloads downloads, List<Rule> rules) {}
+
+    public record LibraryDownloads(Artifact artifact) {}
+
+    public record Artifact(String path, String sha1, long size, String url) {}
+
+    public record Rule(String action, OsConstraint os) {}
+
+    public record OsConstraint(String name, String version, String arch) {}
 
     private MojangManifest() {}
 }

@@ -4,6 +4,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
@@ -11,14 +12,9 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
- * Registers {@link Item}s under one mod's namespace. Each {@code register} call
- * stores a {@link Entry}; the loader entry point ({@code LubricantFabric},
- * {@code LubricantNeoForge}) reads {@link #ALL} at the right phase and commits
- * the entries to that loader's registry pipeline.
- *
- * <p>This class is plain data - no SPI lookup happens during {@code create} or
- * {@code register}. That's why {@code Items.<clinit>} works on a stripped JVM
- * (datagen) without any loader on the classpath.</p>
+ * Registers {@link Item}s under one mod's namespace. Plain data - no SPI lookup
+ * during {@code create} or {@code register}. The loader entry point reads
+ * {@link #ALL} and commits each {@link Entry} into the loader's registry pipeline.
  *
  * <p><a href="https://github.com/vaakxxx/lubricant/wiki/Items">Items wiki</a></p>
  */
@@ -27,8 +23,8 @@ public final class ItemRegistry {
     /** Every registry instance ever created in this JVM, in creation order. */
     public static final List<ItemRegistry> ALL = new CopyOnWriteArrayList<>();
 
-    public final String modId;
-    public final List<Entry> entries = new ArrayList<>();
+    private final String modId;
+    private final List<Entry> entries = new ArrayList<>();
 
     /** One queued registration. The loader sets {@code ref} once the Item exists. */
     public record Entry(String path, Function<Item.Properties, Item> factory, AtomicReference<Item> ref) {}
@@ -57,7 +53,15 @@ public final class ItemRegistry {
         };
     }
 
-    /** Every id passed to {@link #register}, in registration order. Read at any phase. */
+    public String modId() {
+        return modId;
+    }
+
+    /** Read-only view of the queued registrations. Loader iterates and writes through {@code Entry.ref()}. */
+    public List<Entry> entries() {
+        return Collections.unmodifiableList(entries);
+    }
+
     public List<ResourceLocation> ids() {
         List<ResourceLocation> out = new ArrayList<>(entries.size());
         for (Entry entry : entries) {
