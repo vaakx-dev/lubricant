@@ -6,9 +6,10 @@ base {
     archivesName = "cog-fabric"
 }
 
-// Pull cog/common's sources + resources into this build.
+// Pull cog/common's sources + resources (incl. lubricant-generated assets) into this build.
 sourceSets.main.java.srcDir rootProject.file('example/cog/common/src/main/java')
 sourceSets.main.resources.srcDir rootProject.file('example/cog/common/src/main/resources')
+sourceSets.main.resources.srcDir rootProject.file('example/cog/common/src/main/generated/resources')
 
 dependencies {
     minecraft "com.mojang:minecraft:${minecraft_version}"

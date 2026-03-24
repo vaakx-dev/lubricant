@@ -1,9 +1,14 @@
 package wd40.lubricant.neoforge;
 
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import wd40.lubricant.api.registry.BlockRegistry;
+import wd40.lubricant.api.registry.ItemRegistry;
 import wd40.lubricant.internal.Bootstrap;
 import wd40.lubricant.internal.Services;
 
@@ -11,25 +16,48 @@ import wd40.lubricant.internal.Services;
 public final class LubricantNeoForge {
 
     public LubricantNeoForge(IEventBus lubricantBus) {
-        // Force-load every mod's Init class - fills the ALL_X lists in NeoForgeRegistryHelper
-        // and the pending-payload queue in NeoForgeNetHelper.
         Bootstrap.loadAllInit();
 
-        // Touch NetHelper so its ServiceLoader instance is created (sets INSTANCE static),
-        // then wire its onRegister handler to lubricant's mod bus. RegisterPayloadHandlersEvent
-        // fires later in the construct phase and drains the pending queue.
         Services.net();
         lubricantBus.addListener(NeoForgeNetHelper.INSTANCE::onRegister);
 
-        // For each queued registry, find that mod's event bus and attach the
-        // underlying DeferredRegister to it. NeoForge's ModContainer.getEventBus() is
-        // public, so no reflection needed.
-        for (NeoForgeBlockRegistry r : NeoForgeRegistryHelper.ALL_BLOCKS) {
-            r.attach(busFor(r.modId, lubricantBus));
+        for (BlockRegistry registry : BlockRegistry.ALL) {
+            attachBlocks(registry, busFor(registry.modId(), lubricantBus));
         }
-        for (NeoForgeItemRegistry r : NeoForgeRegistryHelper.ALL_ITEMS) {
-            r.attach(busFor(r.modId, lubricantBus));
+        for (ItemRegistry registry : ItemRegistry.ALL) {
+            attachItems(registry, busFor(registry.modId(), lubricantBus));
         }
+    }
+
+    private static void attachBlocks(BlockRegistry registry, IEventBus bus) {
+        DeferredRegister.Blocks blocks = DeferredRegister.createBlocks(registry.modId());
+        DeferredRegister.Items blockItems = DeferredRegister.createItems(registry.modId());
+        for (BlockRegistry.Entry entry : registry.entries()) {
+            // The lambda runs once during the registry event; capture the result into entry.ref
+            // so user code reading the Supplier<Block> sees the live Block.
+            var deferred = blocks.registerBlock(entry.path(), props -> {
+                Block block = entry.factory().apply(props);
+                entry.ref().set(block);
+                return block;
+            });
+            if (!registry.isNoItem(entry.path())) {
+                blockItems.registerSimpleBlockItem(deferred);
+            }
+        }
+        blocks.register(bus);
+        blockItems.register(bus);
+    }
+
+    private static void attachItems(ItemRegistry registry, IEventBus bus) {
+        DeferredRegister.Items items = DeferredRegister.createItems(registry.modId());
+        for (ItemRegistry.Entry entry : registry.entries()) {
+            items.registerItem(entry.path(), props -> {
+                Item item = entry.factory().apply(props);
+                entry.ref().set(item);
+                return item;
+            });
+        }
+        items.register(bus);
     }
 
     private static IEventBus busFor(String modId, IEventBus lubricantBus) {

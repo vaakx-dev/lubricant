@@ -8,6 +8,7 @@ base {
 
 sourceSets.main.java.srcDir rootProject.file('example/cog/common/src/main/java')
 sourceSets.main.resources.srcDir rootProject.file('example/cog/common/src/main/resources')
+sourceSets.main.resources.srcDir rootProject.file('example/cog/common/src/main/generated/resources')
 
 neoForge {
     version = project.neoforge_version

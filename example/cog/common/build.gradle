@@ -1,3 +1,4 @@
+import wd40.lubricant.buildscript.MojangLibraries
 import wd40.lubricant.buildscript.SetupVanillaMinecraftTask
 
 // Cog's common module. Same vanilla setup as lubricant/common, plus depends on
@@ -17,10 +18,21 @@ tasks.named('compileJava').configure {
 }
 
 repositories {
-    // Mojang's library repo - hosts brigadier and DataFixerUpper, both needed at
-    // compile time when StreamCodec.composite overloads are referenced.
+    // Mojang's own Maven - hosts brigadier, DFU, authlib, logging.
     maven { url = "https://libraries.minecraft.net" }
+    mavenCentral()
 }
+
+configurations {
+    datagenRuntime
+}
+
+// Resolve MC's library set from Mojang's launcher manifest. Cached on disk so
+// the HTTP fetch happens once per gradle user dir per MC version. This replaces
+// a brittle hand-pinned list that drifted out of sync on every MC bump.
+def mcLibraries = MojangLibraries.resolve(
+        project.minecraft_version,
+        gradle.gradleUserHomeDir.toPath().resolve("caches/lubricant"))
 
 dependencies {
     compileOnly files(vanillaMcJar).builtBy('setupVanillaMinecraft')
@@ -32,4 +44,26 @@ dependencies {
     compileOnly "com.mojang:datafixerupper:8.0.16"
     // Netty's ByteBuf - StreamCodec.composite touches it via ByteBufCodecs return types.
     compileOnly "io.netty:netty-buffer:4.1.97.Final"
+
+    // Datagen runtime classpath: vanilla MC + lubricant common + every library
+    // Mojang's launcher pairs with this MC version (resolved above). One coord
+    // per line, identical set the production game uses, so there's no drift risk.
+    datagenRuntime files(vanillaMcJar).builtBy('setupVanillaMinecraft')
+    datagenRuntime rootProject.project(':common').sourceSets.main.output
+    mcLibraries.each { coord -> datagenRuntime coord }
 }
+
+// One-task datagen. Runs LubricantDataMain on a stripped JVM (vanilla MC + every
+// MC-runtime library + lubricant common + cog common). Output is loader-agnostic
+// JSON under src/main/generated/resources/assets/<modId>/... - both cog-fabric
+// and cog-neoforge pick it up via the resources srcDir below.
+def generatedResources = file("src/main/generated/resources")
+
+tasks.register('runDatagen', JavaExec) {
+    dependsOn 'compileJava', 'processResources', ':common:compileJava'
+    classpath = configurations.datagenRuntime + sourceSets.main.output
+    mainClass = 'wd40.lubricant.internal.LubricantDataMain'
+    args generatedResources.absolutePath
+}
+
+sourceSets.main.resources.srcDir generatedResources
