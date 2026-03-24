@@ -6,6 +6,7 @@
     "description": "Cross-loader platform abstractions for vaakx mods.",
     "authors": ["vaakx"],
     "license": "MIT",
+    "icon": "icon.png",
     "environment": "*",
     "entrypoints": {
         "main": ["wd40.lubricant.fabric.LubricantFabric"]

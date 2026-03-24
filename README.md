@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="icon.png" alt="lubricant" width="160" />
+</p>
+
 # lubricant
 
 A loader-abstraction layer for Minecraft 1.21.1 mods. Write your items, blocks,

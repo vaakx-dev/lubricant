@@ -7,6 +7,7 @@ modId = "lubricant"
 version = "${version}"
 displayName = "Lubricant"
 authors = "vaakx"
+logoFile = "icon.png"
 description = '''Cross-loader platform abstractions for vaakx mods.'''
 
 [[dependencies.lubricant]]
