@@ -1,4 +1,7 @@
-package wd40.lubricant.internal;
+package wd40.lubricant.core;
+
+import wd40.lubricant.core.events.EventHelper;
+import wd40.lubricant.core.net.NetHelper;
 
 import java.util.ServiceLoader;
 
@@ -10,7 +13,8 @@ import java.util.ServiceLoader;
  *
  * <p>Each helper is loaded via JDK {@link ServiceLoader} on first access and
  * cached for the JVM lifetime. The provider files live in each loader module's
- * resources at {@code META-INF/services/wd40.lubricant.internal.<HelperName>}.</p>
+ * resources at {@code META-INF/services/wd40.lubricant.core.events.EventHelper}
+ * and {@code META-INF/services/wd40.lubricant.core.net.NetHelper}.</p>
  *
  * <p>Threading: races on first call may instantiate duplicate helpers, but only
  * one wins the assignment to the volatile field. Helpers must be safe to

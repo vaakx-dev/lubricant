@@ -1,4 +1,4 @@
-package wd40.lubricant.neoforge;
+package wd40.lubricant.neoforge.net;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -16,7 +16,7 @@ import wd40.lubricant.api.net.handlers.ClientHandler;
 import wd40.lubricant.api.net.S2CPayload;
 import wd40.lubricant.api.net.handlers.ServerContext;
 import wd40.lubricant.api.net.handlers.ServerHandler;
-import wd40.lubricant.internal.NetHelper;
+import wd40.lubricant.core.net.NetHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,15 +26,15 @@ import java.util.List;
 // Net.toClient at API-call time. So we queue every registration into `pending` and
 // drain the queue inside the event handler.
 //
-// LubricantNeoForge wires the listener: lubricantBus.addListener(INSTANCE::onRegister)
-// after Bootstrap.loadAllInit() has filled the queue.
-public final class NeoForgeNetHelper implements NetHelper {
+// Entry wires the listener: lubricantBus.addListener(INSTANCE::onRegister) after
+// Bootstrap.loadAllInit() has filled the queue.
+public final class Net implements NetHelper {
 
-    public static volatile NeoForgeNetHelper INSTANCE;
+    public static volatile Net INSTANCE;
 
     private final List<Pending<?>> pending = new ArrayList<>();
 
-    public NeoForgeNetHelper() {
+    public Net() {
         INSTANCE = this;
     }
 
@@ -44,7 +44,7 @@ public final class NeoForgeNetHelper implements NetHelper {
             StreamCodec<? super RegistryFriendlyByteBuf, T> codec,
             ClientHandler<T> handler) {
         pending.add(new ClientboundPending<>(type, codec, handler));
-        return new NeoForgeS2C<>();
+        return new S2C<>();
     }
 
     @Override
@@ -53,7 +53,7 @@ public final class NeoForgeNetHelper implements NetHelper {
             StreamCodec<? super RegistryFriendlyByteBuf, T> codec,
             ServerHandler<T> handler) {
         pending.add(new ServerboundPending<>(type, codec, handler));
-        return new NeoForgeC2S<>();
+        return new C2S<>();
     }
 
     public void onRegister(RegisterPayloadHandlersEvent event) {

@@ -1,4 +1,4 @@
-package wd40.lubricant.internal;
+package wd40.lubricant.core;
 
 import wd40.lubricant.api.Init;
 
@@ -13,10 +13,10 @@ import java.util.ServiceLoader;
  * and {@code static {}} blocks. That's where consumer mods put their
  * registration code.</p>
  *
- * <p>Loader entry points ({@code LubricantFabric.onInitialize},
- * {@code LubricantNeoForge}'s constructor) call {@link #loadAllInit} once each,
- * during their own startup. After this method returns, every consumer mod's
- * registration code has run.</p>
+ * <p>Loader entry points ({@code wd40.lubricant.fabric.Entry#onInitialize},
+ * {@code wd40.lubricant.neoforge.Entry}'s constructor) call {@link #loadAllInit}
+ * once each, during their own startup. After this method returns, every consumer
+ * mod's registration code has run.</p>
  *
  * @implNote The for-each loop body is empty by design - touching the iterator
  * variable is enough to load the class. We don't call any method on the

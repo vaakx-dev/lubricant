@@ -9,17 +9,18 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import wd40.lubricant.api.registry.BlockRegistry;
 import wd40.lubricant.api.registry.ItemRegistry;
-import wd40.lubricant.internal.Bootstrap;
-import wd40.lubricant.internal.Services;
+import wd40.lubricant.core.Bootstrap;
+import wd40.lubricant.core.Services;
+import wd40.lubricant.neoforge.net.Net;
 
 @Mod("lubricant")
-public final class LubricantNeoForge {
+public final class Entry {
 
-    public LubricantNeoForge(IEventBus lubricantBus) {
+    public Entry(IEventBus lubricantBus) {
         Bootstrap.loadAllInit();
 
         Services.net();
-        lubricantBus.addListener(NeoForgeNetHelper.INSTANCE::onRegister);
+        lubricantBus.addListener(Net.INSTANCE::onRegister);
 
         for (BlockRegistry registry : BlockRegistry.ALL) {
             attachBlocks(registry, busFor(registry.modId(), lubricantBus));

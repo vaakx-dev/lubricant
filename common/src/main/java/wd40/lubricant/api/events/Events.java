@@ -4,7 +4,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import wd40.lubricant.internal.Services;
+import wd40.lubricant.core.Services;
 
 import java.util.function.Consumer;
 

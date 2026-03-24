@@ -5,7 +5,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import wd40.lubricant.api.net.handlers.ClientHandler;
 import wd40.lubricant.api.net.handlers.ServerHandler;
-import wd40.lubricant.internal.Services;
+import wd40.lubricant.core.Services;
 
 /**
  * Declares custom network payloads. Direction is enforced at compile time -

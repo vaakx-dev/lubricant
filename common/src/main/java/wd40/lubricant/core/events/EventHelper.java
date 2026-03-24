@@ -1,4 +1,4 @@
-package wd40.lubricant.internal;
+package wd40.lubricant.core.events;
 
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.commands.CommandSourceStack;
@@ -15,8 +15,8 @@ import java.util.function.Consumer;
  * {@link java.util.ServiceLoader}:
  *
  * <ul>
- *   <li>Fabric: {@code wd40.lubricant.fabric.FabricEventHelper}</li>
- *   <li>NeoForge: {@code wd40.lubricant.neoforge.NeoForgeEventHelper}</li>
+ *   <li>Fabric: {@code wd40.lubricant.fabric.events.Events}</li>
+ *   <li>NeoForge: {@code wd40.lubricant.neoforge.events.Events}</li>
  * </ul>
  *
  * <p>Each impl constructs {@link BridgedEvent}s that wire subscribers into the

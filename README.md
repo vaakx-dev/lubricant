@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="icon.png" alt="lubricant" width="160" />
+  <img src="common/src/main/resources/icon.png" alt="lubricant" width="160" />
 </p>
 
 # lubricant

@@ -1,4 +1,4 @@
-package wd40.lubricant.fabric;
+package wd40.lubricant.fabric.events;
 
 import com.mojang.brigadier.CommandDispatcher;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
@@ -13,14 +13,14 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import wd40.lubricant.api.events.Event;
 import wd40.lubricant.api.events.ItemUseListener;
-import wd40.lubricant.internal.BridgedEvent;
-import wd40.lubricant.internal.EventHelper;
+import wd40.lubricant.core.events.BridgedEvent;
+import wd40.lubricant.core.events.EventHelper;
 
 import java.util.function.Consumer;
 
 // Fabric impl of EventHelper. Each Event<L> wraps a one-shot subscribe -> Fabric API
 // register call. Constructed once by ServiceLoader on first Services.events() call.
-public final class FabricEventHelper implements EventHelper {
+public final class Events implements EventHelper {
 
     private final Event<Consumer<MinecraftServer>> serverTick = new BridgedEvent<>(
             l -> ServerTickEvents.END_SERVER_TICK.register(l::accept));

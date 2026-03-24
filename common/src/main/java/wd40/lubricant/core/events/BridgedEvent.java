@@ -1,4 +1,4 @@
-package wd40.lubricant.internal;
+package wd40.lubricant.core.events;
 
 import wd40.lubricant.api.events.Event;
 

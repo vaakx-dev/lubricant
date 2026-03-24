@@ -9,7 +9,7 @@
     "icon": "icon.png",
     "environment": "*",
     "entrypoints": {
-        "main": ["wd40.lubricant.fabric.LubricantFabric"]
+        "main": ["wd40.lubricant.fabric.Entry"]
     },
     "accessWidener": "lubricant.accesswidener",
     "depends": {

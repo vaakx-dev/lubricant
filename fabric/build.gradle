@@ -23,6 +23,7 @@ sourceSets {
         ]
         resources.srcDirs = [
                 rootProject.file('example/cog/common/src/main/resources'),
+                rootProject.file('example/cog/common/src/main/generated/resources'),
                 rootProject.file('example/cog/fabric/src/main/resources')
         ]
         compileClasspath += sourceSets.main.compileClasspath + sourceSets.main.output
@@ -97,10 +98,6 @@ processResources {
     inputs.property 'version', project.mod_version
     inputs.property 'mc_version', project.minecraft_version
     inputs.property 'fabric_loader_version', project.fabric_loader_version
-
-    // Single source of truth for the mod icon - lives at repo root so the README
-    // can reference it without a deep path.
-    from rootProject.file('icon.png')
 
     filesMatching('fabric.mod.json') {
         expand([

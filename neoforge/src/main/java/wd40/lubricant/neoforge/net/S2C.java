@@ -1,4 +1,4 @@
-package wd40.lubricant.neoforge;
+package wd40.lubricant.neoforge.net;
 
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.MinecraftServer;
@@ -10,7 +10,7 @@ import wd40.lubricant.api.net.S2CPayload;
 
 // NeoForge impl of S2CPayload. PacketDistributor handles all four send shapes
 // natively without iteration helpers.
-final class NeoForgeS2C<T extends CustomPacketPayload> implements S2CPayload<T> {
+final class S2C<T extends CustomPacketPayload> implements S2CPayload<T> {
 
     @Override
     public void sendTo(ServerPlayer player, T payload) {

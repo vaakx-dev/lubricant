@@ -1,4 +1,4 @@
-package wd40.lubricant.fabric;
+package wd40.lubricant.fabric.net;
 
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -11,7 +11,7 @@ import wd40.lubricant.api.net.S2CPayload;
 
 // Fabric impl of S2CPayload. All four sends route through ServerPlayNetworking.send,
 // which is server-side API and safe on dedicated servers + integrated servers.
-final class FabricS2C<T extends CustomPacketPayload> implements S2CPayload<T> {
+final class S2C<T extends CustomPacketPayload> implements S2CPayload<T> {
 
     @Override
     public void sendTo(ServerPlayer player, T payload) {

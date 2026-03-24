@@ -1,4 +1,4 @@
-package wd40.lubricant.internal;
+package wd40.lubricant.data;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -21,15 +21,15 @@ import java.util.concurrent.CompletableFuture;
 /**
  * Vanilla {@link DataProvider} that drives lubricant datagen.
  *
- * <p>Invoked from {@link LubricantDataMain} via a tiny path-backed
- * {@link CachedOutput} - no loader involvement. Loads every {@link DataInit}
- * service, calls each with a {@link LubricantData} buffer, then flushes JSON.</p>
+ * <p>Invoked from {@link DataMain} via a tiny path-backed {@link CachedOutput} -
+ * no loader involvement. Loads every {@link DataInit} service, calls each with
+ * a {@link LubricantData} buffer, then flushes JSON.</p>
  */
-public final class LubricantDataProvider implements DataProvider {
+public final class Provider implements DataProvider {
 
     private final PackOutput output;
 
-    public LubricantDataProvider(PackOutput output) {
+    public Provider(PackOutput output) {
         this.output = output;
     }
 

@@ -1,4 +1,4 @@
-package wd40.lubricant.internal;
+package wd40.lubricant.core.net;
 
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -13,9 +13,9 @@ import wd40.lubricant.api.net.handlers.ServerHandler;
  * per loader, discovered via JDK {@link java.util.ServiceLoader}:
  *
  * <ul>
- *   <li>Fabric: {@code wd40.lubricant.fabric.FabricNetHelper} - registers
+ *   <li>Fabric: {@code wd40.lubricant.fabric.net.Net} - registers
  *       payloads immediately via {@code PayloadTypeRegistry.playS2C/.playC2S}.</li>
- *   <li>NeoForge: {@code wd40.lubricant.neoforge.NeoForgeNetHelper} - queues
+ *   <li>NeoForge: {@code wd40.lubricant.neoforge.net.Net} - queues
  *       registrations and drains them inside a {@code RegisterPayloadHandlersEvent}
  *       listener attached to lubricant's mod bus.</li>
  * </ul>

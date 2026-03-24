@@ -1,4 +1,4 @@
-package wd40.lubricant.fabric;
+package wd40.lubricant.fabric.net;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
@@ -14,19 +14,18 @@ import wd40.lubricant.api.net.handlers.ClientHandler;
 import wd40.lubricant.api.net.S2CPayload;
 import wd40.lubricant.api.net.handlers.ServerContext;
 import wd40.lubricant.api.net.handlers.ServerHandler;
-import wd40.lubricant.internal.NetHelper;
+import wd40.lubricant.core.net.NetHelper;
 
 // Fabric impl of NetHelper. Discovered via JDK ServiceLoader.
 //
 // Fabric's PayloadTypeRegistry is global+static, so registration happens
 // immediately when the consumer mod calls Net.toClient / Net.toServer (via the
-// Bootstrap.loadAllInit() pass inside LubricantFabric.onInitialize - which is
-// inside a ModInitializer, the correct phase).
+// Bootstrap.loadAllInit() pass inside Entry.onInitialize - which is inside a
+// ModInitializer, the correct phase).
 //
-// Client-only API calls (ClientPlayNetworking) are routed through
-// FabricNetClientReceivers, which is @Environment(CLIENT) and never loaded on
-// dedicated servers.
-public final class FabricNetHelper implements NetHelper {
+// Client-only API calls (ClientPlayNetworking) are routed through ClientReceivers,
+// which is @Environment(CLIENT) and never loaded on dedicated servers.
+public final class Net implements NetHelper {
 
     private static final boolean IS_CLIENT =
             FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT;
@@ -38,9 +37,9 @@ public final class FabricNetHelper implements NetHelper {
             ClientHandler<T> handler) {
         PayloadTypeRegistry.playS2C().register(type, codec);
         if (IS_CLIENT) {
-            FabricNetClientReceivers.register(type, handler);
+            ClientReceivers.register(type, handler);
         }
-        return new FabricS2C<>();
+        return new S2C<>();
     }
 
     @Override
@@ -54,7 +53,7 @@ public final class FabricNetHelper implements NetHelper {
             ServerPlayer player = ctx.player();
             server.execute(() -> handler.handle(payload, new ServerContextImpl(server, player)));
         });
-        return new FabricC2S<>();
+        return new C2S<>();
     }
 
     private record ServerContextImpl(MinecraftServer server, ServerPlayer player) implements ServerContext {}

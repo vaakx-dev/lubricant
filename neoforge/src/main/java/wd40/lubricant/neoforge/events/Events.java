@@ -1,4 +1,4 @@
-package wd40.lubricant.neoforge;
+package wd40.lubricant.neoforge.events;
 
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.commands.CommandSourceStack;
@@ -14,15 +14,15 @@ import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import wd40.lubricant.api.events.Event;
 import wd40.lubricant.api.events.ItemUseListener;
-import wd40.lubricant.internal.BridgedEvent;
-import wd40.lubricant.internal.EventHelper;
+import wd40.lubricant.core.events.BridgedEvent;
+import wd40.lubricant.core.events.EventHelper;
 
 import java.util.function.Consumer;
 
 // NeoForge impl of EventHelper. All seven of these events live on the global
 // NeoForge.EVENT_BUS (the "game bus"), not on per-mod buses, so we don't need any
 // modId/bus lookup like the registry path does.
-public final class NeoForgeEventHelper implements EventHelper {
+public final class Events implements EventHelper {
 
     private final Event<Consumer<MinecraftServer>> serverTick = new BridgedEvent<>(
             l -> NeoForge.EVENT_BUS.addListener((ServerTickEvent.Post e) -> l.accept(e.getServer())));

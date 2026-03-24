@@ -12,9 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import wd40.lubricant.api.registry.BlockRegistry;
 import wd40.lubricant.api.registry.ItemRegistry;
-import wd40.lubricant.internal.Bootstrap;
+import wd40.lubricant.core.Bootstrap;
 
-public final class LubricantFabric implements ModInitializer {
+public final class Entry implements ModInitializer {
 
     private static final Logger LOG = LoggerFactory.getLogger("lubricant");
 
