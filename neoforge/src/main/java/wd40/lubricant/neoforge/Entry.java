@@ -11,6 +11,7 @@ import wd40.lubricant.api.registry.BlockRegistry;
 import wd40.lubricant.api.registry.ItemRegistry;
 import wd40.lubricant.core.Bootstrap;
 import wd40.lubricant.core.Services;
+import wd40.lubricant.neoforge.data.Stacks;
 import wd40.lubricant.neoforge.net.Net;
 
 @Mod("lubricant")
@@ -20,7 +21,9 @@ public final class Entry {
         Bootstrap.loadAllInit();
 
         Services.net();
+        Services.stacks();
         lubricantBus.addListener(Net.INSTANCE::onRegister);
+        lubricantBus.addListener(Stacks.INSTANCE::onRegister);
 
         for (BlockRegistry registry : BlockRegistry.ALL) {
             attachBlocks(registry, busFor(registry.modId(), lubricantBus));

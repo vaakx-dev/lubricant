@@ -1,5 +1,6 @@
 package wd40.lubricant.core;
 
+import wd40.lubricant.core.data.StackHelper;
 import wd40.lubricant.core.events.EventHelper;
 import wd40.lubricant.core.net.NetHelper;
 
@@ -13,8 +14,9 @@ import java.util.ServiceLoader;
  *
  * <p>Each helper is loaded via JDK {@link ServiceLoader} on first access and
  * cached for the JVM lifetime. The provider files live in each loader module's
- * resources at {@code META-INF/services/wd40.lubricant.core.events.EventHelper}
- * and {@code META-INF/services/wd40.lubricant.core.net.NetHelper}.</p>
+ * resources at {@code META-INF/services/wd40.lubricant.core.events.EventHelper},
+ * {@code wd40.lubricant.core.net.NetHelper}, and
+ * {@code wd40.lubricant.core.data.StackHelper}.</p>
  *
  * <p>Threading: races on first call may instantiate duplicate helpers, but only
  * one wins the assignment to the volatile field. Helpers must be safe to
@@ -24,6 +26,7 @@ public final class Services {
 
     private static volatile EventHelper EVENTS;
     private static volatile NetHelper NET;
+    private static volatile StackHelper STACKS;
 
     /** The loader-specific {@link EventHelper}, used by {@code Events}. */
     public static EventHelper events() {
@@ -45,6 +48,18 @@ public final class Services {
                     .orElseThrow(() -> new IllegalStateException(
                             "No lubricant NetHelper service found - is the lubricant loader module on the classpath?"));
             NET = local;
+        }
+        return local;
+    }
+
+    /** The loader-specific {@link StackHelper}, used by {@code Stacks}. */
+    public static StackHelper stacks() {
+        StackHelper local = STACKS;
+        if (local == null) {
+            local = ServiceLoader.load(StackHelper.class).findFirst()
+                    .orElseThrow(() -> new IllegalStateException(
+                            "No lubricant StackHelper service found - is the lubricant loader module on the classpath?"));
+            STACKS = local;
         }
         return local;
     }
