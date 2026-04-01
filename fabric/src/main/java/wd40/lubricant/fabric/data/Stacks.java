@@ -9,6 +9,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import wd40.lubricant.api.data.Key;
+import wd40.lubricant.core.data.Registered;
 import wd40.lubricant.core.data.StackHelper;
 
 import java.util.HashMap;
@@ -29,6 +30,7 @@ public final class Stacks implements StackHelper {
 
     @Override
     public <T> void register(Key<T> key) {
+        Registered.claim(key, Registered.Facade.STACKS);
         StreamCodec<RegistryFriendlyByteBuf, T> stream = ByteBufCodecs.fromCodecWithRegistries(key.codec());
         DataComponentType<T> type = DataComponentType.<T>builder()
                 .persistent(key.codec())

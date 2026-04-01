@@ -1,5 +1,8 @@
 package wd40.lubricant.core;
 
+import wd40.lubricant.core.client.RendererHelper;
+import wd40.lubricant.core.data.BlockEntityHelper;
+import wd40.lubricant.core.data.EntityHelper;
 import wd40.lubricant.core.data.StackHelper;
 import wd40.lubricant.core.events.EventHelper;
 import wd40.lubricant.core.net.NetHelper;
@@ -27,6 +30,10 @@ public final class Services {
     private static volatile EventHelper EVENTS;
     private static volatile NetHelper NET;
     private static volatile StackHelper STACKS;
+    private static volatile BlockEntityHelper BLOCK_ENTITIES;
+    private static volatile EntityHelper ENTITIES;
+    private static volatile RendererHelper RENDERERS;
+    private static volatile boolean RENDERERS_LOADED;
 
     /** The loader-specific {@link EventHelper}, used by {@code Events}. */
     public static EventHelper events() {
@@ -62,6 +69,51 @@ public final class Services {
             STACKS = local;
         }
         return local;
+    }
+
+    /** The loader-specific {@link BlockEntityHelper}, used by {@code BlockEntities}. */
+    public static BlockEntityHelper blockEntities() {
+        BlockEntityHelper local = BLOCK_ENTITIES;
+        if (local == null) {
+            local = ServiceLoader.load(BlockEntityHelper.class).findFirst()
+                    .orElseThrow(() -> new IllegalStateException(
+                            "No lubricant BlockEntityHelper service found - is the lubricant loader module on the classpath?"));
+            BLOCK_ENTITIES = local;
+        }
+        return local;
+    }
+
+    /** The loader-specific {@link EntityHelper}, used by {@code Entities}. */
+    public static EntityHelper entities() {
+        EntityHelper local = ENTITIES;
+        if (local == null) {
+            local = ServiceLoader.load(EntityHelper.class).findFirst()
+                    .orElseThrow(() -> new IllegalStateException(
+                            "No lubricant EntityHelper service found - is the lubricant loader module on the classpath?"));
+            ENTITIES = local;
+        }
+        return local;
+    }
+
+    /**
+     * The loader-specific {@link RendererHelper}, or {@code null} if none is
+     * available. Unlike the other accessors, this one returns null instead of
+     * throwing - renderers are inherently client-only, and on a dedicated
+     * server the loader's renderer impl service file is absent, which is a
+     * normal runtime state, not an error.
+     */
+    public static RendererHelper renderers() {
+        if (RENDERERS_LOADED) return RENDERERS;
+        synchronized (Services.class) {
+            if (RENDERERS_LOADED) return RENDERERS;
+            try {
+                RENDERERS = ServiceLoader.load(RendererHelper.class).findFirst().orElse(null);
+            } catch (Throwable ignored) {
+                RENDERERS = null;  // class stripped on this side, etc.
+            }
+            RENDERERS_LOADED = true;
+            return RENDERERS;
+        }
     }
 
     private Services() {}

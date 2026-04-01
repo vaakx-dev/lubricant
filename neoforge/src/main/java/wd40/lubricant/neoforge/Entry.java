@@ -1,16 +1,26 @@
 package wd40.lubricant.neoforge;
 
+import net.minecraft.core.registries.Registries;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import wd40.lubricant.api.registry.BlockEntityRegistry;
 import wd40.lubricant.api.registry.BlockRegistry;
+import wd40.lubricant.api.registry.EntityRegistry;
 import wd40.lubricant.api.registry.ItemRegistry;
 import wd40.lubricant.core.Bootstrap;
 import wd40.lubricant.core.Services;
+import wd40.lubricant.neoforge.client.Renderers;
+import wd40.lubricant.neoforge.data.BlockEntities;
+import wd40.lubricant.neoforge.data.Entities;
 import wd40.lubricant.neoforge.data.Stacks;
 import wd40.lubricant.neoforge.net.Net;
 
@@ -22,14 +32,30 @@ public final class Entry {
 
         Services.net();
         Services.stacks();
+        Services.blockEntities();
+        Services.entities();
         lubricantBus.addListener(Net.INSTANCE::onRegister);
         lubricantBus.addListener(Stacks.INSTANCE::onRegister);
+        lubricantBus.addListener(BlockEntities.INSTANCE::onRegister);
+        lubricantBus.addListener(Entities.INSTANCE::onRegister);
+
+        // Force ServiceLoader to instantiate the renderer helper (sets Renderers.INSTANCE)
+        // before the client-only wiring tries to read it. Safe on dedicated server: returns null.
+        if (wd40.lubricant.core.Services.renderers() != null) {
+            Renderers.attachListenerIfClient(lubricantBus);
+        }
 
         for (BlockRegistry registry : BlockRegistry.ALL) {
             attachBlocks(registry, busFor(registry.modId(), lubricantBus));
         }
         for (ItemRegistry registry : ItemRegistry.ALL) {
             attachItems(registry, busFor(registry.modId(), lubricantBus));
+        }
+        for (BlockEntityRegistry registry : BlockEntityRegistry.ALL) {
+            attachBlockEntities(registry, busFor(registry.modId(), lubricantBus));
+        }
+        for (EntityRegistry registry : EntityRegistry.ALL) {
+            attachEntities(registry, busFor(registry.modId(), lubricantBus));
         }
     }
 
@@ -62,6 +88,42 @@ public final class Entry {
             });
         }
         items.register(bus);
+    }
+
+    private static void attachBlockEntities(BlockEntityRegistry registry, IEventBus bus) {
+        DeferredRegister<BlockEntityType<?>> types = DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, registry.modId());
+        for (BlockEntityRegistry.Entry<?> entry : registry.entries()) {
+            registerOneBlockEntity(types, entry);
+        }
+        types.register(bus);
+    }
+
+    @SuppressWarnings("DataFlowIssue")  // BlockEntityType.Builder.build accepts null DataFixerType
+    private static <T extends BlockEntity> void registerOneBlockEntity(
+            DeferredRegister<BlockEntityType<?>> types, BlockEntityRegistry.Entry<T> entry) {
+        types.register(entry.path(), () -> {
+            Block[] blocks = entry.validBlocks().stream().map(java.util.function.Supplier::get).toArray(Block[]::new);
+            BlockEntityType<T> type = BlockEntityType.Builder.of(entry.factory()::apply, blocks).build(null);
+            entry.ref().set(type);
+            return type;
+        });
+    }
+
+    private static void attachEntities(EntityRegistry registry, IEventBus bus) {
+        DeferredRegister<EntityType<?>> types = DeferredRegister.create(Registries.ENTITY_TYPE, registry.modId());
+        for (EntityRegistry.Entry<?> entry : registry.entries()) {
+            registerOneEntity(types, entry, registry.modId());
+        }
+        types.register(bus);
+    }
+
+    private static <T extends Entity> void registerOneEntity(
+            DeferredRegister<EntityType<?>> types, EntityRegistry.Entry<T> entry, String modId) {
+        types.register(entry.path(), () -> {
+            EntityType<T> type = entry.builder().build(modId + ":" + entry.path());
+            entry.ref().set(type);
+            return type;
+        });
     }
 
     private static IEventBus busFor(String modId, IEventBus lubricantBus) {

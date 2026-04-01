@@ -18,6 +18,12 @@ import java.nio.file.Path;
 public final class DatagenMain {
 
     public static void main(String[] args) throws Exception {
+        // Tell lubricant facades (Events, Net, Stacks, etc.) that we're running the datagen
+        // JVM - no loader module on classpath, so Services lookups would otherwise blow up
+        // when consumer mods call Stacks.register / Events.X().subscribe / Net.toClient
+        // from their static blocks. With the flag set, those calls become no-ops.
+        System.setProperty("lubricant.datagen", "true");
+
         if (args.length < 1) {
             System.err.println("Usage: DatagenMain <output-resources-dir>");
             System.exit(2);

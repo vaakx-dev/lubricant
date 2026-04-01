@@ -4,13 +4,19 @@ import net.fabricmc.api.ModInitializer;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import wd40.lubricant.api.registry.BlockEntityRegistry;
 import wd40.lubricant.api.registry.BlockRegistry;
+import wd40.lubricant.api.registry.EntityRegistry;
 import wd40.lubricant.api.registry.ItemRegistry;
 import wd40.lubricant.core.Bootstrap;
 
@@ -44,8 +50,38 @@ public final class Entry implements ModInitializer {
                 entry.ref().set(item);
             }
         }
+        // Block entities require their valid blocks to already exist - depends on the block loop above.
+        for (BlockEntityRegistry registry : BlockEntityRegistry.ALL) {
+            String modId = registry.modId();
+            for (BlockEntityRegistry.Entry<?> entry : registry.entries()) {
+                bindBlockEntity(entry, modId);
+            }
+        }
+        for (EntityRegistry registry : EntityRegistry.ALL) {
+            String modId = registry.modId();
+            for (EntityRegistry.Entry<?> entry : registry.entries()) {
+                bindEntity(entry, modId);
+            }
+        }
 
-        LOG.info("[lubricant] init complete on Fabric ({} block reg(s), {} item reg(s))",
-                BlockRegistry.ALL.size(), ItemRegistry.ALL.size());
+        LOG.info("[lubricant] init complete on Fabric ({} block reg(s), {} item reg(s), {} BE reg(s), {} entity reg(s))",
+                BlockRegistry.ALL.size(), ItemRegistry.ALL.size(),
+                BlockEntityRegistry.ALL.size(), EntityRegistry.ALL.size());
+    }
+
+    @SuppressWarnings("DataFlowIssue")  // BlockEntityType.Builder.build accepts null DataFixerType
+    private static <T extends BlockEntity> void bindBlockEntity(BlockEntityRegistry.Entry<T> entry, String modId) {
+        Block[] blocks = entry.validBlocks().stream().map(java.util.function.Supplier::get).toArray(Block[]::new);
+        BlockEntityType<T> type = BlockEntityType.Builder.of(entry.factory()::apply, blocks).build(null);
+        Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE,
+                ResourceLocation.fromNamespaceAndPath(modId, entry.path()), type);
+        entry.ref().set(type);
+    }
+
+    private static <T extends Entity> void bindEntity(EntityRegistry.Entry<T> entry, String modId) {
+        ResourceLocation id = ResourceLocation.fromNamespaceAndPath(modId, entry.path());
+        EntityType<T> type = entry.builder().build(id.toString());
+        Registry.register(BuiltInRegistries.ENTITY_TYPE, id, type);
+        entry.ref().set(type);
     }
 }

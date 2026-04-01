@@ -9,6 +9,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.registries.RegisterEvent;
 import wd40.lubricant.api.data.Key;
+import wd40.lubricant.core.data.Registered;
 import wd40.lubricant.core.data.StackHelper;
 
 import java.util.ArrayList;
@@ -36,6 +37,7 @@ public final class Stacks implements StackHelper {
 
     @Override
     public <T> void register(Key<T> key) {
+        Registered.claim(key, Registered.Facade.STACKS);
         pending.add(key);
     }
 
