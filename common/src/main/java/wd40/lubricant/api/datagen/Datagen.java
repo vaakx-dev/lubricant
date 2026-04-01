@@ -1,11 +1,11 @@
-package wd40.lubricant.api.data;
+package wd40.lubricant.api.datagen;
 
 import net.minecraft.resources.ResourceLocation;
 import wd40.lubricant.api.registry.BlockRegistry;
 import wd40.lubricant.api.registry.ItemRegistry;
 
 /**
- * Modder-facing facade passed to {@link DataInit#onData}. The high-level
+ * Modder-facing facade passed to {@link DatagenInit#onDatagen}. The high-level
  * {@code defaults(...)} methods cover the 90% case (item/generated for items,
  * cube_all for blocks, title-case lang). The low-level methods exist for the
  * rest.
@@ -13,7 +13,7 @@ import wd40.lubricant.api.registry.ItemRegistry;
  * <p>Files lubricant would otherwise generate are skipped if a hand-authored
  * file already lives in the mod's {@code src/main/resources/assets/...}.</p>
  */
-public interface LubricantData {
+public interface Datagen {
 
     /** Default item model + lang entry for every id in the registry. */
     void defaults(ItemRegistry items);

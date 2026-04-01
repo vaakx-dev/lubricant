@@ -32,7 +32,7 @@ dependencies {
     // compile classpath. Loader modules already bring their own copy at runtime.
     compileOnly "com.mojang:brigadier:1.2.9"
     // Gson + Guava are bundled with MC at runtime - compile-only here for the
-    // datagen JSON builder in data.Provider.
+    // datagen JSON builder in datagen.Provider.
     compileOnly "com.google.code.gson:gson:2.11.0"
     compileOnly "com.google.guava:guava:33.3.1-jre"
     // DFU brings com.mojang.serialization.Codec - DataProvider.saveStable signature

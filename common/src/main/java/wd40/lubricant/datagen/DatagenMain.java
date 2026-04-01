@@ -1,4 +1,4 @@
-package wd40.lubricant.data;
+package wd40.lubricant.datagen;
 
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.PackOutput;
@@ -15,11 +15,11 @@ import java.nio.file.Path;
  * generated tree is loader-agnostic - both Fabric and NeoForge load it from
  * {@code src/main/generated/resources/assets/...} as a normal resource srcDir.</p>
  */
-public final class DataMain {
+public final class DatagenMain {
 
     public static void main(String[] args) throws Exception {
         if (args.length < 1) {
-            System.err.println("Usage: DataMain <output-resources-dir>");
+            System.err.println("Usage: DatagenMain <output-resources-dir>");
             System.exit(2);
         }
         Path outputRoot = Path.of(args[0]);
@@ -35,5 +35,5 @@ public final class DataMain {
         System.out.println("[lubricant datagen] wrote assets to " + outputRoot.toAbsolutePath());
     }
 
-    private DataMain() {}
+    private DatagenMain() {}
 }

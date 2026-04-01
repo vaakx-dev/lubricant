@@ -53,7 +53,7 @@ dependencies {
     mcLibraries.each { coord -> datagenRuntime coord }
 }
 
-// One-task datagen. Runs DataMain on a stripped JVM (vanilla MC + every
+// One-task datagen. Runs DatagenMain on a stripped JVM (vanilla MC + every
 // MC-runtime library + lubricant common + cog common). Output is loader-agnostic
 // JSON under src/main/generated/resources/assets/<modId>/... - both cog-fabric
 // and cog-neoforge pick it up via the resources srcDir below.
@@ -62,7 +62,7 @@ def generatedResources = file("src/main/generated/resources")
 tasks.register('runDatagen', JavaExec) {
     dependsOn 'compileJava', 'processResources', ':common:compileJava'
     classpath = configurations.datagenRuntime + sourceSets.main.output
-    mainClass = 'wd40.lubricant.data.DataMain'
+    mainClass = 'wd40.lubricant.datagen.DatagenMain'
     args generatedResources.absolutePath
 }
 

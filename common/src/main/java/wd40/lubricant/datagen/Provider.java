@@ -1,4 +1,4 @@
-package wd40.lubricant.data;
+package wd40.lubricant.datagen;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -6,8 +6,8 @@ import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
-import wd40.lubricant.api.data.DataInit;
-import wd40.lubricant.api.data.LubricantData;
+import wd40.lubricant.api.datagen.DatagenInit;
+import wd40.lubricant.api.datagen.Datagen;
 import wd40.lubricant.api.registry.BlockRegistry;
 import wd40.lubricant.api.registry.ItemRegistry;
 
@@ -21,9 +21,9 @@ import java.util.concurrent.CompletableFuture;
 /**
  * Vanilla {@link DataProvider} that drives lubricant datagen.
  *
- * <p>Invoked from {@link DataMain} via a tiny path-backed {@link CachedOutput} -
- * no loader involvement. Loads every {@link DataInit} service, calls each with
- * a {@link LubricantData} buffer, then flushes JSON.</p>
+ * <p>Invoked from {@link DatagenMain} via a tiny path-backed {@link CachedOutput} -
+ * no loader involvement. Loads every {@link DatagenInit} service, calls each with
+ * a {@link Datagen} buffer, then flushes JSON.</p>
  */
 public final class Provider implements DataProvider {
 
@@ -38,8 +38,8 @@ public final class Provider implements DataProvider {
         Path assetsRoot = output.getOutputFolder(PackOutput.Target.RESOURCE_PACK);
 
         Buffer buf = new Buffer();
-        for (DataInit init : ServiceLoader.load(DataInit.class)) {
-            init.onData(buf);
+        for (DatagenInit init : ServiceLoader.load(DatagenInit.class)) {
+            init.onDatagen(buf);
         }
 
         List<CompletableFuture<?>> writes = new ArrayList<>();
@@ -60,8 +60,8 @@ public final class Provider implements DataProvider {
         return "Lubricant default assets";
     }
 
-    /** Collects everything DataInit emits, then flushes once. */
-    private static final class Buffer implements LubricantData {
+    /** Collects everything DatagenInit emits, then flushes once. */
+    private static final class Buffer implements Datagen {
 
         record Entry(String relPath, JsonElement json) {}
 
