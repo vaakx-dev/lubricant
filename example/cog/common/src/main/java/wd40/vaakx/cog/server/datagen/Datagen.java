@@ -3,6 +3,9 @@ package wd40.vaakx.cog.server.datagen;
 import wd40.lubricant.api.datagen.DatagenInit;
 import wd40.vaakx.cog.server.blocks.Blocks;
 import wd40.vaakx.cog.server.items.Items;
+import wd40.vaakx.cog.server.particles.Particles;
+import wd40.vaakx.cog.server.sounds.Sounds;
+import wd40.vaakx.cog.server.tabs.Tabs;
 
 /**
  * Cog's datagen entry. Loaded via ServiceLoader at datagen time only - not at
@@ -24,6 +27,9 @@ public final class Datagen implements DatagenInit {
     public void onDatagen(wd40.lubricant.api.datagen.Datagen datagen) {
         datagen.defaults(Items.ITEMS);
         datagen.defaults(Blocks.BLOCKS);
+        datagen.defaults(Sounds.SOUNDS);
+        datagen.defaults(Particles.PARTICLES);
+        datagen.defaults(Tabs.TABS);
     }
 
     public Datagen() {}

@@ -1,5 +1,6 @@
 package wd40.lubricant.datagen;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.data.CachedOutput;
@@ -9,8 +10,12 @@ import net.minecraft.resources.ResourceLocation;
 import wd40.lubricant.api.datagen.DatagenInit;
 import wd40.lubricant.api.datagen.Datagen;
 import wd40.lubricant.api.registry.BlockRegistry;
+import wd40.lubricant.api.registry.CreativeTabRegistry;
 import wd40.lubricant.api.registry.ItemRegistry;
+import wd40.lubricant.api.registry.ParticleRegistry;
+import wd40.lubricant.api.registry.SoundRegistry;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,9 +33,15 @@ import java.util.concurrent.CompletableFuture;
 public final class Provider implements DataProvider {
 
     private final PackOutput output;
+    private final Path handAuthoredRoot;  // null = no hand-author check; always overwrite generated
 
     public Provider(PackOutput output) {
+        this(output, null);
+    }
+
+    public Provider(PackOutput output, Path handAuthoredRoot) {
         this.output = output;
+        this.handAuthoredRoot = handAuthoredRoot;
     }
 
     @Override
@@ -44,15 +55,30 @@ public final class Provider implements DataProvider {
 
         List<CompletableFuture<?>> writes = new ArrayList<>();
         for (Buffer.Entry e : buf.entries) {
+            if (isHandAuthored(e.relPath)) continue;
             writes.add(DataProvider.saveStable(cache, e.json, assetsRoot.resolve(e.relPath)));
         }
+        for (var sounds : buf.soundsByModId.entrySet()) {
+            String relPath = sounds.getKey() + "/sounds.json";
+            if (isHandAuthored(relPath)) continue;
+            JsonObject merged = new JsonObject();
+            for (var entry : sounds.getValue().entrySet()) merged.add(entry.getKey(), entry.getValue());
+            writes.add(DataProvider.saveStable(cache, merged, assetsRoot.resolve(relPath)));
+        }
         for (var lang : buf.langByModId.entrySet()) {
+            String relPath = lang.getKey() + "/lang/en_us.json";
+            if (isHandAuthored(relPath)) continue;
             JsonObject merged = new JsonObject();
             for (var kv : lang.getValue().entrySet()) merged.addProperty(kv.getKey(), kv.getValue());
-            Path p = assetsRoot.resolve(lang.getKey() + "/lang/en_us.json");
-            writes.add(DataProvider.saveStable(cache, merged, p));
+            writes.add(DataProvider.saveStable(cache, merged, assetsRoot.resolve(relPath)));
         }
         return CompletableFuture.allOf(writes.toArray(CompletableFuture[]::new));
+    }
+
+    /** True if {@code <handAuthoredRoot>/assets/<relPath>} exists - skip the generated copy. */
+    private boolean isHandAuthored(String relPath) {
+        if (handAuthoredRoot == null) return false;
+        return Files.exists(handAuthoredRoot.resolve("assets").resolve(relPath));
     }
 
     @Override
@@ -68,6 +94,8 @@ public final class Provider implements DataProvider {
         final List<Entry> entries = new ArrayList<>();
         // Per-modId so two mods sharing one datagen pass don't trample each other's lang.
         final TreeMap<String, TreeMap<String, String>> langByModId = new TreeMap<>();
+        // Per-modId aggregate of sounds.json entries (one file per mod).
+        final TreeMap<String, TreeMap<String, JsonObject>> soundsByModId = new TreeMap<>();
 
         @Override
         public void defaults(ItemRegistry registry) {
@@ -131,6 +159,53 @@ public final class Provider implements DataProvider {
         @Override
         public void lang(String modId, String key, String value) {
             langByModId.computeIfAbsent(modId, k -> new TreeMap<>()).put(key, value);
+        }
+
+        @Override
+        public void defaults(SoundRegistry registry) {
+            for (ResourceLocation id : registry.ids()) {
+                String subtitleKey = "subtitles." + id.getNamespace() + "." + id.getPath();
+                soundEvent(id, List.of(id.toString()), subtitleKey);
+                lang(id.getNamespace(), subtitleKey, titleCase(id.getPath()));
+            }
+        }
+
+        @Override
+        public void defaults(ParticleRegistry registry) {
+            for (ResourceLocation id : registry.ids()) {
+                particle(id, List.of(id));
+            }
+        }
+
+        @Override
+        public void defaults(CreativeTabRegistry registry) {
+            for (ResourceLocation id : registry.ids()) {
+                lang(id.getNamespace(),
+                        "itemGroup." + id.getNamespace() + "." + id.getPath(),
+                        titleCase(id.getPath()));
+            }
+        }
+
+        @Override
+        public void soundEvent(ResourceLocation id, List<String> sampleNames, String subtitleKey) {
+            JsonObject body = new JsonObject();
+            if (subtitleKey != null && !subtitleKey.isEmpty()) {
+                body.addProperty("subtitle", subtitleKey);
+            }
+            JsonArray samples = new JsonArray();
+            for (String name : sampleNames) samples.add(name);
+            body.add("sounds", samples);
+            soundsByModId.computeIfAbsent(id.getNamespace(), k -> new TreeMap<>()).put(id.getPath(), body);
+        }
+
+        @Override
+        public void particle(ResourceLocation id, List<ResourceLocation> textures) {
+            JsonObject json = new JsonObject();
+            JsonArray texArray = new JsonArray();
+            for (ResourceLocation tex : textures) texArray.add(tex.toString());
+            json.add("textures", texArray);
+            entries.add(new Entry(
+                    id.getNamespace() + "/particles/" + id.getPath() + ".json", json));
         }
 
         private static String titleCase(String path) {

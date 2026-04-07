@@ -69,7 +69,9 @@ tasks.register('runDatagen', JavaExec) {
     dependsOn 'compileJava', 'processResources', ':common:compileJava'
     classpath = configurations.datagenRuntime + sourceSets.main.output
     mainClass = 'wd40.lubricant.datagen.DatagenMain'
-    args generatedResources.absolutePath
+    // Pass main/resources too so the generator skips files cog hand-authored
+    // (sounds.json, particles/*.json, etc.) and only fills in the gaps.
+    args generatedResources.absolutePath, file('src/main/resources').absolutePath
 }
 
 sourceSets.main.resources.srcDir generatedResources

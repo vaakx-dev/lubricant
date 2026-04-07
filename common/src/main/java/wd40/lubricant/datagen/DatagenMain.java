@@ -25,11 +25,16 @@ public final class DatagenMain {
         System.setProperty("lubricant.datagen", "true");
 
         if (args.length < 1) {
-            System.err.println("Usage: DatagenMain <output-resources-dir>");
+            System.err.println("Usage: DatagenMain <output-resources-dir> [<hand-authored-resources-dir>]");
             System.exit(2);
         }
         Path outputRoot = Path.of(args[0]);
         Files.createDirectories(outputRoot);
+
+        // Optional second arg points at the consumer mod's src/main/resources so we can
+        // skip generating any file the modder already hand-authored. Without it, datagen
+        // overwrites blindly (and Gradle resource processing may complain about duplicates).
+        Path handAuthoredRoot = args.length >= 2 ? Path.of(args[1]) : null;
 
         PackOutput packOutput = new PackOutput(outputRoot);
         CachedOutput cache = (path, bytes, hash) -> {
@@ -37,7 +42,7 @@ public final class DatagenMain {
             Files.write(path, bytes);
         };
 
-        new Provider(packOutput).run(cache).join();
+        new Provider(packOutput, handAuthoredRoot).run(cache).join();
         System.out.println("[lubricant datagen] wrote assets to " + outputRoot.toAbsolutePath());
     }
 
