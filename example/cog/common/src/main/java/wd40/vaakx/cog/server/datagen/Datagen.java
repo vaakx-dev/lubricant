@@ -1,9 +1,8 @@
-package wd40.vaakx.cog.data;
+package wd40.vaakx.cog.server.datagen;
 
-import wd40.lubricant.api.datagen.Datagen;
 import wd40.lubricant.api.datagen.DatagenInit;
-import wd40.vaakx.cog.blocks.Blocks;
-import wd40.vaakx.cog.items.Items;
+import wd40.vaakx.cog.server.blocks.Blocks;
+import wd40.vaakx.cog.server.items.Items;
 
 /**
  * Cog's datagen entry. Loaded via ServiceLoader at datagen time only - not at
@@ -11,17 +10,21 @@ import wd40.vaakx.cog.items.Items;
  * {@code META-INF/services/wd40.lubricant.api.datagen.DatagenInit}.
  *
  * <p>Each {@code defaults(...)} call asks lubricant to emit the standard JSON
- * lubricant would otherwise have to be hand-written: item/generated models,
- * cube_all blockstates + block models, and lang entries derived from the id.
- * Any file already present in {@code src/main/resources/assets/cog/...} wins.</p>
+ * cog would otherwise have to hand-write: item/generated models, cube_all
+ * blockstates + block models, and lang entries derived from the id. Any file
+ * already present in {@code src/main/resources/assets/cog/...} wins.</p>
+ *
+ * <p>The simple name {@code Datagen} matches the lubricant facade type
+ * ({@link wd40.lubricant.api.datagen.Datagen}); this file uses a fully-qualified
+ * reference for the facade in the method signature to dodge the import clash.</p>
  */
-public final class CogData implements DatagenInit {
+public final class Datagen implements DatagenInit {
 
     @Override
-    public void onDatagen(Datagen datagen) {
+    public void onDatagen(wd40.lubricant.api.datagen.Datagen datagen) {
         datagen.defaults(Items.ITEMS);
         datagen.defaults(Blocks.BLOCKS);
     }
 
-    public CogData() {}
+    public Datagen() {}
 }

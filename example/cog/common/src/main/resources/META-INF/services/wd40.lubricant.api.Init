@@ -1,5 +1,7 @@
-wd40.vaakx.cog.items.Items
-wd40.vaakx.cog.blocks.Blocks
-wd40.vaakx.cog.events.Listeners
-wd40.vaakx.cog.net.Channel
-wd40.vaakx.cog.data.Attachments
+wd40.vaakx.cog.server.items.Items
+wd40.vaakx.cog.server.blocks.Blocks
+wd40.vaakx.cog.server.blockentities.BlockEntities
+wd40.vaakx.cog.server.entities.Entities
+wd40.vaakx.cog.server.net.Channel
+wd40.vaakx.cog.server.Server
+wd40.vaakx.cog.client.Client

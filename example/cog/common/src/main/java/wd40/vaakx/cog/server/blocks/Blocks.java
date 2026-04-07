@@ -1,4 +1,4 @@
-package wd40.vaakx.cog.blocks;
+package wd40.vaakx.cog.server.blocks;
 
 import net.minecraft.world.level.block.Block;
 import wd40.lubricant.api.Init;
@@ -9,7 +9,7 @@ import java.util.function.Supplier;
 
 /**
  * All of cog's blocks (and their auto-generated BlockItems). Same lifecycle as
- * {@link wd40.vaakx.cog.items.Items} - see Items.java for the full explanation.
+ * {@link wd40.vaakx.cog.server.items.Items} - see Items.java for the full explanation.
  *
  * <p>{@code register} adds a matching BlockItem; {@code registerNoItem} doesn't
  * (use for multi-block halves, technical blocks, anything you shouldn't hold).</p>
@@ -26,6 +26,10 @@ public final class Blocks implements Init {
     /** No BlockItem - {@code /give @s cog:gear_head} returns "Unknown item"; {@code /setblock} works. */
     public static final Supplier<Block> GEAR_HEAD = BLOCKS.registerNoItem("gear_head",
             props -> new Block(props.strength(50.0f).destroyTime(50.0f)));
+
+    /** Right-clicking increments a counter stored on the BlockEntity via lubricant attached data. */
+    public static final Supplier<Block> COUNTER = BLOCKS.register("counter",
+            props -> new Counter(props.strength(1.0f).destroyTime(1.0f)));
 
     public Blocks() {}
 }

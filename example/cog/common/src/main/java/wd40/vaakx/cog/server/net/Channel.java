@@ -1,4 +1,4 @@
-package wd40.vaakx.cog.net;
+package wd40.vaakx.cog.server.net;
 
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -6,19 +6,18 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import wd40.lubricant.api.Init;
-import wd40.lubricant.api.events.Events;
 import wd40.lubricant.api.net.Net;
 import wd40.lubricant.api.net.S2CPayload;
 import wd40.vaakx.cog.Cog;
 
 /**
- * Cog's network channel. Same lifecycle as {@link wd40.vaakx.cog.items.Items} -
- * see Items.java for the full explanation.
+ * Cog's network channel. Declares the {@link HelloPayload} type and the S2C
+ * handle. The actual send loop lives in {@link wd40.vaakx.cog.server.Server}.
  *
  * <p>Each payload needs three vanilla pieces: a {@link CustomPacketPayload}
- * (typically a record), a {@link CustomPacketPayload.Type} carrying the id, and
- * a {@link StreamCodec} for serialization. Lubricant's {@link Net} takes the
- * Type + codec separately and returns a direction-typed handle.</p>
+ * (typically a record), a {@link CustomPacketPayload.Type} carrying the id,
+ * and a {@link StreamCodec} for serialization. Lubricant's {@link Net} takes
+ * the Type + codec separately and returns a direction-typed handle.</p>
  *
  * <p><a href="https://github.com/vaakxxx/lubricant/wiki/Networking">Networking wiki</a></p>
  */
@@ -39,16 +38,6 @@ public final class Channel implements Init {
     public static final S2CPayload<HelloPayload> HELLO = Net.toClient(
             HelloPayload.TYPE, HelloPayload.CODEC,
             (payload, ctx) -> Cog.LOG.info("client received hello @ tick {}", payload.tickStamp()));
-
-    static {
-        Events.serverTick().subscribe(server -> {
-            int tick = server.getTickCount();
-            if (tick % 20 != 0) return;
-            HELLO.sendToAll(server, new HelloPayload(tick));
-        });
-
-        // HELLO.sendToServer(new HelloPayload(0)); // <-- direction split: doesn't compile
-    }
 
     public Channel() {}
 }

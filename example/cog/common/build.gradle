@@ -44,6 +44,9 @@ dependencies {
     compileOnly "com.mojang:datafixerupper:8.0.16"
     // Netty's ByteBuf - StreamCodec.composite touches it via ByteBufCodecs return types.
     compileOnly "io.netty:netty-buffer:4.1.97.Final"
+    // joml - referenced indirectly via com.mojang.math.Axis (returns Quaternionf etc.)
+    // by client/SpinningCogRenderer. Both loaders ship joml at runtime via MC.
+    compileOnly "org.joml:joml:1.10.5"
 
     // Datagen runtime classpath: vanilla MC + lubricant common + every library
     // Mojang's launcher pairs with this MC version (resolved above). One coord
