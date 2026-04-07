@@ -7,8 +7,8 @@ import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
+import wd40.lubricant.api.datagen.Assets;
 import wd40.lubricant.api.datagen.DatagenInit;
-import wd40.lubricant.api.datagen.Datagen;
 import wd40.lubricant.api.registry.BlockRegistry;
 import wd40.lubricant.api.registry.CreativeTabRegistry;
 import wd40.lubricant.api.registry.ItemRegistry;
@@ -28,7 +28,7 @@ import java.util.concurrent.CompletableFuture;
  *
  * <p>Invoked from {@link DatagenMain} via a tiny path-backed {@link CachedOutput} -
  * no loader involvement. Loads every {@link DatagenInit} service, calls each with
- * a {@link Datagen} buffer, then flushes JSON.</p>
+ * an {@link Assets} buffer, then flushes JSON.</p>
  */
 public final class Provider implements DataProvider {
 
@@ -87,7 +87,7 @@ public final class Provider implements DataProvider {
     }
 
     /** Collects everything DatagenInit emits, then flushes once. */
-    private static final class Buffer implements Datagen {
+    private static final class Buffer implements Assets {
 
         record Entry(String relPath, JsonElement json) {}
 

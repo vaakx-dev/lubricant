@@ -1,5 +1,6 @@
 package wd40.vaakx.cog.server.datagen;
 
+import wd40.lubricant.api.datagen.Assets;
 import wd40.lubricant.api.datagen.DatagenInit;
 import wd40.vaakx.cog.server.blocks.Blocks;
 import wd40.vaakx.cog.server.items.Items;
@@ -24,12 +25,12 @@ import wd40.vaakx.cog.server.tabs.Tabs;
 public final class Datagen implements DatagenInit {
 
     @Override
-    public void onDatagen(wd40.lubricant.api.datagen.Datagen datagen) {
-        datagen.defaults(Items.ITEMS);
-        datagen.defaults(Blocks.BLOCKS);
-        datagen.defaults(Sounds.SOUNDS);
-        datagen.defaults(Particles.PARTICLES);
-        datagen.defaults(Tabs.TABS);
+    public void onDatagen(Assets assets) {
+        assets.defaults(Items.ITEMS);
+        assets.defaults(Blocks.BLOCKS);
+        assets.defaults(Sounds.SOUNDS);
+        assets.defaults(Particles.PARTICLES);
+        assets.defaults(Tabs.TABS);
     }
 
     public Datagen() {}

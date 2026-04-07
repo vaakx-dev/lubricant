@@ -9,14 +9,14 @@ import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
-import wd40.lubricant.api.data.BlockEntities;
+import wd40.lubricant.api.data.BlockEntityData;
 import wd40.vaakx.cog.Cog;
 
 import static wd40.vaakx.cog.server.blockentities.BlockEntities.COUNTER_CLICKS;
 
 /**
  * A toy block that increments a counter on every right-click. The count is
- * stored on a {@link CounterBE} via the lubricant {@link BlockEntities} data
+ * stored on a {@link CounterBE} via the lubricant {@link BlockEntityData} data
  * API, persisted across world reloads.
  *
  * <p>Demo of: custom block + custom BlockEntity registered through lubricant,
@@ -38,8 +38,8 @@ public final class Counter extends Block implements EntityBlock {
         if (level.isClientSide()) return InteractionResult.SUCCESS;
         BlockEntity be = level.getBlockEntity(pos);
         if (!(be instanceof CounterBE counter)) return InteractionResult.PASS;
-        int next = BlockEntities.get(counter, COUNTER_CLICKS) + 1;
-        BlockEntities.set(counter, COUNTER_CLICKS, next);
+        int next = BlockEntityData.get(counter, COUNTER_CLICKS) + 1;
+        BlockEntityData.set(counter, COUNTER_CLICKS, next);
         Cog.LOG.info("counter @ {} -> {}", pos, next);
         return InteractionResult.SUCCESS;
     }

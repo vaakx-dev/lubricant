@@ -1,5 +1,7 @@
 package wd40.vaakx.cog.server.entities;
 
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
@@ -18,11 +20,11 @@ public final class SpinningCog extends Entity {
     }
 
     @Override
-    protected void defineSynchedData(net.minecraft.network.syncher.SynchedEntityData.Builder builder) {}
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {}
 
     @Override
-    protected void readAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {}
+    protected void readAdditionalSaveData(CompoundTag tag) {}
 
     @Override
-    protected void addAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {}
+    protected void addAdditionalSaveData(CompoundTag tag) {}
 }

@@ -27,6 +27,7 @@ import wd40.lubricant.api.registry.ItemRegistry;
 import wd40.lubricant.api.registry.ParticleRegistry;
 import wd40.lubricant.api.registry.SoundRegistry;
 import wd40.lubricant.core.Bootstrap;
+import wd40.lubricant.core.Services;
 
 public final class Entry implements ModInitializer {
 
@@ -100,6 +101,11 @@ public final class Entry implements ModInitializer {
                 entry.ref().set(tab);
             }
         }
+
+        // Fire setup() listeners now that every registry binding is done. Modders can
+        // safely touch Items/Blocks/etc. .get() inside these callbacks (e.g. to call
+        // FlowerPotBlock.addPlant(...) which mutates a static map after both blocks exist).
+        Services.events().fireSetup();
 
         LOG.info("[lubricant] init complete on Fabric ({} block reg(s), {} item reg(s), {} BE reg(s), {} entity reg(s), {} sound reg(s), {} particle reg(s), {} creative tab reg(s))",
                 BlockRegistry.ALL.size(), ItemRegistry.ALL.size(),

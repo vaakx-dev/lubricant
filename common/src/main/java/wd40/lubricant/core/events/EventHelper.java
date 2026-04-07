@@ -4,6 +4,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import wd40.lubricant.api.events.EntityInteractListener;
 import wd40.lubricant.api.events.Event;
 import wd40.lubricant.api.events.ItemUseListener;
 
@@ -31,4 +32,20 @@ public interface EventHelper {
     Event<Consumer<ServerPlayer>> playerLeave();
     Event<Consumer<CommandDispatcher<CommandSourceStack>>> commands();
     Event<ItemUseListener> itemUse();
+    Event<EntityInteractListener> entityInteract();
+
+    /**
+     * Fires once after lubricant's loader entry binds every registry. Use for
+     * one-time wiring that depends on registered objects existing - e.g. calling
+     * {@code FlowerPotBlock.addPlant(...)} after both blocks are real.
+     * Listeners run on the main thread.
+     */
+    Event<Runnable> setup();
+
+    /**
+     * Drain the setup queue. Loader entry calls this once at the right phase
+     * (Fabric: tail of {@code onInitialize}; NeoForge: inside
+     * {@code FMLCommonSetupEvent.enqueueWork}). Idempotent.
+     */
+    void fireSetup();
 }

@@ -8,14 +8,14 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import wd40.lubricant.api.data.Key;
+import wd40.lubricant.api.data.DataKey;
 import wd40.lubricant.core.data.Registered;
 import wd40.lubricant.core.data.StackHelper;
 
 import java.util.HashMap;
 import java.util.Map;
 
-// Fabric impl of StackHelper. Each registered Key spawns a DataComponentType
+// Fabric impl of StackHelper. Each registered DataKey spawns a DataComponentType
 // in BuiltInRegistries.DATA_COMPONENT_TYPE. Vanilla handles persistence and
 // network sync via the Codec + StreamCodec.
 //
@@ -29,7 +29,7 @@ public final class Stacks implements StackHelper {
     public Stacks() {}
 
     @Override
-    public <T> void register(Key<T> key) {
+    public <T> void register(DataKey<T> key) {
         Registered.claim(key, Registered.Facade.STACKS);
         StreamCodec<RegistryFriendlyByteBuf, T> stream = ByteBufCodecs.fromCodecWithRegistries(key.codec());
         DataComponentType<T> type = DataComponentType.<T>builder()
@@ -41,32 +41,32 @@ public final class Stacks implements StackHelper {
     }
 
     @Override
-    public <T> T get(ItemStack stack, Key<T> key) {
+    public <T> T get(ItemStack stack, DataKey<T> key) {
         T value = stack.get(typeOf(key));
         return value != null ? value : key.defaultValue();
     }
 
     @Override
-    public <T> void set(ItemStack stack, Key<T> key, T value) {
+    public <T> void set(ItemStack stack, DataKey<T> key, T value) {
         stack.set(typeOf(key), value);
     }
 
     @Override
-    public <T> boolean has(ItemStack stack, Key<T> key) {
+    public <T> boolean has(ItemStack stack, DataKey<T> key) {
         return stack.has(typeOf(key));
     }
 
     @Override
-    public <T> void remove(ItemStack stack, Key<T> key) {
+    public <T> void remove(ItemStack stack, DataKey<T> key) {
         stack.remove(typeOf(key));
     }
 
     @SuppressWarnings("unchecked")
-    private <T> DataComponentType<T> typeOf(Key<T> key) {
+    private <T> DataComponentType<T> typeOf(DataKey<T> key) {
         DataComponentType<?> raw = byId.get(key.id());
         if (raw == null) {
             throw new IllegalStateException(
-                    "Key " + key.id() + " not registered as item-attachable - call Stacks.register(...) during init");
+                    "DataKey " + key.id() + " not registered as item-attachable - call StackData.register(...) during init");
         }
         return (DataComponentType<T>) raw;
     }

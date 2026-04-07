@@ -1,6 +1,7 @@
 package wd40.lubricant.neoforge;
 
 import net.minecraft.core.particles.ParticleType;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.sounds.SoundEvent;
@@ -15,6 +16,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import wd40.lubricant.api.registry.BlockEntityRegistry;
 import wd40.lubricant.api.registry.BlockRegistry;
@@ -48,7 +50,7 @@ public final class Entry {
 
         // Force ServiceLoader to instantiate the renderer helper (sets Renderers.INSTANCE)
         // before the client-only wiring tries to read it. Safe on dedicated server: returns null.
-        if (wd40.lubricant.core.Services.renderers() != null) {
+        if (Services.renderers() != null) {
             Renderers.attachListenerIfClient(lubricantBus);
         }
 
@@ -73,6 +75,12 @@ public final class Entry {
         for (CreativeTabRegistry registry : CreativeTabRegistry.ALL) {
             attachCreativeTabs(registry, busFor(registry.modId(), lubricantBus));
         }
+
+        // Fire setup() listeners during FMLCommonSetupEvent. enqueueWork moves the call
+        // onto the main thread - any listener that touches a non-thread-safe vanilla map
+        // (e.g. FlowerPotBlock.POTTED_BY_CONTENT via FlowerPotBlock.addPlant) is then safe.
+        lubricantBus.addListener((FMLCommonSetupEvent event) ->
+                event.enqueueWork(() -> Services.events().fireSetup()));
     }
 
     private static void attachBlocks(BlockRegistry registry, IEventBus bus) {
@@ -147,7 +155,7 @@ public final class Entry {
         for (SoundRegistry.Entry entry : registry.entries()) {
             sounds.register(entry.path(), () -> {
                 SoundEvent sound = SoundEvent.createVariableRangeEvent(
-                        net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(registry.modId(), entry.path()));
+                        ResourceLocation.fromNamespaceAndPath(registry.modId(), entry.path()));
                 entry.ref().set(sound);
                 return sound;
             });

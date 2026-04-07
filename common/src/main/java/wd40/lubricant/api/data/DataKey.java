@@ -5,9 +5,10 @@ import net.minecraft.resources.ResourceLocation;
 
 /**
  * A typed handle for a piece of data attached to an ItemStack, BlockEntity,
- * Entity, or Level. Created via {@link Keys#of}, registered via the matching
- * facade ({@link Stacks#register}, {@code BlockEntities.register}, etc.), then
- * used as the lookup key for get/set operations.
+ * Entity, or Level. Created via {@link DataKeys#of}, registered via the matching
+ * facade ({@link StackData#register}, {@link BlockEntityData#register},
+ * {@link EntityData#register}), then used as the lookup key for get/set
+ * operations.
  *
  * <p>The {@link Codec} is the only serialization spec lubricant needs: on
  * 1.21 it drives DataComponentType persistence and network sync; on 1.20 it
@@ -19,13 +20,13 @@ import net.minecraft.resources.ResourceLocation;
  *
  * @param <T> the value type
  */
-public final class Key<T> {
+public final class DataKey<T> {
 
     private final ResourceLocation id;
     private final Codec<T> codec;
     private final T defaultValue;
 
-    Key(ResourceLocation id, Codec<T> codec, T defaultValue) {
+    DataKey(ResourceLocation id, Codec<T> codec, T defaultValue) {
         this.id = id;
         this.codec = codec;
         this.defaultValue = defaultValue;
@@ -40,6 +41,6 @@ public final class Key<T> {
 
     @Override
     public String toString() {
-        return "Key[" + id + "]";
+        return "DataKey[" + id + "]";
     }
 }

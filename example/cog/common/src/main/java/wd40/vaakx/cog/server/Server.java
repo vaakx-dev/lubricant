@@ -1,13 +1,14 @@
 package wd40.vaakx.cog.server;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import wd40.lubricant.api.Init;
-import wd40.lubricant.api.data.Entities;
-import wd40.lubricant.api.data.Stacks;
+import wd40.lubricant.api.data.EntityData;
+import wd40.lubricant.api.data.StackData;
 import wd40.lubricant.api.events.Events;
 import wd40.vaakx.cog.Cog;
 import wd40.vaakx.cog.server.items.Items;
@@ -41,9 +42,9 @@ public final class Server implements Init {
         Events.playerJoin().subscribe(player -> {
             Cog.LOG.info("player joined: {}", player.getScoreboardName());
 
-            UUID stored = Entities.get(player, wd40.vaakx.cog.server.entities.Entities.OWNER);
+            UUID stored = EntityData.get(player, wd40.vaakx.cog.server.entities.Entities.OWNER);
             if (stored == null) {
-                Entities.set(player, wd40.vaakx.cog.server.entities.Entities.OWNER, player.getUUID());
+                EntityData.set(player, wd40.vaakx.cog.server.entities.Entities.OWNER, player.getUUID());
                 Cog.LOG.info("first join, OWNER set to {}", player.getUUID());
             } else {
                 Cog.LOG.info("welcome back, OWNER={}", stored);
@@ -59,8 +60,8 @@ public final class Server implements Init {
             if (level.isClientSide()) return InteractionResult.PASS;
             ItemStack held = player.getItemInHand(hand);
             if (held.is(Items.GREASED_COG.get())) {
-                int next = Stacks.get(held, Items.CHARGE) + 1;
-                Stacks.set(held, Items.CHARGE, next);
+                int next = StackData.get(held, Items.CHARGE) + 1;
+                StackData.set(held, Items.CHARGE, next);
                 Cog.LOG.info("greased_cog charge -> {}", next);
                 playFeedback(player, level);
                 return InteractionResult.SUCCESS;
@@ -78,7 +79,7 @@ public final class Server implements Init {
     private static void playFeedback(Player player, Level level) {
         level.playSound(null, player.getX(), player.getY(), player.getZ(),
                 Sounds.GEAR_CLICK.get(), SoundSource.PLAYERS, 1.0f, 1.0f);
-        if (level instanceof net.minecraft.server.level.ServerLevel server) {
+        if (level instanceof ServerLevel server) {
             server.sendParticles(Particles.GEAR_SPARK.get(),
                     player.getX(), player.getY() + 1.2, player.getZ(),
                     8, 0.2, 0.2, 0.2, 0.05);

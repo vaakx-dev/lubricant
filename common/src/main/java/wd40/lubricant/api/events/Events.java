@@ -47,4 +47,13 @@ public final class Events {
     public static Event<ItemUseListener> itemUse() {
         return Datagen.IS_DATAGEN ? Datagen.noOpEvent() : Services.events().itemUse();
     }
+
+    public static Event<EntityInteractListener> entityInteract() {
+        return Datagen.IS_DATAGEN ? Datagen.noOpEvent() : Services.events().entityInteract();
+    }
+
+    /** One-shot post-registry hook. See {@link wd40.lubricant.core.events.EventHelper#setup()}. */
+    public static Event<Runnable> setup() {
+        return Datagen.IS_DATAGEN ? Datagen.noOpEvent() : Services.events().setup();
+    }
 }

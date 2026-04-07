@@ -3,9 +3,9 @@ package wd40.vaakx.cog.server.items;
 import com.mojang.serialization.Codec;
 import net.minecraft.world.item.Item;
 import wd40.lubricant.api.Init;
-import wd40.lubricant.api.data.Key;
-import wd40.lubricant.api.data.Keys;
-import wd40.lubricant.api.data.Stacks;
+import wd40.lubricant.api.data.DataKey;
+import wd40.lubricant.api.data.DataKeys;
+import wd40.lubricant.api.data.StackData;
 import wd40.lubricant.api.registry.ItemRegistry;
 import wd40.vaakx.cog.Cog;
 
@@ -30,13 +30,13 @@ public final class Items implements Init {
     public static final Supplier<Item> GREASED_COG = ITEMS.register("greased_cog",
             props -> new Item(props.stacksTo(1).fireResistant()));
 
-    private static final Keys KEYS = Keys.create(Cog.ID);
+    private static final DataKeys KEYS = DataKeys.create(Cog.ID);
 
     /** Click-counter on a greased_cog ItemStack. Persists across logout/world reload. */
-    public static final Key<Integer> CHARGE = KEYS.of("charge", Codec.INT, 0);
+    public static final DataKey<Integer> CHARGE = KEYS.of("charge", Codec.INT, 0);
 
     static {
-        Stacks.register(CHARGE);
+        StackData.register(CHARGE);
     }
 
     public Items() {}

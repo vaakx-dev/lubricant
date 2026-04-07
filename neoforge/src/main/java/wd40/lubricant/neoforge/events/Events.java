@@ -12,11 +12,14 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import wd40.lubricant.api.events.EntityInteractListener;
 import wd40.lubricant.api.events.Event;
 import wd40.lubricant.api.events.ItemUseListener;
 import wd40.lubricant.core.events.BridgedEvent;
 import wd40.lubricant.core.events.EventHelper;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 // NeoForge impl of EventHelper. All seven of these events live on the global
@@ -51,6 +54,18 @@ public final class Events implements EventHelper {
                 }
             }));
 
+    private final Event<EntityInteractListener> entityInteract = new BridgedEvent<>(
+            l -> NeoForge.EVENT_BUS.addListener((PlayerInteractEvent.EntityInteract e) -> {
+                InteractionResult r = l.onInteract(e.getEntity(), e.getTarget(), e.getHand());
+                if (r != InteractionResult.PASS) {
+                    e.setCanceled(true);
+                    e.setCancellationResult(r);
+                }
+            }));
+
+    private final List<Runnable> setupQueue = new ArrayList<>();
+    private final Event<Runnable> setup = new BridgedEvent<>(setupQueue::add);
+
     @Override public Event<Consumer<MinecraftServer>> serverTick()  { return serverTick; }
     @Override public Event<Consumer<MinecraftServer>> serverStart() { return serverStart; }
     @Override public Event<Consumer<MinecraftServer>> serverStop()  { return serverStop; }
@@ -58,4 +73,12 @@ public final class Events implements EventHelper {
     @Override public Event<Consumer<ServerPlayer>>    playerLeave() { return playerLeave; }
     @Override public Event<Consumer<CommandDispatcher<CommandSourceStack>>> commands() { return commands; }
     @Override public Event<ItemUseListener>           itemUse()     { return itemUse; }
+    @Override public Event<EntityInteractListener>    entityInteract() { return entityInteract; }
+    @Override public Event<Runnable>                  setup()       { return setup; }
+
+    @Override
+    public void fireSetup() {
+        for (Runnable task : setupQueue) task.run();
+        setupQueue.clear();
+    }
 }

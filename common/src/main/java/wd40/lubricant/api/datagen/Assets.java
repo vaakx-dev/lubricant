@@ -18,7 +18,7 @@ import java.util.List;
  * <p>Files lubricant would otherwise generate are skipped if a hand-authored
  * file already lives in the mod's {@code src/main/resources/assets/...}.</p>
  */
-public interface Datagen {
+public interface Assets {
 
     /** Default item model + lang entry for every id in the registry. */
     void defaults(ItemRegistry items);
