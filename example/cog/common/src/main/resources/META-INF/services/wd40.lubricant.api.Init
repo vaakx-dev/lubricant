@@ -2,6 +2,9 @@ wd40.vaakx.cog.server.items.Items
 wd40.vaakx.cog.server.blocks.Blocks
 wd40.vaakx.cog.server.blockentities.BlockEntities
 wd40.vaakx.cog.server.entities.Entities
+wd40.vaakx.cog.server.sounds.Sounds
+wd40.vaakx.cog.server.particles.Particles
+wd40.vaakx.cog.server.tabs.Tabs
 wd40.vaakx.cog.server.net.Channel
 wd40.vaakx.cog.server.Server
 wd40.vaakx.cog.client.Client

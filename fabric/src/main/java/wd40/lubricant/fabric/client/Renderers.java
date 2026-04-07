@@ -4,10 +4,15 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
+import net.minecraft.client.particle.ParticleProvider;
+import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -15,6 +20,7 @@ import wd40.lubricant.core.client.RendererHelper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 // Fabric impl of RendererHelper. Wears two hats:
@@ -30,6 +36,7 @@ import java.util.function.Supplier;
 public final class Renderers implements RendererHelper, ClientModInitializer {
 
     private static final List<Pending<?>> PENDING = new ArrayList<>();
+    private static final List<PendingParticle<?>> PENDING_PARTICLES = new ArrayList<>();
 
     public Renderers() {}
 
@@ -46,9 +53,18 @@ public final class Renderers implements RendererHelper, ClientModInitializer {
     }
 
     @Override
+    public <T extends ParticleOptions> void particle(
+            Supplier<? extends ParticleType<T>> type,
+            Function<SpriteSet, ParticleProvider<T>> factory) {
+        PENDING_PARTICLES.add(new PendingParticle<>(type, factory));
+    }
+
+    @Override
     public void onInitializeClient() {
         for (Pending<?> p : PENDING) p.register();
         PENDING.clear();
+        for (PendingParticle<?> p : PENDING_PARTICLES) p.register();
+        PENDING_PARTICLES.clear();
     }
 
     private record Pending<T extends Entity>(
@@ -58,6 +74,15 @@ public final class Renderers implements RendererHelper, ClientModInitializer {
         void register() {
             EntityType<T> bound = (EntityType<T>) type.get();
             EntityRendererRegistry.register(bound, provider);
+        }
+    }
+
+    private record PendingParticle<T extends ParticleOptions>(
+            Supplier<? extends ParticleType<T>> type,
+            Function<SpriteSet, ParticleProvider<T>> factory) {
+        void register() {
+            // Fabric's PendingParticleFactory yields a FabricSpriteProvider, which IS-A SpriteSet.
+            ParticleFactoryRegistry.getInstance().register(type.get(), factory::apply);
         }
     }
 

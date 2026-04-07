@@ -1,6 +1,8 @@
 package wd40.vaakx.cog.client;
 
+import net.minecraft.client.particle.EndRodParticle;
 import wd40.lubricant.api.Init;
+import wd40.lubricant.api.client.Particles;
 import wd40.lubricant.api.client.Renderers;
 import wd40.vaakx.cog.server.entities.Entities;
 
@@ -18,6 +20,8 @@ public final class Client implements Init {
 
     static {
         Renderers.entity(Entities.SPINNING_COG, SpinningCogRenderer::new);
+        // Reuse vanilla EndRodParticle.Provider for the gear_spark sprite particle.
+        Particles.register(wd40.vaakx.cog.server.particles.Particles.GEAR_SPARK, EndRodParticle.Provider::new);
     }
 
     public Client() {}

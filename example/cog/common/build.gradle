@@ -47,6 +47,9 @@ dependencies {
     // joml - referenced indirectly via com.mojang.math.Axis (returns Quaternionf etc.)
     // by client/SpinningCogRenderer. Both loaders ship joml at runtime via MC.
     compileOnly "org.joml:joml:1.10.5"
+    // Brigadier - Component extends com.mojang.brigadier.Message; CreativeModeTab.Builder.title()
+    // requires the full Component type to compile. Both loaders ship brigadier at runtime via MC.
+    compileOnly "com.mojang:brigadier:1.2.9"
 
     // Datagen runtime classpath: vanilla MC + lubricant common + every library
     // Mojang's launcher pairs with this MC version (resolved above). One coord

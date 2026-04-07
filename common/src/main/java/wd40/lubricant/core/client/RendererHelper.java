@@ -1,9 +1,14 @@
 package wd40.lubricant.core.client;
 
+import net.minecraft.client.particle.ParticleProvider;
+import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -42,4 +47,15 @@ public interface RendererHelper {
     <T extends Entity> void entity(
             Supplier<? extends EntityType<? extends T>> type,
             EntityRendererProvider<T> provider);
+
+    /**
+     * Register a sprite-based {@link ParticleProvider} for {@code type}. The
+     * factory receives the loader's {@link SpriteSet} for the particle (loaded
+     * from {@code assets/<modid>/particles/<path>.json}) and returns the actual
+     * provider. Mirrors NeoForge's {@code event.registerSpriteSet} and Fabric's
+     * {@code ParticleFactoryRegistry.register}.
+     */
+    <T extends ParticleOptions> void particle(
+            Supplier<? extends ParticleType<T>> type,
+            Function<SpriteSet, ParticleProvider<T>> factory);
 }

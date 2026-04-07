@@ -1,8 +1,12 @@
 package wd40.lubricant.neoforge;
 
+import net.minecraft.core.particles.ParticleType;
+import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -14,8 +18,11 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import wd40.lubricant.api.registry.BlockEntityRegistry;
 import wd40.lubricant.api.registry.BlockRegistry;
+import wd40.lubricant.api.registry.CreativeTabRegistry;
 import wd40.lubricant.api.registry.EntityRegistry;
 import wd40.lubricant.api.registry.ItemRegistry;
+import wd40.lubricant.api.registry.ParticleRegistry;
+import wd40.lubricant.api.registry.SoundRegistry;
 import wd40.lubricant.core.Bootstrap;
 import wd40.lubricant.core.Services;
 import wd40.lubricant.neoforge.client.Renderers;
@@ -56,6 +63,15 @@ public final class Entry {
         }
         for (EntityRegistry registry : EntityRegistry.ALL) {
             attachEntities(registry, busFor(registry.modId(), lubricantBus));
+        }
+        for (SoundRegistry registry : SoundRegistry.ALL) {
+            attachSounds(registry, busFor(registry.modId(), lubricantBus));
+        }
+        for (ParticleRegistry registry : ParticleRegistry.ALL) {
+            attachParticles(registry, busFor(registry.modId(), lubricantBus));
+        }
+        for (CreativeTabRegistry registry : CreativeTabRegistry.ALL) {
+            attachCreativeTabs(registry, busFor(registry.modId(), lubricantBus));
         }
     }
 
@@ -124,6 +140,45 @@ public final class Entry {
             entry.ref().set(type);
             return type;
         });
+    }
+
+    private static void attachSounds(SoundRegistry registry, IEventBus bus) {
+        DeferredRegister<SoundEvent> sounds = DeferredRegister.create(Registries.SOUND_EVENT, registry.modId());
+        for (SoundRegistry.Entry entry : registry.entries()) {
+            sounds.register(entry.path(), () -> {
+                SoundEvent sound = SoundEvent.createVariableRangeEvent(
+                        net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(registry.modId(), entry.path()));
+                entry.ref().set(sound);
+                return sound;
+            });
+        }
+        sounds.register(bus);
+    }
+
+    private static void attachParticles(ParticleRegistry registry, IEventBus bus) {
+        DeferredRegister<ParticleType<?>> particles = DeferredRegister.create(Registries.PARTICLE_TYPE, registry.modId());
+        for (ParticleRegistry.Entry entry : registry.entries()) {
+            particles.register(entry.path(), () -> {
+                SimpleParticleType type = new SimpleParticleType(entry.overrideLimiter()) {};
+                entry.ref().set(type);
+                return type;
+            });
+        }
+        particles.register(bus);
+    }
+
+    private static void attachCreativeTabs(CreativeTabRegistry registry, IEventBus bus) {
+        DeferredRegister<CreativeModeTab> tabs = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, registry.modId());
+        for (CreativeTabRegistry.Entry entry : registry.entries()) {
+            tabs.register(entry.path(), () -> {
+                CreativeModeTab.Builder builder = CreativeModeTab.builder();
+                entry.configure().accept(builder);
+                CreativeModeTab tab = builder.build();
+                entry.ref().set(tab);
+                return tab;
+            });
+        }
+        tabs.register(bus);
     }
 
     private static IEventBus busFor(String modId, IEventBus lubricantBus) {

@@ -1,12 +1,17 @@
 package wd40.lubricant.fabric;
 
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
+import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
 import net.minecraft.core.Registry;
+import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -16,8 +21,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import wd40.lubricant.api.registry.BlockEntityRegistry;
 import wd40.lubricant.api.registry.BlockRegistry;
+import wd40.lubricant.api.registry.CreativeTabRegistry;
 import wd40.lubricant.api.registry.EntityRegistry;
 import wd40.lubricant.api.registry.ItemRegistry;
+import wd40.lubricant.api.registry.ParticleRegistry;
+import wd40.lubricant.api.registry.SoundRegistry;
 import wd40.lubricant.core.Bootstrap;
 
 public final class Entry implements ModInitializer {
@@ -63,10 +71,40 @@ public final class Entry implements ModInitializer {
                 bindEntity(entry, modId);
             }
         }
+        for (SoundRegistry registry : SoundRegistry.ALL) {
+            String modId = registry.modId();
+            for (SoundRegistry.Entry entry : registry.entries()) {
+                ResourceLocation id = ResourceLocation.fromNamespaceAndPath(modId, entry.path());
+                SoundEvent sound = SoundEvent.createVariableRangeEvent(id);
+                Registry.register(BuiltInRegistries.SOUND_EVENT, id, sound);
+                entry.ref().set(sound);
+            }
+        }
+        for (ParticleRegistry registry : ParticleRegistry.ALL) {
+            String modId = registry.modId();
+            for (ParticleRegistry.Entry entry : registry.entries()) {
+                ResourceLocation id = ResourceLocation.fromNamespaceAndPath(modId, entry.path());
+                SimpleParticleType type = FabricParticleTypes.simple(entry.overrideLimiter());
+                Registry.register(BuiltInRegistries.PARTICLE_TYPE, id, type);
+                entry.ref().set(type);
+            }
+        }
+        for (CreativeTabRegistry registry : CreativeTabRegistry.ALL) {
+            String modId = registry.modId();
+            for (CreativeTabRegistry.Entry entry : registry.entries()) {
+                ResourceLocation id = ResourceLocation.fromNamespaceAndPath(modId, entry.path());
+                CreativeModeTab.Builder builder = FabricItemGroup.builder();
+                entry.configure().accept(builder);
+                CreativeModeTab tab = builder.build();
+                Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, id, tab);
+                entry.ref().set(tab);
+            }
+        }
 
-        LOG.info("[lubricant] init complete on Fabric ({} block reg(s), {} item reg(s), {} BE reg(s), {} entity reg(s))",
+        LOG.info("[lubricant] init complete on Fabric ({} block reg(s), {} item reg(s), {} BE reg(s), {} entity reg(s), {} sound reg(s), {} particle reg(s), {} creative tab reg(s))",
                 BlockRegistry.ALL.size(), ItemRegistry.ALL.size(),
-                BlockEntityRegistry.ALL.size(), EntityRegistry.ALL.size());
+                BlockEntityRegistry.ALL.size(), EntityRegistry.ALL.size(),
+                SoundRegistry.ALL.size(), ParticleRegistry.ALL.size(), CreativeTabRegistry.ALL.size());
     }
 
     @SuppressWarnings("DataFlowIssue")  // BlockEntityType.Builder.build accepts null DataFixerType
