@@ -10,16 +10,20 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * Registers {@link Block}s under one mod's namespace. {@link #register} also
  * implies a matching BlockItem; {@link #registerNoItem} skips it.
  *
- * <p>Plain data - see {@link ItemRegistry} for the lifecycle. Loader entry
- * points read {@link #ALL} and commit to vanilla / NeoForge registries.</p>
+ * <p>Returns the constructed {@link Block} as a typed field (no Supplier wrapper).
+ * The generic preserves custom block subclasses at the call site:
+ * {@code public static final Counter MY = Blocks.register("counter", Counter::new);}.</p>
+ *
+ * <pre>{@code
+ * public static final BlockRegistry BLOCKS = BlockRegistry.create("mymod");
+ * public static final Block GEAR = BLOCKS.register("gear", props -> new Block(props));
+ * }</pre>
  *
  * <p><a href="https://github.com/vaakxxx/lubricant/wiki/Blocks">Blocks wiki</a></p>
  */
@@ -28,10 +32,24 @@ public final class BlockRegistry {
     public static final List<BlockRegistry> ALL = new CopyOnWriteArrayList<>();
 
     private final String modId;
-    private final List<Entry> entries = new ArrayList<>();
+    private final List<Entry<?>> entries = new ArrayList<>();
     private final Set<String> noItemPaths = new HashSet<>();
 
-    public record Entry(String path, Function<BlockBehaviour.Properties, Block> factory, AtomicReference<Block> ref) {}
+    public static final class Entry<B extends Block> {
+        private final String path;
+        private final Function<BlockBehaviour.Properties, B> factory;
+        private final B bound;
+
+        Entry(String path, Function<BlockBehaviour.Properties, B> factory, B bound) {
+            this.path = path;
+            this.factory = factory;
+            this.bound = bound;
+        }
+
+        public String path() { return path; }
+        public Function<BlockBehaviour.Properties, B> factory() { return factory; }
+        public B bound() { return bound; }
+    }
 
     public static BlockRegistry create(String modId) {
         BlockRegistry registry = new BlockRegistry(modId);
@@ -43,33 +61,27 @@ public final class BlockRegistry {
         this.modId = modId;
     }
 
-    public Supplier<Block> register(String path, Function<BlockBehaviour.Properties, Block> factory) {
+    public <B extends Block> B register(String path, Function<BlockBehaviour.Properties, B> factory) {
         return queue(path, factory);
     }
 
-    public Supplier<Block> registerNoItem(String path, Function<BlockBehaviour.Properties, Block> factory) {
+    public <B extends Block> B registerNoItem(String path, Function<BlockBehaviour.Properties, B> factory) {
         noItemPaths.add(path);
         return queue(path, factory);
     }
 
-    private Supplier<Block> queue(String path, Function<BlockBehaviour.Properties, Block> factory) {
-        Entry entry = new Entry(path, factory, new AtomicReference<>());
-        entries.add(entry);
-        return () -> {
-            Block block = entry.ref.get();
-            if (block == null) {
-                throw new IllegalStateException(
-                        "Block " + modId + ":" + path + " was accessed before lubricant bootstrap completed");
-            }
-            return block;
-        };
+    private <B extends Block> B queue(String path, Function<BlockBehaviour.Properties, B> factory) {
+        BlockBehaviour.Properties props = BlockBehaviour.Properties.of();
+        B block = factory.apply(props);
+        entries.add(new Entry<>(path, factory, block));
+        return block;
     }
 
     public String modId() {
         return modId;
     }
 
-    public List<Entry> entries() {
+    public List<Entry<?>> entries() {
         return Collections.unmodifiableList(entries);
     }
 
@@ -80,7 +92,7 @@ public final class BlockRegistry {
 
     public List<ResourceLocation> ids() {
         List<ResourceLocation> out = new ArrayList<>(entries.size());
-        for (Entry entry : entries) {
+        for (Entry<?> entry : entries) {
             out.add(ResourceLocation.fromNamespaceAndPath(modId, entry.path));
         }
         return out;

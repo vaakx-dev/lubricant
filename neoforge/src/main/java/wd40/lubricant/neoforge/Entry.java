@@ -84,16 +84,14 @@ public final class Entry {
     }
 
     private static void attachBlocks(BlockRegistry registry, IEventBus bus) {
+        // Items/Blocks are constructed eagerly inside the registry's register() call (during
+        // consumer Init class load). Here we just register the already-built instances with
+        // NeoForge's DeferredRegister, which then commits them at RegisterEvent time.
         DeferredRegister.Blocks blocks = DeferredRegister.createBlocks(registry.modId());
         DeferredRegister.Items blockItems = DeferredRegister.createItems(registry.modId());
-        for (BlockRegistry.Entry entry : registry.entries()) {
-            // The lambda runs once during the registry event; capture the result into entry.ref
-            // so user code reading the Supplier<Block> sees the live Block.
-            var deferred = blocks.registerBlock(entry.path(), props -> {
-                Block block = entry.factory().apply(props);
-                entry.ref().set(block);
-                return block;
-            });
+        for (BlockRegistry.Entry<?> entry : registry.entries()) {
+            Block block = entry.bound();
+            var deferred = blocks.register(entry.path(), () -> block);
             if (!registry.isNoItem(entry.path())) {
                 blockItems.registerSimpleBlockItem(deferred);
             }
@@ -104,12 +102,9 @@ public final class Entry {
 
     private static void attachItems(ItemRegistry registry, IEventBus bus) {
         DeferredRegister.Items items = DeferredRegister.createItems(registry.modId());
-        for (ItemRegistry.Entry entry : registry.entries()) {
-            items.registerItem(entry.path(), props -> {
-                Item item = entry.factory().apply(props);
-                entry.ref().set(item);
-                return item;
-            });
+        for (ItemRegistry.Entry<?> entry : registry.entries()) {
+            Item item = entry.bound();
+            items.register(entry.path(), () -> item);
         }
         items.register(bus);
     }
@@ -126,7 +121,7 @@ public final class Entry {
     private static <T extends BlockEntity> void registerOneBlockEntity(
             DeferredRegister<BlockEntityType<?>> types, BlockEntityRegistry.Entry<T> entry) {
         types.register(entry.path(), () -> {
-            Block[] blocks = entry.validBlocks().stream().map(java.util.function.Supplier::get).toArray(Block[]::new);
+            Block[] blocks = entry.validBlocks().toArray(new Block[0]);
             BlockEntityType<T> type = BlockEntityType.Builder.of(entry.factory()::apply, blocks).build(null);
             entry.ref().set(type);
             return type;

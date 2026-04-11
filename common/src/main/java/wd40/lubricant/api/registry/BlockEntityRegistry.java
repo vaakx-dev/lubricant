@@ -15,6 +15,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
+
 /**
  * Registers {@link BlockEntityType}s under one mod's namespace. Plain data -
  * see {@link ItemRegistry} for the lifecycle. Loader entry points read
@@ -23,8 +24,7 @@ import java.util.function.Supplier;
  * <p>The {@code factory} is a {@code BiFunction<BlockPos, BlockState, T>} -
  * typically a constructor reference like {@code MyBE::new}. The
  * {@code validBlocks} varargs lists the {@link Block}s that may instantiate
- * this BE; pass the suppliers returned by {@link BlockRegistry#register} so
- * the references resolve after binding.</p>
+ * this BE; pass the {@link Block} fields returned by {@link BlockRegistry#register}.</p>
  *
  * <p><a href="https://github.com/vaakxxx/lubricant/wiki/Block-Entities">Block Entities wiki</a></p>
  */
@@ -39,7 +39,7 @@ public final class BlockEntityRegistry {
     public record Entry<T extends BlockEntity>(
             String path,
             BiFunction<BlockPos, BlockState, T> factory,
-            List<Supplier<? extends Block>> validBlocks,
+            List<Block> validBlocks,
             AtomicReference<BlockEntityType<T>> ref) {}
 
     public static BlockEntityRegistry create(String modId) {
@@ -57,13 +57,12 @@ public final class BlockEntityRegistry {
      *
      * @param path         path under the mod's namespace, e.g. {@code "counter"}
      * @param factory      constructor reference (e.g. {@code CounterBE::new})
-     * @param validBlocks  block suppliers (typically the result of {@link BlockRegistry#register})
+     * @param validBlocks  blocks (typically the {@link Block} fields returned by {@link BlockRegistry#register})
      */
-    @SafeVarargs
-    public final <T extends BlockEntity> Supplier<BlockEntityType<T>> register(
+    public <T extends BlockEntity> Supplier<BlockEntityType<T>> register(
             String path,
             BiFunction<BlockPos, BlockState, T> factory,
-            Supplier<? extends Block>... validBlocks) {
+            Block... validBlocks) {
         Entry<T> entry = new Entry<>(path, factory, List.of(validBlocks), new AtomicReference<>());
         entries.add(entry);
         return () -> {

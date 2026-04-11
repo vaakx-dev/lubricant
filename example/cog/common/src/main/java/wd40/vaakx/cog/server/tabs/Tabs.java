@@ -22,14 +22,14 @@ public final class Tabs implements Init {
     /** Resource id: {@code cog:cog}. */
     public static final Supplier<CreativeModeTab> COG_TAB = TABS.register("cog", builder -> builder
             .title(Component.literal("Cog"))
-            .icon(() -> new ItemStack(Items.COG.get()))
+            .icon(() -> new ItemStack(Items.COG))
             .displayItems((params, output) -> {
                 for (var entry : Items.ITEMS.entries()) {
-                    output.accept(entry.ref().get());
+                    output.accept(entry.bound());
                 }
                 for (var entry : Blocks.BLOCKS.entries()) {
                     if (Blocks.BLOCKS.isNoItem(entry.path())) continue;
-                    output.accept(entry.ref().get());
+                    output.accept(entry.bound());
                 }
             }));
 

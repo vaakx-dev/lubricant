@@ -59,7 +59,7 @@ public final class Server implements Init {
             // component back to the client.
             if (level.isClientSide()) return InteractionResult.PASS;
             ItemStack held = player.getItemInHand(hand);
-            if (held.is(Items.GREASED_COG.get())) {
+            if (held.is(Items.GREASED_COG)) {
                 int next = StackData.get(held, Items.CHARGE) + 1;
                 StackData.set(held, Items.CHARGE, next);
                 Cog.LOG.info("greased_cog charge -> {}", next);

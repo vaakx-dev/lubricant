@@ -16,7 +16,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.block.state.BlockBehaviour;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import wd40.lubricant.api.registry.BlockEntityRegistry;
@@ -37,14 +36,15 @@ public final class Entry implements ModInitializer {
     public void onInitialize() {
         Bootstrap.loadAllInit();
 
-        // Bind blocks before items so item factories may reference Blocks.X.get().
+        // Items/Blocks are constructed eagerly inside the registry's register() call (during
+        // consumer Init class load, fired by Bootstrap.loadAllInit above). Here we just commit
+        // the already-built instances into vanilla registries.
         for (BlockRegistry registry : BlockRegistry.ALL) {
             String modId = registry.modId();
-            for (BlockRegistry.Entry entry : registry.entries()) {
+            for (BlockRegistry.Entry<?> entry : registry.entries()) {
                 ResourceLocation id = ResourceLocation.fromNamespaceAndPath(modId, entry.path());
-                Block block = entry.factory().apply(BlockBehaviour.Properties.of());
+                Block block = entry.bound();
                 Registry.register(BuiltInRegistries.BLOCK, id, block);
-                entry.ref().set(block);
                 if (!registry.isNoItem(entry.path())) {
                     Registry.register(BuiltInRegistries.ITEM, id, new BlockItem(block, new Item.Properties()));
                 }
@@ -52,11 +52,9 @@ public final class Entry implements ModInitializer {
         }
         for (ItemRegistry registry : ItemRegistry.ALL) {
             String modId = registry.modId();
-            for (ItemRegistry.Entry entry : registry.entries()) {
+            for (ItemRegistry.Entry<?> entry : registry.entries()) {
                 ResourceLocation id = ResourceLocation.fromNamespaceAndPath(modId, entry.path());
-                Item item = entry.factory().apply(new Item.Properties());
-                Registry.register(BuiltInRegistries.ITEM, id, item);
-                entry.ref().set(item);
+                Registry.register(BuiltInRegistries.ITEM, id, entry.bound());
             }
         }
         // Block entities require their valid blocks to already exist - depends on the block loop above.
@@ -115,7 +113,7 @@ public final class Entry implements ModInitializer {
 
     @SuppressWarnings("DataFlowIssue")  // BlockEntityType.Builder.build accepts null DataFixerType
     private static <T extends BlockEntity> void bindBlockEntity(BlockEntityRegistry.Entry<T> entry, String modId) {
-        Block[] blocks = entry.validBlocks().stream().map(java.util.function.Supplier::get).toArray(Block[]::new);
+        Block[] blocks = entry.validBlocks().toArray(new Block[0]);
         BlockEntityType<T> type = BlockEntityType.Builder.of(entry.factory()::apply, blocks).build(null);
         Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE,
                 ResourceLocation.fromNamespaceAndPath(modId, entry.path()), type);
