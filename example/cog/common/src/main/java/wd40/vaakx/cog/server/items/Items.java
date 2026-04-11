@@ -5,7 +5,6 @@ import net.minecraft.world.item.Item;
 import wd40.lubricant.api.Init;
 import wd40.lubricant.api.data.DataKey;
 import wd40.lubricant.api.data.DataKeys;
-import wd40.lubricant.api.data.StackData;
 import wd40.lubricant.api.registry.ItemRegistry;
 import wd40.vaakx.cog.Cog;
 
@@ -33,11 +32,7 @@ public final class Items implements Init {
     private static final DataKeys KEYS = DataKeys.create(Cog.ID);
 
     /** Click-counter on a greased_cog ItemStack. Persists across logout/world reload. */
-    public static final DataKey<Integer> CHARGE = KEYS.of("charge", Codec.INT, 0);
-
-    static {
-        StackData.register(CHARGE);
-    }
+    public static final DataKey<Integer> CHARGE = KEYS.stack("charge", Codec.INT, 0);
 
     public Items() {}
 }

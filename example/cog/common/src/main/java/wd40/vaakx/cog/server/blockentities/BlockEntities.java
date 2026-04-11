@@ -3,7 +3,6 @@ package wd40.vaakx.cog.server.blockentities;
 import com.mojang.serialization.Codec;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import wd40.lubricant.api.Init;
-import wd40.lubricant.api.data.BlockEntityData;
 import wd40.lubricant.api.data.DataKey;
 import wd40.lubricant.api.data.DataKeys;
 import wd40.lubricant.api.registry.BlockEntityRegistry;
@@ -27,11 +26,7 @@ public final class BlockEntities implements Init {
     private static final DataKeys KEYS = DataKeys.create(Cog.ID);
 
     /** Click count on a Counter block, stored on its {@link CounterBE} via lubricant attached data. */
-    public static final DataKey<Integer> COUNTER_CLICKS = KEYS.of("counter_clicks", Codec.INT, 0);
-
-    static {
-        BlockEntityData.register(COUNTER_CLICKS);
-    }
+    public static final DataKey<Integer> COUNTER_CLICKS = KEYS.blockEntity("counter_clicks", Codec.INT, 0);
 
     public BlockEntities() {}
 }

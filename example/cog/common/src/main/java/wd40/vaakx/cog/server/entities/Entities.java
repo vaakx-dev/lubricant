@@ -6,7 +6,6 @@ import net.minecraft.world.entity.MobCategory;
 import wd40.lubricant.api.Init;
 import wd40.lubricant.api.data.DataKey;
 import wd40.lubricant.api.data.DataKeys;
-import wd40.lubricant.api.data.EntityData;
 import wd40.lubricant.api.registry.EntityRegistry;
 import wd40.vaakx.cog.Cog;
 
@@ -31,11 +30,7 @@ public final class Entities implements Init {
     private static final DataKeys KEYS = DataKeys.create(Cog.ID);
 
     /** Player UUID, captured on first join and re-logged on every subsequent join. */
-    public static final DataKey<UUID> OWNER = KEYS.of("owner", UUIDUtil.CODEC);
-
-    static {
-        EntityData.register(OWNER);
-    }
+    public static final DataKey<UUID> OWNER = KEYS.entity("owner", UUIDUtil.CODEC);
 
     public Entities() {}
 }
