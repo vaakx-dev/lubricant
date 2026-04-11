@@ -26,7 +26,7 @@ public final class BridgedEvent<L> implements Event<L> {
     }
 
     @Override
-    public void subscribe(L listener) {
+    public void register(L listener) {
         bridge.accept(listener);
     }
 }

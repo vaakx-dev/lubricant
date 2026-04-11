@@ -1,6 +1,6 @@
 package wd40.lubricant.api.events;
 
-/** Subscription point returned by {@link Events} accessors. Listeners aren't unsubscribable. */
+/** Subscription point returned by event-holder constants. Listeners aren't unsubscribable. */
 public interface Event<L> {
-    void subscribe(L listener);
+    void register(L listener);
 }

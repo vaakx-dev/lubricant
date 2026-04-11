@@ -9,7 +9,9 @@ import net.minecraft.world.level.Level;
 import wd40.lubricant.api.Init;
 import wd40.lubricant.api.data.EntityData;
 import wd40.lubricant.api.data.StackData;
-import wd40.lubricant.api.events.Events;
+import wd40.lubricant.api.events.ItemEvents;
+import wd40.lubricant.api.events.PlayerEvents;
+import wd40.lubricant.api.events.ServerEvents;
 import wd40.vaakx.cog.Cog;
 import wd40.vaakx.cog.server.items.Items;
 import wd40.vaakx.cog.server.net.Channel;
@@ -33,13 +35,13 @@ import java.util.UUID;
 public final class Server implements Init {
 
     static {
-        Events.serverStart().subscribe(server ->
+        ServerEvents.START.register(server ->
                 Cog.LOG.info("server starting: {}", server.getServerVersion()));
 
-        Events.serverStop().subscribe(server ->
+        ServerEvents.STOP.register(server ->
                 Cog.LOG.info("server stopping"));
 
-        Events.playerJoin().subscribe(player -> {
+        PlayerEvents.JOIN.register(player -> {
             Cog.LOG.info("player joined: {}", player.getScoreboardName());
 
             UUID stored = EntityData.get(player, wd40.vaakx.cog.server.entities.Entities.OWNER);
@@ -51,11 +53,11 @@ public final class Server implements Init {
             }
         });
 
-        Events.playerLeave().subscribe(player ->
+        PlayerEvents.LEAVE.register(player ->
                 Cog.LOG.info("player left: {}", player.getScoreboardName()));
 
-        Events.itemUse().subscribe((player, level, hand) -> {
-            // itemUse fires on both sides; mutate only on server. Vanilla syncs the new
+        ItemEvents.USE.register((player, level, hand) -> {
+            // ItemEvents.USE fires on both sides; mutate only on server. Vanilla syncs the new
             // component back to the client.
             if (level.isClientSide()) return InteractionResult.PASS;
             ItemStack held = player.getItemInHand(hand);
@@ -69,7 +71,7 @@ public final class Server implements Init {
             return InteractionResult.PASS;
         });
 
-        Events.serverTick().subscribe(server -> {
+        ServerEvents.TICK.register(server -> {
             int tick = server.getTickCount();
             if (tick % 20 != 0) return;
             Channel.HELLO.sendToAll(server, new Channel.HelloPayload(tick));
