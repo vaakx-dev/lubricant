@@ -2,6 +2,7 @@ package wd40.lubricant.api.registry;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
+import wd40.lubricant.core.Datagen;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -73,6 +74,9 @@ public final class ItemRegistry {
     public <I extends Item> I register(String path, Function<Item.Properties, I> factory) {
         Entry<I> entry = new Entry<>(path, factory);
         entries.add(entry);
+        // Datagen JVM has no MC Bootstrap and would crash on Item construction. Datagen
+        // providers only need ids/paths anyway, so we skip the factory and return null.
+        if (Datagen.IS_DATAGEN) return null;
         Item.Properties props = new Item.Properties();
         I item = factory.apply(props);
         entry.setBound(item);

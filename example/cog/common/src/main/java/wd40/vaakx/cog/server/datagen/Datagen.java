@@ -1,7 +1,13 @@
 package wd40.vaakx.cog.server.datagen;
 
-import wd40.lubricant.api.datagen.Assets;
+import wd40.lubricant.api.datagen.DataGenerator;
 import wd40.lubricant.api.datagen.DatagenInit;
+import wd40.lubricant.api.datagen.Pack;
+import wd40.lubricant.api.datagen.providers.BlockstateProvider;
+import wd40.lubricant.api.datagen.providers.ItemModelProvider;
+import wd40.lubricant.api.datagen.providers.ParticlesProvider;
+import wd40.lubricant.api.datagen.providers.SoundsProvider;
+import wd40.lubricant.api.datagen.providers.TabProvider;
 import wd40.vaakx.cog.server.blocks.Blocks;
 import wd40.vaakx.cog.server.items.Items;
 import wd40.vaakx.cog.server.particles.Particles;
@@ -13,24 +19,21 @@ import wd40.vaakx.cog.server.tabs.Tabs;
  * normal mod boot. Listed in
  * {@code META-INF/services/wd40.lubricant.api.datagen.DatagenInit}.
  *
- * <p>Each {@code defaults(...)} call asks lubricant to emit the standard JSON
- * cog would otherwise have to hand-write: item/generated models, cube_all
- * blockstates + block models, and lang entries derived from the id. Any file
- * already present in {@code src/main/resources/assets/cog/...} wins.</p>
- *
- * <p>The simple name {@code Datagen} matches the lubricant facade type
- * ({@link wd40.lubricant.api.datagen.Datagen}); this file uses a fully-qualified
- * reference for the facade in the method signature to dodge the import clash.</p>
+ * <p>Each built-in provider takes the registry it cares about and emits the
+ * standard JSON cog would otherwise hand-write: item/generated models, cube_all
+ * blockstates + block models, sounds.json, particles JSON, lang. Files already
+ * present in {@code src/main/resources/assets/cog/...} are skipped.</p>
  */
 public final class Datagen implements DatagenInit {
 
     @Override
-    public void onDatagen(Assets assets) {
-        assets.defaults(Items.ITEMS);
-        assets.defaults(Blocks.BLOCKS);
-        assets.defaults(Sounds.SOUNDS);
-        assets.defaults(Particles.PARTICLES);
-        assets.defaults(Tabs.TABS);
+    public void onDatagen(DataGenerator gen) {
+        Pack pack = gen.createPack();
+        pack.addProvider(out -> new ItemModelProvider(out, Items.ITEMS));
+        pack.addProvider(out -> new BlockstateProvider(out, Blocks.BLOCKS));
+        pack.addProvider(out -> new SoundsProvider(out, Sounds.SOUNDS));
+        pack.addProvider(out -> new ParticlesProvider(out, Particles.PARTICLES));
+        pack.addProvider(out -> new TabProvider(out, Tabs.TABS));
     }
 
     public Datagen() {}

@@ -1,19 +1,14 @@
 package wd40.lubricant.datagen;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.data.CachedOutput;
-import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
-import net.minecraft.resources.ResourceLocation;
-import wd40.lubricant.api.datagen.Assets;
+import wd40.lubricant.api.datagen.DataGenerator;
+import wd40.lubricant.api.datagen.DataOutput;
+import wd40.lubricant.api.datagen.DataProvider;
 import wd40.lubricant.api.datagen.DatagenInit;
-import wd40.lubricant.api.registry.BlockRegistry;
-import wd40.lubricant.api.registry.CreativeTabRegistry;
-import wd40.lubricant.api.registry.ItemRegistry;
-import wd40.lubricant.api.registry.ParticleRegistry;
-import wd40.lubricant.api.registry.SoundRegistry;
+import wd40.lubricant.api.datagen.Pack;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -22,18 +17,20 @@ import java.util.List;
 import java.util.ServiceLoader;
 import java.util.TreeMap;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
 /**
- * Vanilla {@link DataProvider} that drives lubricant datagen.
+ * Vanilla {@link net.minecraft.data.DataProvider} that drives lubricant datagen.
  *
- * <p>Invoked from {@link DatagenMain} via a tiny path-backed {@link CachedOutput} -
- * no loader involvement. Loads every {@link DatagenInit} service, calls each with
- * an {@link Assets} buffer, then flushes JSON.</p>
+ * <p>Invoked from {@link DatagenMain} via a tiny path-backed {@link CachedOutput}.
+ * Loads every {@link DatagenInit} service, gives each a {@link DataGenerator},
+ * runs every attached {@link DataProvider} against a shared sink, then flushes
+ * accumulated JSON / lang / sound entries to disk.</p>
  */
-public final class Provider implements DataProvider {
+public final class Provider implements net.minecraft.data.DataProvider {
 
     private final PackOutput output;
-    private final Path handAuthoredRoot;  // null = no hand-author check; always overwrite generated
+    private final Path handAuthoredRoot;  // null = no skip-if-exists check
 
     public Provider(PackOutput output) {
         this(output, null);
@@ -47,38 +44,31 @@ public final class Provider implements DataProvider {
     @Override
     public CompletableFuture<?> run(CachedOutput cache) {
         Path assetsRoot = output.getOutputFolder(PackOutput.Target.RESOURCE_PACK);
+        Sink sink = new Sink(handAuthoredRoot);
+        Generator gen = new Generator(sink);
 
-        Buffer buf = new Buffer();
         for (DatagenInit init : ServiceLoader.load(DatagenInit.class)) {
-            init.onDatagen(buf);
+            init.onDatagen(gen);
         }
+        gen.runAll();
 
         List<CompletableFuture<?>> writes = new ArrayList<>();
-        for (Buffer.Entry e : buf.entries) {
-            if (isHandAuthored(e.relPath)) continue;
-            writes.add(DataProvider.saveStable(cache, e.json, assetsRoot.resolve(e.relPath)));
+        for (Sink.Entry e : sink.entries) {
+            writes.add(net.minecraft.data.DataProvider.saveStable(cache, e.json, assetsRoot.resolve(e.relPath)));
         }
-        for (var sounds : buf.soundsByModId.entrySet()) {
+        for (var sounds : sink.soundsByModId.entrySet()) {
             String relPath = sounds.getKey() + "/sounds.json";
-            if (isHandAuthored(relPath)) continue;
             JsonObject merged = new JsonObject();
             for (var entry : sounds.getValue().entrySet()) merged.add(entry.getKey(), entry.getValue());
-            writes.add(DataProvider.saveStable(cache, merged, assetsRoot.resolve(relPath)));
+            writes.add(net.minecraft.data.DataProvider.saveStable(cache, merged, assetsRoot.resolve(relPath)));
         }
-        for (var lang : buf.langByModId.entrySet()) {
+        for (var lang : sink.langByModId.entrySet()) {
             String relPath = lang.getKey() + "/lang/en_us.json";
-            if (isHandAuthored(relPath)) continue;
             JsonObject merged = new JsonObject();
             for (var kv : lang.getValue().entrySet()) merged.addProperty(kv.getKey(), kv.getValue());
-            writes.add(DataProvider.saveStable(cache, merged, assetsRoot.resolve(relPath)));
+            writes.add(net.minecraft.data.DataProvider.saveStable(cache, merged, assetsRoot.resolve(relPath)));
         }
         return CompletableFuture.allOf(writes.toArray(CompletableFuture[]::new));
-    }
-
-    /** True if {@code <handAuthoredRoot>/assets/<relPath>} exists - skip the generated copy. */
-    private boolean isHandAuthored(String relPath) {
-        if (handAuthoredRoot == null) return false;
-        return Files.exists(handAuthoredRoot.resolve("assets").resolve(relPath));
     }
 
     @Override
@@ -86,136 +76,76 @@ public final class Provider implements DataProvider {
         return "Lubricant default assets";
     }
 
-    /** Collects everything DatagenInit emits, then flushes once. */
-    private static final class Buffer implements Assets {
+    /** Constructs Pack instances and runs every provider attached to each. */
+    private static final class Generator implements DataGenerator {
+        private final Sink sink;
+        private final List<PackImpl> packs = new ArrayList<>();
+
+        Generator(Sink sink) { this.sink = sink; }
+
+        @Override
+        public Pack createPack() {
+            PackImpl pack = new PackImpl(sink);
+            packs.add(pack);
+            return pack;
+        }
+
+        void runAll() {
+            for (PackImpl pack : packs) pack.runAll();
+        }
+    }
+
+    private static final class PackImpl implements Pack {
+        private final Sink sink;
+        private final List<DataProvider> providers = new ArrayList<>();
+
+        PackImpl(Sink sink) { this.sink = sink; }
+
+        @Override
+        public void addProvider(Function<DataOutput, ? extends DataProvider> factory) {
+            providers.add(factory.apply(sink));
+        }
+
+        void runAll() {
+            for (DataProvider provider : providers) provider.generate();
+        }
+    }
+
+    /** Aggregating sink. Buffers everything providers emit, written by run() at the end. */
+    private static final class Sink implements DataOutput {
 
         record Entry(String relPath, JsonElement json) {}
 
         final List<Entry> entries = new ArrayList<>();
-        // Per-modId so two mods sharing one datagen pass don't trample each other's lang.
         final TreeMap<String, TreeMap<String, String>> langByModId = new TreeMap<>();
-        // Per-modId aggregate of sounds.json entries (one file per mod).
         final TreeMap<String, TreeMap<String, JsonObject>> soundsByModId = new TreeMap<>();
 
-        @Override
-        public void defaults(ItemRegistry registry) {
-            for (ResourceLocation id : registry.ids()) {
-                itemModel(id, "item/generated", id.withPrefix("item/"));
-                lang(id.getNamespace(), "item." + id.getNamespace() + "." + id.getPath(), titleCase(id.getPath()));
-            }
+        private final Path handAuthoredRoot;
+
+        Sink(Path handAuthoredRoot) {
+            this.handAuthoredRoot = handAuthoredRoot;
         }
 
         @Override
-        public void defaults(BlockRegistry registry) {
-            var noItem = registry.noItemIds();
-            for (ResourceLocation id : registry.ids()) {
-                ResourceLocation modelId = id.withPrefix("block/");
-                blockstate(id, modelId);
-                blockModel(id, "block/cube_all", id.withPrefix("block/"));
-                if (!noItem.contains(id)) {
-                    JsonObject m = new JsonObject();
-                    m.addProperty("parent", modelId.toString());
-                    entries.add(new Entry(
-                            id.getNamespace() + "/models/item/" + id.getPath() + ".json", m));
-                }
-                lang(id.getNamespace(), "block." + id.getNamespace() + "." + id.getPath(), titleCase(id.getPath()));
-            }
+        public void writeJson(String relPath, JsonElement json) {
+            if (isHandAuthored(relPath)) return;
+            entries.add(new Entry(relPath, json));
         }
 
         @Override
-        public void itemModel(ResourceLocation id, String parent, ResourceLocation layer0) {
-            JsonObject json = new JsonObject();
-            json.addProperty("parent", parent);
-            JsonObject tex = new JsonObject();
-            tex.addProperty("layer0", layer0.toString());
-            json.add("textures", tex);
-            entries.add(new Entry(
-                    id.getNamespace() + "/models/item/" + id.getPath() + ".json", json));
-        }
-
-        @Override
-        public void blockstate(ResourceLocation id, ResourceLocation modelId) {
-            JsonObject variant = new JsonObject();
-            variant.addProperty("model", modelId.toString());
-            JsonObject variants = new JsonObject();
-            variants.add("", variant);
-            JsonObject json = new JsonObject();
-            json.add("variants", variants);
-            entries.add(new Entry(
-                    id.getNamespace() + "/blockstates/" + id.getPath() + ".json", json));
-        }
-
-        @Override
-        public void blockModel(ResourceLocation id, String parent, ResourceLocation textureAll) {
-            JsonObject json = new JsonObject();
-            json.addProperty("parent", parent);
-            JsonObject tex = new JsonObject();
-            tex.addProperty("all", textureAll.toString());
-            json.add("textures", tex);
-            entries.add(new Entry(
-                    id.getNamespace() + "/models/block/" + id.getPath() + ".json", json));
-        }
-
-        @Override
-        public void lang(String modId, String key, String value) {
+        public void addLang(String modId, String key, String value) {
             langByModId.computeIfAbsent(modId, k -> new TreeMap<>()).put(key, value);
         }
 
         @Override
-        public void defaults(SoundRegistry registry) {
-            for (ResourceLocation id : registry.ids()) {
-                String subtitleKey = "subtitles." + id.getNamespace() + "." + id.getPath();
-                soundEvent(id, List.of(id.toString()), subtitleKey);
-                lang(id.getNamespace(), subtitleKey, titleCase(id.getPath()));
-            }
+        public void addSoundEntry(String modId, String soundPath, JsonObject body) {
+            soundsByModId.computeIfAbsent(modId, k -> new TreeMap<>()).put(soundPath, body);
         }
 
         @Override
-        public void defaults(ParticleRegistry registry) {
-            for (ResourceLocation id : registry.ids()) {
-                particle(id, List.of(id));
-            }
-        }
-
-        @Override
-        public void defaults(CreativeTabRegistry registry) {
-            for (ResourceLocation id : registry.ids()) {
-                lang(id.getNamespace(),
-                        "itemGroup." + id.getNamespace() + "." + id.getPath(),
-                        titleCase(id.getPath()));
-            }
-        }
-
-        @Override
-        public void soundEvent(ResourceLocation id, List<String> sampleNames, String subtitleKey) {
-            JsonObject body = new JsonObject();
-            if (subtitleKey != null && !subtitleKey.isEmpty()) {
-                body.addProperty("subtitle", subtitleKey);
-            }
-            JsonArray samples = new JsonArray();
-            for (String name : sampleNames) samples.add(name);
-            body.add("sounds", samples);
-            soundsByModId.computeIfAbsent(id.getNamespace(), k -> new TreeMap<>()).put(id.getPath(), body);
-        }
-
-        @Override
-        public void particle(ResourceLocation id, List<ResourceLocation> textures) {
-            JsonObject json = new JsonObject();
-            JsonArray texArray = new JsonArray();
-            for (ResourceLocation tex : textures) texArray.add(tex.toString());
-            json.add("textures", texArray);
-            entries.add(new Entry(
-                    id.getNamespace() + "/particles/" + id.getPath() + ".json", json));
-        }
-
-        private static String titleCase(String path) {
-            StringBuilder sb = new StringBuilder();
-            for (String part : path.split("_")) {
-                if (part.isEmpty()) continue;
-                sb.append(Character.toUpperCase(part.charAt(0))).append(part.substring(1)).append(' ');
-            }
-            return sb.toString().trim();
+        public boolean isHandAuthored(String relPath) {
+            if (handAuthoredRoot == null) return false;
+            return Files.exists(handAuthoredRoot.resolve("assets").resolve(relPath));
         }
     }
-
 }

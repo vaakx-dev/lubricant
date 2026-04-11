@@ -3,6 +3,7 @@ package wd40.lubricant.api.registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import wd40.lubricant.core.Datagen;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -71,6 +72,12 @@ public final class BlockRegistry {
     }
 
     private <B extends Block> B queue(String path, Function<BlockBehaviour.Properties, B> factory) {
+        // Datagen JVM has no MC Bootstrap and would crash on Block construction. Datagen
+        // providers only need ids/paths anyway, so we skip the factory and return null.
+        if (Datagen.IS_DATAGEN) {
+            entries.add(new Entry<>(path, factory, null));
+            return null;
+        }
         BlockBehaviour.Properties props = BlockBehaviour.Properties.of();
         B block = factory.apply(props);
         entries.add(new Entry<>(path, factory, block));
