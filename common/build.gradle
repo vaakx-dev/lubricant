@@ -41,6 +41,9 @@ dependencies {
     // joml is referenced indirectly via com.mojang.math.Axis (returns Quaternionf etc.)
     // in core/client/SpinningItemRenderer. Both loaders ship joml at runtime via MC.
     compileOnly "org.joml:joml:1.10.5"
+    // Netty buffer - StreamCodec is parameterised on ByteBuf, AutoCodec needs to
+    // reference it transitively via the ByteBufCodecs constants.
+    compileOnly "io.netty:netty-buffer:4.1.97.Final"
 }
 
 // Make the vanilla MC jar available to other subprojects that depend on :common.
