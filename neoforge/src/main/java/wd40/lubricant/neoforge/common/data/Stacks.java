@@ -1,4 +1,4 @@
-package wd40.lubricant.neoforge.data;
+package wd40.lubricant.neoforge.common.data;
 
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;

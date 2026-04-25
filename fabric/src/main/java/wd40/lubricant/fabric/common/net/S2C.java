@@ -1,4 +1,4 @@
-package wd40.lubricant.fabric.net;
+package wd40.lubricant.fabric.common.net;
 
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;

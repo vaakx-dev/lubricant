@@ -1,4 +1,4 @@
-package wd40.lubricant.fabric.net;
+package wd40.lubricant.fabric.client.net;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -13,9 +13,9 @@ import wd40.lubricant.api.client.net.handlers.ClientHandler;
 // fabric-loader strips this class on dedicated servers - prevents NoClassDefFoundError
 // when the JVM loads Net (which references this class).
 @Environment(EnvType.CLIENT)
-final class ClientReceivers {
+public final class ClientReceivers {
 
-    static <T extends CustomPacketPayload> void register(
+    public static <T extends CustomPacketPayload> void register(
             CustomPacketPayload.Type<T> type,
             ClientHandler<T> handler) {
         ClientPlayNetworking.registerGlobalReceiver(type, (payload, ctx) -> {
@@ -23,7 +23,7 @@ final class ClientReceivers {
         });
     }
 
-    static void send(CustomPacketPayload payload) {
+    public static void send(CustomPacketPayload payload) {
         ClientPlayNetworking.send(payload);
     }
 

@@ -30,10 +30,10 @@ import wd40.lubricant.api.common.registry.SoundRegistry;
 import wd40.lubricant.core.Bootstrap;
 import wd40.lubricant.core.Services;
 import wd40.lubricant.neoforge.client.Renderers;
-import wd40.lubricant.neoforge.data.BlockEntities;
-import wd40.lubricant.neoforge.data.Entities;
-import wd40.lubricant.neoforge.data.Stacks;
-import wd40.lubricant.neoforge.net.Net;
+import wd40.lubricant.neoforge.common.data.BlockEntities;
+import wd40.lubricant.neoforge.common.data.Entities;
+import wd40.lubricant.neoforge.common.data.Stacks;
+import wd40.lubricant.neoforge.common.net.Net;
 
 @Mod("lubricant")
 public final class Entry {

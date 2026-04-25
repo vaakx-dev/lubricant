@@ -1,4 +1,4 @@
-package wd40.lubricant.fabric.data;
+package wd40.lubricant.fabric.common.data;
 
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;

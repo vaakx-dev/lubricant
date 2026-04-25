@@ -1,4 +1,4 @@
-package wd40.lubricant.fabric.net;
+package wd40.lubricant.fabric.common.net;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
@@ -15,6 +15,7 @@ import wd40.lubricant.api.common.net.S2CPayload;
 import wd40.lubricant.api.server.net.handlers.ServerContext;
 import wd40.lubricant.api.server.net.handlers.ServerHandler;
 import wd40.lubricant.core.net.NetHelper;
+import wd40.lubricant.fabric.client.net.ClientReceivers;
 
 // Fabric impl of NetHelper. Discovered via JDK ServiceLoader.
 //

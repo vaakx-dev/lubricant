@@ -1,4 +1,4 @@
-package wd40.lubricant.neoforge.net;
+package wd40.lubricant.neoforge.common.net;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
