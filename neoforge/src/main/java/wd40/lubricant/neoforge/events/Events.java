@@ -12,9 +12,9 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
-import wd40.lubricant.api.events.EntityInteractListener;
-import wd40.lubricant.api.events.Event;
-import wd40.lubricant.api.events.ItemUseListener;
+import wd40.lubricant.api.server.events.EntityInteractListener;
+import wd40.lubricant.api.common.events.Event;
+import wd40.lubricant.api.server.events.ItemUseListener;
 import wd40.lubricant.core.events.BridgedEvent;
 import wd40.lubricant.core.events.EventHelper;
 
@@ -63,8 +63,11 @@ public final class Events implements EventHelper {
                 }
             }));
 
-    private final List<Runnable> setupQueue = new ArrayList<>();
-    private final Event<Runnable> setup = new BridgedEvent<>(setupQueue::add);
+    private final List<Runnable> serverSetupQueue = new ArrayList<>();
+    private final Event<Runnable> serverSetup = new BridgedEvent<>(serverSetupQueue::add);
+
+    private final List<Runnable> clientSetupQueue = new ArrayList<>();
+    private final Event<Runnable> clientSetup = new BridgedEvent<>(clientSetupQueue::add);
 
     @Override public Event<Consumer<MinecraftServer>> serverTick()  { return serverTick; }
     @Override public Event<Consumer<MinecraftServer>> serverStart() { return serverStart; }
@@ -74,11 +77,18 @@ public final class Events implements EventHelper {
     @Override public Event<Consumer<CommandDispatcher<CommandSourceStack>>> commands() { return commands; }
     @Override public Event<ItemUseListener>           itemUse()     { return itemUse; }
     @Override public Event<EntityInteractListener>    entityInteract() { return entityInteract; }
-    @Override public Event<Runnable>                  setup()       { return setup; }
+    @Override public Event<Runnable>                  serverSetup() { return serverSetup; }
+    @Override public Event<Runnable>                  clientSetup() { return clientSetup; }
 
     @Override
-    public void fireSetup() {
-        for (Runnable task : setupQueue) task.run();
-        setupQueue.clear();
+    public void fireServerSetup() {
+        for (Runnable task : serverSetupQueue) task.run();
+        serverSetupQueue.clear();
+    }
+
+    @Override
+    public void fireClientSetup() {
+        for (Runnable task : clientSetupQueue) task.run();
+        clientSetupQueue.clear();
     }
 }

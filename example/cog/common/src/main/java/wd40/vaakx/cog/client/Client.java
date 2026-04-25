@@ -1,7 +1,7 @@
 package wd40.vaakx.cog.client;
 
 import net.minecraft.client.particle.EndRodParticle;
-import wd40.lubricant.api.Init;
+import wd40.lubricant.api.client.ClientInit;
 import wd40.lubricant.api.client.EntityRenderers;
 import wd40.lubricant.api.client.ParticleRenderers;
 import wd40.vaakx.cog.common.entities.Entities;
@@ -11,13 +11,13 @@ import wd40.vaakx.cog.common.particles.Particles;
  * All of cog's client-side setup in one place. Mirrors {@link wd40.vaakx.cog.server.Server}
  * for the client side.
  *
- * <p>Loaded as a regular {@link Init} - listed in
- * {@code META-INF/services/wd40.lubricant.api.Init}. Lubricant's
+ * <p>Loaded as a regular {@link wd40.lubricant.api.client.ClientInit} - listed in
+ * {@code META-INF/services/wd40.lubricant.api.client.ClientInit}. Lubricant's
  * {@link EntityRenderers} facade short-circuits to no-op on dedicated server, so
  * this class is safe to load on any side; the actual renderer registration
  * only takes effect on the client.</p>
  */
-public final class Client implements Init {
+public final class Client implements ClientInit {
 
     static {
         EntityRenderers.entity(Entities.SPINNING_COG, SpinningCogRenderer::new);

@@ -1,11 +1,11 @@
 package wd40.lubricant.core.data;
 
 import net.minecraft.world.level.block.entity.BlockEntity;
-import wd40.lubricant.api.data.DataKey;
+import wd40.lubricant.api.common.data.DataKey;
 
 /**
  * Loader-specific source of BlockEntity data ops backing the public
- * {@link wd40.lubricant.api.data.BlockEntityData} facade. One implementation
+ * {@link wd40.lubricant.api.common.data.BlockEntityData} facade. One implementation
  * per loader, discovered via JDK {@link java.util.ServiceLoader}:
  *
  * <ul>

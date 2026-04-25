@@ -1,7 +1,7 @@
 package wd40.lubricant.core.data;
 
 import net.minecraft.resources.ResourceLocation;
-import wd40.lubricant.api.data.DataKey;
+import wd40.lubricant.api.common.data.DataKey;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -9,11 +9,11 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import wd40.lubricant.api.net.C2SPayload;
-import wd40.lubricant.api.net.handlers.ClientHandler;
-import wd40.lubricant.api.net.S2CPayload;
-import wd40.lubricant.api.net.handlers.ServerContext;
-import wd40.lubricant.api.net.handlers.ServerHandler;
+import wd40.lubricant.api.common.net.C2SPayload;
+import wd40.lubricant.api.client.net.handlers.ClientHandler;
+import wd40.lubricant.api.common.net.S2CPayload;
+import wd40.lubricant.api.server.net.handlers.ServerContext;
+import wd40.lubricant.api.server.net.handlers.ServerHandler;
 import wd40.lubricant.core.net.NetHelper;
 
 // Fabric impl of NetHelper. Discovered via JDK ServiceLoader.

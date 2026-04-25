@@ -2,10 +2,10 @@ package wd40.vaakx.cog.common.items;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.world.item.Item;
-import wd40.lubricant.api.Init;
-import wd40.lubricant.api.data.DataKey;
-import wd40.lubricant.api.data.DataKeys;
-import wd40.lubricant.api.registry.ItemRegistry;
+import wd40.lubricant.api.common.CommonInit;
+import wd40.lubricant.api.common.data.DataKey;
+import wd40.lubricant.api.common.data.DataKeys;
+import wd40.lubricant.api.common.registry.ItemRegistry;
 import wd40.vaakx.cog.Cog;
 
 /**
@@ -15,7 +15,7 @@ import wd40.vaakx.cog.Cog;
  *
  * <p>See <a href="https://github.com/vaakxxx/lubricant/wiki/Items">Items wiki</a>.</p>
  */
-public final class Items implements Init {
+public final class Items implements CommonInit {
 
     public static final ItemRegistry ITEMS = ItemRegistry.create(Cog.ID);
 

@@ -15,7 +15,7 @@ import java.util.function.Supplier;
  * Client-side particle rendering registration. Same short-circuit contract as
  * {@link EntityRenderers} - safe to call on dedicated server / datagen JVM.
  *
- * <p>Pair with {@link wd40.lubricant.api.registry.ParticleRegistry} for the
+ * <p>Pair with {@link wd40.lubricant.api.common.registry.ParticleRegistry} for the
  * data side: register the {@link ParticleType} once on both sides via
  * {@code ParticleRegistry}, then on the client side register a renderer
  * (vanilla calls it {@link ParticleProvider}) for it here. The

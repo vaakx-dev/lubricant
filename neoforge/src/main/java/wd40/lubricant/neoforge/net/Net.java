@@ -10,12 +10,12 @@ import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
-import wd40.lubricant.api.net.C2SPayload;
-import wd40.lubricant.api.net.handlers.ClientContext;
-import wd40.lubricant.api.net.handlers.ClientHandler;
-import wd40.lubricant.api.net.S2CPayload;
-import wd40.lubricant.api.net.handlers.ServerContext;
-import wd40.lubricant.api.net.handlers.ServerHandler;
+import wd40.lubricant.api.common.net.C2SPayload;
+import wd40.lubricant.api.client.net.handlers.ClientContext;
+import wd40.lubricant.api.client.net.handlers.ClientHandler;
+import wd40.lubricant.api.common.net.S2CPayload;
+import wd40.lubricant.api.server.net.handlers.ServerContext;
+import wd40.lubricant.api.server.net.handlers.ServerHandler;
 import wd40.lubricant.core.net.NetHelper;
 
 import java.util.ArrayList;

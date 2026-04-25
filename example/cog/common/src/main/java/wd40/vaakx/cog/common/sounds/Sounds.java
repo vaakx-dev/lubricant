@@ -1,8 +1,8 @@
 package wd40.vaakx.cog.common.sounds;
 
 import net.minecraft.sounds.SoundEvent;
-import wd40.lubricant.api.Init;
-import wd40.lubricant.api.registry.SoundRegistry;
+import wd40.lubricant.api.common.CommonInit;
+import wd40.lubricant.api.common.registry.SoundRegistry;
 import wd40.vaakx.cog.Cog;
 
 import java.util.function.Supplier;
@@ -14,7 +14,7 @@ import java.util.function.Supplier;
  * <p>The {@code sounds.json} entry under {@code assets/cog/} maps this id to a
  * vanilla .ogg, so we avoid shipping an audio asset just for the smoke test.</p>
  */
-public final class Sounds implements Init {
+public final class Sounds implements CommonInit {
 
     public static final SoundRegistry SOUNDS = SoundRegistry.create(Cog.ID);
 

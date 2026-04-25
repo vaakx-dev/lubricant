@@ -5,7 +5,7 @@ import com.google.gson.JsonObject;
 import net.minecraft.resources.ResourceLocation;
 import wd40.lubricant.api.datagen.DataOutput;
 import wd40.lubricant.api.datagen.DataProvider;
-import wd40.lubricant.api.registry.ParticleRegistry;
+import wd40.lubricant.api.common.registry.ParticleRegistry;
 
 /**
  * Writes a {@code particles/<path>.json} per particle with a single texture

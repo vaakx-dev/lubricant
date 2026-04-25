@@ -6,7 +6,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.neoforged.neoforge.network.PacketDistributor;
-import wd40.lubricant.api.net.S2CPayload;
+import wd40.lubricant.api.common.net.S2CPayload;
 
 // NeoForge impl of S2CPayload. PacketDistributor handles all four send shapes
 // natively without iteration helpers.

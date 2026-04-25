@@ -8,7 +8,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.registries.RegisterEvent;
-import wd40.lubricant.api.data.DataKey;
+import wd40.lubricant.api.common.data.DataKey;
 import wd40.lubricant.core.data.Registered;
 import wd40.lubricant.core.data.StackHelper;
 

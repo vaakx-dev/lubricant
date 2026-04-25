@@ -2,7 +2,7 @@ package wd40.lubricant.neoforge.net;
 
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.neoforged.neoforge.network.PacketDistributor;
-import wd40.lubricant.api.net.C2SPayload;
+import wd40.lubricant.api.common.net.C2SPayload;
 
 // NeoForge impl of C2SPayload. sendToServer is only valid on a client connection;
 // calling it from server-side code throws a runtime error inside PacketDistributor

@@ -6,12 +6,12 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import wd40.lubricant.api.Init;
-import wd40.lubricant.api.data.EntityData;
-import wd40.lubricant.api.data.StackData;
-import wd40.lubricant.api.events.ItemEvents;
-import wd40.lubricant.api.events.PlayerEvents;
-import wd40.lubricant.api.events.ServerEvents;
+import wd40.lubricant.api.server.ServerInit;
+import wd40.lubricant.api.common.data.EntityData;
+import wd40.lubricant.api.common.data.StackData;
+import wd40.lubricant.api.server.events.ItemEvents;
+import wd40.lubricant.api.server.events.PlayerEvents;
+import wd40.lubricant.api.server.events.ServerEvents;
 import wd40.vaakx.cog.Cog;
 import wd40.vaakx.cog.common.entities.Entities;
 import wd40.vaakx.cog.common.items.Items;
@@ -34,7 +34,7 @@ import java.util.UUID;
  * Co-locating them makes "what does cog do at runtime on the server" a
  * one-file question.</p>
  */
-public final class Server implements Init {
+public final class Server implements ServerInit {
 
     static {
         ServerEvents.START.register(server ->

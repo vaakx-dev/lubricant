@@ -2,10 +2,10 @@ package wd40.vaakx.cog.common.blockentities;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import wd40.lubricant.api.Init;
-import wd40.lubricant.api.data.DataKey;
-import wd40.lubricant.api.data.DataKeys;
-import wd40.lubricant.api.registry.BlockEntityRegistry;
+import wd40.lubricant.api.common.CommonInit;
+import wd40.lubricant.api.common.data.DataKey;
+import wd40.lubricant.api.common.data.DataKeys;
+import wd40.lubricant.api.common.registry.BlockEntityRegistry;
 import wd40.vaakx.cog.Cog;
 import wd40.vaakx.cog.common.blocks.Blocks;
 import wd40.vaakx.cog.common.blocks.CounterBE;
@@ -16,7 +16,7 @@ import java.util.function.Supplier;
  * All of cog's {@link BlockEntityType}s, plus block-entity-attached data.
  * Same lifecycle as {@link wd40.vaakx.cog.common.items.Items}.
  */
-public final class BlockEntities implements Init {
+public final class BlockEntities implements CommonInit {
 
     public static final BlockEntityRegistry TYPES = BlockEntityRegistry.create(Cog.ID);
 

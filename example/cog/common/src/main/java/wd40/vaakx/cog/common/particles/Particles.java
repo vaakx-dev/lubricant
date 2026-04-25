@@ -1,8 +1,8 @@
 package wd40.vaakx.cog.common.particles;
 
 import net.minecraft.core.particles.SimpleParticleType;
-import wd40.lubricant.api.Init;
-import wd40.lubricant.api.registry.ParticleRegistry;
+import wd40.lubricant.api.common.CommonInit;
+import wd40.lubricant.api.common.registry.ParticleRegistry;
 import wd40.vaakx.cog.Cog;
 
 import java.util.function.Supplier;
@@ -14,7 +14,7 @@ import java.util.function.Supplier;
  * <p>The {@code particles/gear_spark.json} asset references a vanilla texture
  * so we avoid shipping a particle sprite just for the smoke test.</p>
  */
-public final class Particles implements Init {
+public final class Particles implements CommonInit {
 
     public static final ParticleRegistry PARTICLES = ParticleRegistry.create(Cog.ID);
 

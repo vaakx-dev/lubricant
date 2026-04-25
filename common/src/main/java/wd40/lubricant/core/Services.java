@@ -11,7 +11,7 @@ import java.util.ServiceLoader;
 
 /**
  * Lazy lookup table for loader-specific helper services. The public API
- * (e.g. {@link wd40.lubricant.api.registry.ItemRegistry#create}) calls into
+ * (e.g. {@link wd40.lubricant.api.common.registry.ItemRegistry#create}) calls into
  * these accessors rather than touching loader code directly, keeping the API
  * loader-agnostic.
  *

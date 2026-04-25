@@ -7,7 +7,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
-import wd40.lubricant.api.net.S2CPayload;
+import wd40.lubricant.api.common.net.S2CPayload;
 
 // Fabric impl of S2CPayload. All four sends route through ServerPlayNetworking.send,
 // which is server-side API and safe on dedicated servers + integrated servers.

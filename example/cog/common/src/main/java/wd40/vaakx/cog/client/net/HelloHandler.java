@@ -1,6 +1,6 @@
 package wd40.vaakx.cog.client.net;
 
-import wd40.lubricant.api.net.handlers.ClientContext;
+import wd40.lubricant.api.client.net.handlers.ClientContext;
 import wd40.vaakx.cog.Cog;
 import wd40.vaakx.cog.server.net.HelloPayload;
 

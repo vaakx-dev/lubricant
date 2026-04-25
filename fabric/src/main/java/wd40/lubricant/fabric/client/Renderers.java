@@ -16,6 +16,8 @@ import net.minecraft.core.particles.ParticleType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import wd40.lubricant.core.Bootstrap;
+import wd40.lubricant.core.Services;
 import wd40.lubricant.core.client.RendererHelper;
 
 import java.util.ArrayList;
@@ -61,10 +63,16 @@ public final class Renderers implements RendererHelper, ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        // Pulls double duty: this class IS the SPI impl for renderers, AND fabric's
+        // single client entrypoint. Sequence: load ClientInit classes (their static
+        // blocks queue renderers/particles into PENDING), drain the queues into
+        // fabric registries, then fire ClientEvents.SETUP for any one-time wiring.
+        Bootstrap.loadClient();
         for (Pending<?> p : PENDING) p.register();
         PENDING.clear();
         for (PendingParticle<?> p : PENDING_PARTICLES) p.register();
         PENDING_PARTICLES.clear();
+        Services.events().fireClientSetup();
     }
 
     private record Pending<T extends Entity>(

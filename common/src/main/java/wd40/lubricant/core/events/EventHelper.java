@@ -4,9 +4,9 @@ import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import wd40.lubricant.api.events.EntityInteractListener;
-import wd40.lubricant.api.events.Event;
-import wd40.lubricant.api.events.ItemUseListener;
+import wd40.lubricant.api.server.events.EntityInteractListener;
+import wd40.lubricant.api.common.events.Event;
+import wd40.lubricant.api.server.events.ItemUseListener;
 
 import java.util.function.Consumer;
 
@@ -35,17 +35,27 @@ public interface EventHelper {
     Event<EntityInteractListener> entityInteract();
 
     /**
-     * Fires once after lubricant's loader entry binds every registry. Use for
-     * one-time wiring that depends on registered objects existing - e.g. calling
-     * {@code FlowerPotBlock.addPlant(...)} after both blocks are real.
-     * Listeners run on the main thread.
+     * Fires once after lubricant binds every registry on the server side.
+     * Listeners run on the main server thread.
      */
-    Event<Runnable> setup();
+    Event<Runnable> serverSetup();
 
     /**
-     * Drain the setup queue. Loader entry calls this once at the right phase
-     * (Fabric: tail of {@code onInitialize}; NeoForge: inside
-     * {@code FMLCommonSetupEvent.enqueueWork}). Idempotent.
+     * Drain the server-setup queue. Fabric: tail of {@code onInitialize}.
+     * NeoForge: inside {@code FMLCommonSetupEvent.enqueueWork}. Idempotent.
      */
-    void fireSetup();
+    void fireServerSetup();
+
+    /**
+     * Fires once after lubricant binds every registry on the client side.
+     * Never fires on dedicated server.
+     */
+    Event<Runnable> clientSetup();
+
+    /**
+     * Drain the client-setup queue. Fabric: tail of
+     * {@code ClientEntry#onInitializeClient}. NeoForge: inside
+     * {@code FMLClientSetupEvent.enqueueWork}. Idempotent.
+     */
+    void fireClientSetup();
 }

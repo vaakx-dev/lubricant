@@ -5,7 +5,7 @@ import net.minecraft.world.entity.Entity;
 import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import net.neoforged.neoforge.registries.RegisterEvent;
-import wd40.lubricant.api.data.DataKey;
+import wd40.lubricant.api.common.data.DataKey;
 import wd40.lubricant.core.data.EntityHelper;
 import wd40.lubricant.core.data.Registered;
 

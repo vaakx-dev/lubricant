@@ -1,8 +1,8 @@
 package wd40.vaakx.cog.common.blocks;
 
 import net.minecraft.world.level.block.Block;
-import wd40.lubricant.api.Init;
-import wd40.lubricant.api.registry.BlockRegistry;
+import wd40.lubricant.api.common.CommonInit;
+import wd40.lubricant.api.common.registry.BlockRegistry;
 import wd40.vaakx.cog.Cog;
 
 /**
@@ -14,7 +14,7 @@ import wd40.vaakx.cog.Cog;
  *
  * <p><a href="https://github.com/vaakxxx/lubricant/wiki/Blocks">Blocks wiki</a></p>
  */
-public final class Blocks implements Init {
+public final class Blocks implements CommonInit {
 
     public static final BlockRegistry BLOCKS = BlockRegistry.create(Cog.ID);
 

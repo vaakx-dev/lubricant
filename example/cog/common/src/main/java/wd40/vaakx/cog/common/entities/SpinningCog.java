@@ -7,7 +7,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
 
 /**
- * A do-nothing entity used to demonstrate {@link wd40.lubricant.api.data.EntityData}.
+ * A do-nothing entity used to demonstrate {@link wd40.lubricant.api.common.data.EntityData}.
  *
  * <p>No renderer is registered; the entity is invisible at runtime. Spawn one
  * with {@code /summon cog:spinning_cog}, attach data with

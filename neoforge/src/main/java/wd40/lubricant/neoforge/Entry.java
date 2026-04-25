@@ -16,15 +16,17 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.registries.DeferredRegister;
-import wd40.lubricant.api.registry.BlockEntityRegistry;
-import wd40.lubricant.api.registry.BlockRegistry;
-import wd40.lubricant.api.registry.CreativeTabRegistry;
-import wd40.lubricant.api.registry.EntityRegistry;
-import wd40.lubricant.api.registry.ItemRegistry;
-import wd40.lubricant.api.registry.ParticleRegistry;
-import wd40.lubricant.api.registry.SoundRegistry;
+import wd40.lubricant.api.common.registry.BlockEntityRegistry;
+import wd40.lubricant.api.common.registry.BlockRegistry;
+import wd40.lubricant.api.common.registry.CreativeTabRegistry;
+import wd40.lubricant.api.common.registry.EntityRegistry;
+import wd40.lubricant.api.common.registry.ItemRegistry;
+import wd40.lubricant.api.common.registry.ParticleRegistry;
+import wd40.lubricant.api.common.registry.SoundRegistry;
 import wd40.lubricant.core.Bootstrap;
 import wd40.lubricant.core.Services;
 import wd40.lubricant.neoforge.client.Renderers;
@@ -37,7 +39,11 @@ import wd40.lubricant.neoforge.net.Net;
 public final class Entry {
 
     public Entry(IEventBus lubricantBus) {
-        Bootstrap.loadAllInit();
+        Bootstrap.loadCommon();
+        Bootstrap.loadServer();
+        if (FMLEnvironment.dist.isClient()) {
+            Bootstrap.loadClient();
+        }
 
         Services.net();
         Services.stacks();
@@ -76,11 +82,17 @@ public final class Entry {
             attachCreativeTabs(registry, busFor(registry.modId(), lubricantBus));
         }
 
-        // Fire setup() listeners during FMLCommonSetupEvent. enqueueWork moves the call
-        // onto the main thread - any listener that touches a non-thread-safe vanilla map
-        // (e.g. FlowerPotBlock.POTTED_BY_CONTENT via FlowerPotBlock.addPlant) is then safe.
+        // Fire ServerEvents.SETUP listeners during FMLCommonSetupEvent. enqueueWork moves
+        // the call onto the main thread - any listener that touches a non-thread-safe vanilla
+        // map (e.g. FlowerPotBlock.POTTED_BY_CONTENT via FlowerPotBlock.addPlant) is safe.
         lubricantBus.addListener((FMLCommonSetupEvent event) ->
-                event.enqueueWork(() -> Services.events().fireSetup()));
+                event.enqueueWork(() -> Services.events().fireServerSetup()));
+
+        // Fire ClientEvents.SETUP during FMLClientSetupEvent on client only.
+        if (FMLEnvironment.dist.isClient()) {
+            lubricantBus.addListener((FMLClientSetupEvent event) ->
+                    event.enqueueWork(() -> Services.events().fireClientSetup()));
+        }
     }
 
     private static void attachBlocks(BlockRegistry registry, IEventBus bus) {

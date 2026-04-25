@@ -1,6 +1,6 @@
 package wd40.lubricant.core.events;
 
-import wd40.lubricant.api.events.Event;
+import wd40.lubricant.api.common.events.Event;
 
 import java.util.function.Consumer;
 

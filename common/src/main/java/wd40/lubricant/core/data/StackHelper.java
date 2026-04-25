@@ -1,11 +1,11 @@
 package wd40.lubricant.core.data;
 
 import net.minecraft.world.item.ItemStack;
-import wd40.lubricant.api.data.DataKey;
+import wd40.lubricant.api.common.data.DataKey;
 
 /**
  * Loader-specific source of ItemStack data ops backing the public
- * {@link wd40.lubricant.api.data.StackData} facade. One implementation per loader,
+ * {@link wd40.lubricant.api.common.data.StackData} facade. One implementation per loader,
  * discovered via JDK {@link java.util.ServiceLoader}:
  *
  * <ul>

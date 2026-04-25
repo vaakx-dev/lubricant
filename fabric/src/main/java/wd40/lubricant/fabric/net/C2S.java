@@ -1,7 +1,7 @@
 package wd40.lubricant.fabric.net;
 
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import wd40.lubricant.api.net.C2SPayload;
+import wd40.lubricant.api.common.net.C2SPayload;
 
 // Fabric impl of C2SPayload. sendToServer is a client-only operation (calls
 // ClientPlayNetworking.send), so it routes through ClientReceivers, which is

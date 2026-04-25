@@ -1,37 +1,52 @@
 package wd40.lubricant.core;
 
-import wd40.lubricant.api.Init;
+import wd40.lubricant.api.client.ClientInit;
+import wd40.lubricant.api.common.CommonInit;
+import wd40.lubricant.api.server.ServerInit;
 
 import java.util.ServiceLoader;
 
 /**
- * Force-loads every {@link Init} implementation via JDK {@link ServiceLoader}.
+ * Force-loads {@link CommonInit}, {@link ServerInit}, and {@link ClientInit}
+ * implementations via JDK {@link ServiceLoader}.
  *
- * <p>Iterating the {@code ServiceLoader} instantiates each provider class in
+ * <p>Iterating a {@code ServiceLoader} instantiates each provider class in
  * turn. The first reference to each class triggers JVM class initialization,
  * which runs the class's {@code <clinit>} - i.e. its static field initializers
  * and {@code static {}} blocks. That's where consumer mods put their
  * registration code.</p>
  *
- * <p>Loader entry points ({@code wd40.lubricant.fabric.Entry#onInitialize},
- * {@code wd40.lubricant.neoforge.Entry}'s constructor) call {@link #loadAllInit}
- * once each, during their own startup. After this method returns, every consumer
- * mod's registration code has run.</p>
+ * <p>Loader entry points wire the sides:
+ * <ul>
+ *   <li>Fabric: {@link #loadCommon} + {@link #loadServer} from {@code Entry#onInitialize};
+ *       {@link #loadClient} from {@code ClientEntry#onInitializeClient}.</li>
+ *   <li>NeoForge: {@link #loadCommon} + {@link #loadServer} always; {@link #loadClient}
+ *       only when {@code FMLEnvironment.dist.isClient()}.</li>
+ * </ul></p>
+ *
+ * <p>Each method is idempotent - calling twice loads each class only once
+ * (JVM caches loaded classes).</p>
  *
  * @implNote The for-each loop body is empty by design - touching the iterator
- * variable is enough to load the class. We don't call any method on the
- * provider because {@link Init} has none.
+ * variable is enough to load the class.
  */
 public final class Bootstrap {
 
-    /**
-     * Iterates every {@code Init} provider on the classpath, forcing each to
-     * load. Idempotent - calling twice loads each class only once (JVM caches
-     * loaded classes).
-     */
-    public static void loadAllInit() {
-        for (Init unused : ServiceLoader.load(Init.class)) {
-            // touched -> JVM ran <clinit> on the class. Nothing else to do per service.
+    public static void loadCommon() {
+        for (CommonInit unused : ServiceLoader.load(CommonInit.class)) {
+            // touched -> JVM ran <clinit>
+        }
+    }
+
+    public static void loadServer() {
+        for (ServerInit unused : ServiceLoader.load(ServerInit.class)) {
+            // touched -> JVM ran <clinit>
+        }
+    }
+
+    public static void loadClient() {
+        for (ClientInit unused : ServiceLoader.load(ClientInit.class)) {
+            // touched -> JVM ran <clinit>
         }
     }
 

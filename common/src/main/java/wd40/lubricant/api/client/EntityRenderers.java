@@ -13,7 +13,7 @@ import java.util.function.Supplier;
  * Client-side renderer registration. All methods are safe to call from any
  * side - the facade short-circuits when no client renderer service is
  * available (dedicated server, datagen JVM). Modder code can call these from
- * regular {@link wd40.lubricant.api.Init} static blocks without guarding by
+ * regular {@link wd40.lubricant.api.common.CommonInit} static blocks without guarding by
  * side; the loader handles the plumbing.
  */
 public final class EntityRenderers {

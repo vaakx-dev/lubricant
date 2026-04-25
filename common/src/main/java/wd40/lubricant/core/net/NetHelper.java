@@ -3,10 +3,10 @@ package wd40.lubricant.core.net;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import wd40.lubricant.api.net.C2SPayload;
-import wd40.lubricant.api.net.S2CPayload;
-import wd40.lubricant.api.net.handlers.ClientHandler;
-import wd40.lubricant.api.net.handlers.ServerHandler;
+import wd40.lubricant.api.common.net.C2SPayload;
+import wd40.lubricant.api.common.net.S2CPayload;
+import wd40.lubricant.api.client.net.handlers.ClientHandler;
+import wd40.lubricant.api.server.net.handlers.ServerHandler;
 
 /**
  * Loader-specific factory for networking payload handles. One implementation

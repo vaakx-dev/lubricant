@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
  *   <li>{@code fabric.mod.json} -&gt; {@code "id"}</li>
  *   <li>{@code neoforge.mods.toml} -&gt; {@code [[mods]].modId}</li>
  *   <li>The {@code @Mod(...)} annotation on {@code CogNeoForge}</li>
- *   <li>The lookup namespace in {@code META-INF/services/wd40.lubricant.api.Init}
+ *   <li>The lookup namespace in {@code META-INF/services/wd40.lubricant.api.common.CommonInit}
  *       paths and resource locations like {@code cog:wrench}</li>
  * </ul>
  *

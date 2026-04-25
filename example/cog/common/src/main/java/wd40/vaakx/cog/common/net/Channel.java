@@ -1,8 +1,8 @@
 package wd40.vaakx.cog.common.net;
 
-import wd40.lubricant.api.Init;
-import wd40.lubricant.api.net.Payloads;
-import wd40.lubricant.api.net.S2CPayload;
+import wd40.lubricant.api.common.CommonInit;
+import wd40.lubricant.api.common.net.Payloads;
+import wd40.lubricant.api.common.net.S2CPayload;
 import wd40.vaakx.cog.Cog;
 import wd40.vaakx.cog.client.net.HelloHandler;
 import wd40.vaakx.cog.server.net.HelloPayload;
@@ -26,7 +26,7 @@ import wd40.vaakx.cog.server.net.HelloPayload;
  *
  * <p><a href="https://github.com/vaakxxx/lubricant/wiki/Networking">Networking wiki</a></p>
  */
-public final class Channel implements Init {
+public final class Channel implements CommonInit {
 
     public static final Payloads PAYLOADS = Payloads.create(Cog.ID);
 

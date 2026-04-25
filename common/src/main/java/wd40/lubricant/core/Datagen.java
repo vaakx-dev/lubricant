@@ -1,12 +1,12 @@
 package wd40.lubricant.core;
 
-import wd40.lubricant.api.events.Event;
+import wd40.lubricant.api.common.events.Event;
 
 /**
  * Static flag tracking whether the current JVM is the datagen runner. The
  * datagen JVM (started by {@code wd40.lubricant.datagen.DatagenMain}) has no
  * loader module on classpath, so every {@link Services} lookup would otherwise
- * fail. Modder code reads attached-data {@link wd40.lubricant.api.data.Key}s
+ * fail. Modder code reads attached-data {@link wd40.lubricant.api.common.data.DataKey}s
  * and event subscribers from class-init blocks, and those static blocks run
  * during datagen as a side effect of the datagen entry referencing the mod's
  * {@code Items}, {@code Blocks}, etc. classes.

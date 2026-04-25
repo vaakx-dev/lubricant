@@ -3,10 +3,10 @@ package wd40.vaakx.cog.common.entities;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
-import wd40.lubricant.api.Init;
-import wd40.lubricant.api.data.DataKey;
-import wd40.lubricant.api.data.DataKeys;
-import wd40.lubricant.api.registry.EntityRegistry;
+import wd40.lubricant.api.common.CommonInit;
+import wd40.lubricant.api.common.data.DataKey;
+import wd40.lubricant.api.common.data.DataKeys;
+import wd40.lubricant.api.common.registry.EntityRegistry;
 import wd40.vaakx.cog.Cog;
 
 import java.util.UUID;
@@ -18,7 +18,7 @@ import java.util.function.Supplier;
  * {@link wd40.vaakx.cog.server.Server}; renderer registration lives in
  * {@link wd40.vaakx.cog.client.Client}.
  */
-public final class Entities implements Init {
+public final class Entities implements CommonInit {
 
     public static final EntityRegistry TYPES = EntityRegistry.create(Cog.ID);
 

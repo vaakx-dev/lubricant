@@ -18,13 +18,13 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import wd40.lubricant.api.registry.BlockEntityRegistry;
-import wd40.lubricant.api.registry.BlockRegistry;
-import wd40.lubricant.api.registry.CreativeTabRegistry;
-import wd40.lubricant.api.registry.EntityRegistry;
-import wd40.lubricant.api.registry.ItemRegistry;
-import wd40.lubricant.api.registry.ParticleRegistry;
-import wd40.lubricant.api.registry.SoundRegistry;
+import wd40.lubricant.api.common.registry.BlockEntityRegistry;
+import wd40.lubricant.api.common.registry.BlockRegistry;
+import wd40.lubricant.api.common.registry.CreativeTabRegistry;
+import wd40.lubricant.api.common.registry.EntityRegistry;
+import wd40.lubricant.api.common.registry.ItemRegistry;
+import wd40.lubricant.api.common.registry.ParticleRegistry;
+import wd40.lubricant.api.common.registry.SoundRegistry;
 import wd40.lubricant.core.Bootstrap;
 import wd40.lubricant.core.Services;
 
@@ -34,7 +34,8 @@ public final class Entry implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        Bootstrap.loadAllInit();
+        Bootstrap.loadCommon();
+        Bootstrap.loadServer();
 
         // Items/Blocks are constructed eagerly inside the registry's register() call (during
         // consumer Init class load, fired by Bootstrap.loadAllInit above). Here we just commit
@@ -100,10 +101,10 @@ public final class Entry implements ModInitializer {
             }
         }
 
-        // Fire setup() listeners now that every registry binding is done. Modders can
-        // safely touch Items/Blocks/etc. .get() inside these callbacks (e.g. to call
+        // Fire ServerEvents.SETUP listeners now that every registry binding is done. Modders
+        // can safely touch Items/Blocks/etc. .get() inside these callbacks (e.g. to call
         // FlowerPotBlock.addPlant(...) which mutates a static map after both blocks exist).
-        Services.events().fireSetup();
+        Services.events().fireServerSetup();
 
         LOG.info("[lubricant] init complete on Fabric ({} block reg(s), {} item reg(s), {} BE reg(s), {} entity reg(s), {} sound reg(s), {} particle reg(s), {} creative tab reg(s))",
                 BlockRegistry.ALL.size(), ItemRegistry.ALL.size(),

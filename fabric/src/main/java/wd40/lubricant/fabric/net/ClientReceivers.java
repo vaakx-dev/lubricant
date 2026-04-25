@@ -6,8 +6,8 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import wd40.lubricant.api.net.handlers.ClientContext;
-import wd40.lubricant.api.net.handlers.ClientHandler;
+import wd40.lubricant.api.client.net.handlers.ClientContext;
+import wd40.lubricant.api.client.net.handlers.ClientHandler;
 
 // All Fabric client-only networking calls. Annotated @Environment(CLIENT) so
 // fabric-loader strips this class on dedicated servers - prevents NoClassDefFoundError
