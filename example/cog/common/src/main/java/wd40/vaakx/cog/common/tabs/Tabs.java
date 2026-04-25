@@ -1,4 +1,4 @@
-package wd40.vaakx.cog.server.tabs;
+package wd40.vaakx.cog.common.tabs;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
@@ -6,8 +6,8 @@ import net.minecraft.world.item.ItemStack;
 import wd40.lubricant.api.Init;
 import wd40.lubricant.api.registry.CreativeTabRegistry;
 import wd40.vaakx.cog.Cog;
-import wd40.vaakx.cog.server.blocks.Blocks;
-import wd40.vaakx.cog.server.items.Items;
+import wd40.vaakx.cog.common.blocks.Blocks;
+import wd40.vaakx.cog.common.items.Items;
 
 import java.util.function.Supplier;
 

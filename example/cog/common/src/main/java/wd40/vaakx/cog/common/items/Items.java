@@ -1,4 +1,4 @@
-package wd40.vaakx.cog.server.items;
+package wd40.vaakx.cog.common.items;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.world.item.Item;

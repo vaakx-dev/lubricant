@@ -13,8 +13,9 @@ import java.util.function.Supplier;
 
 /**
  * Loader-specific source of client-side renderer registration backing the
- * public {@link wd40.lubricant.api.client.Renderers} facade. One implementation
- * per loader, discovered via JDK {@link java.util.ServiceLoader}:
+ * public {@link wd40.lubricant.api.client.EntityRenderers} and
+ * {@link wd40.lubricant.api.client.ParticleRenderers} facades. One
+ * implementation per loader, discovered via JDK {@link java.util.ServiceLoader}:
  *
  * <ul>
  *   <li>Fabric: {@code wd40.lubricant.fabric.client.Renderers}</li>

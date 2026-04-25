@@ -1,4 +1,4 @@
-package wd40.vaakx.cog.server.blocks;
+package wd40.vaakx.cog.common.blocks;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionResult;
@@ -12,7 +12,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import wd40.lubricant.api.data.BlockEntityData;
 import wd40.vaakx.cog.Cog;
 
-import static wd40.vaakx.cog.server.blockentities.BlockEntities.COUNTER_CLICKS;
+import static wd40.vaakx.cog.common.blockentities.BlockEntities.COUNTER_CLICKS;
 
 /**
  * A toy block that increments a counter on every right-click. The count is

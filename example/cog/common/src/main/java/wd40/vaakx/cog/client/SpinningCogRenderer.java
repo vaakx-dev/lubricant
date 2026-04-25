@@ -10,13 +10,13 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import wd40.vaakx.cog.server.entities.SpinningCog;
-import wd40.vaakx.cog.server.items.Items;
+import wd40.vaakx.cog.common.entities.SpinningCog;
+import wd40.vaakx.cog.common.items.Items;
 
 /**
  * Draws {@link SpinningCog} as the cog item, floating + spinning around the
  * Y axis. Pure cog code - lubricant doesn't ship this; cog registers it via
- * {@link wd40.lubricant.api.client.Renderers#entity}.
+ * {@link wd40.lubricant.api.client.EntityRenderers#entity}.
  */
 public final class SpinningCogRenderer extends EntityRenderer<SpinningCog> {
 

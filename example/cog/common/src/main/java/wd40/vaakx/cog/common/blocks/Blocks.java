@@ -1,4 +1,4 @@
-package wd40.vaakx.cog.server.blocks;
+package wd40.vaakx.cog.common.blocks;
 
 import net.minecraft.world.level.block.Block;
 import wd40.lubricant.api.Init;
@@ -7,7 +7,7 @@ import wd40.vaakx.cog.Cog;
 
 /**
  * All of cog's blocks (and their auto-generated BlockItems). Same lifecycle as
- * {@link wd40.vaakx.cog.server.items.Items} - see Items.java for the full explanation.
+ * {@link wd40.vaakx.cog.common.items.Items} - see Items.java for the full explanation.
  *
  * <p>{@code register} adds a matching BlockItem; {@code registerNoItem} doesn't
  * (use for multi-block halves, technical blocks, anything you shouldn't hold).</p>

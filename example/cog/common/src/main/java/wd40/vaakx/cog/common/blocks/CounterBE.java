@@ -1,9 +1,9 @@
-package wd40.vaakx.cog.server.blocks;
+package wd40.vaakx.cog.common.blocks;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import wd40.vaakx.cog.server.blockentities.BlockEntities;
+import wd40.vaakx.cog.common.blockentities.BlockEntities;
 
 /**
  * Empty BlockEntity. All state lives in lubricant attached data

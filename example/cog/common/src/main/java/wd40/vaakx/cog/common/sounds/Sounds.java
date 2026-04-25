@@ -1,4 +1,4 @@
-package wd40.vaakx.cog.server.sounds;
+package wd40.vaakx.cog.common.sounds;
 
 import net.minecraft.sounds.SoundEvent;
 import wd40.lubricant.api.Init;

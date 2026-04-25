@@ -1,4 +1,4 @@
-package wd40.vaakx.cog.server.particles;
+package wd40.vaakx.cog.common.particles;
 
 import net.minecraft.core.particles.SimpleParticleType;
 import wd40.lubricant.api.Init;

@@ -13,16 +13,18 @@ import wd40.lubricant.api.events.ItemEvents;
 import wd40.lubricant.api.events.PlayerEvents;
 import wd40.lubricant.api.events.ServerEvents;
 import wd40.vaakx.cog.Cog;
-import wd40.vaakx.cog.server.items.Items;
-import wd40.vaakx.cog.server.net.Channel;
-import wd40.vaakx.cog.server.particles.Particles;
-import wd40.vaakx.cog.server.sounds.Sounds;
+import wd40.vaakx.cog.common.entities.Entities;
+import wd40.vaakx.cog.common.items.Items;
+import wd40.vaakx.cog.common.net.Channel;
+import wd40.vaakx.cog.common.particles.Particles;
+import wd40.vaakx.cog.common.sounds.Sounds;
+import wd40.vaakx.cog.server.net.HelloPayload;
 
 import java.util.UUID;
 
 /**
  * All of cog's server-side behavior in one place. Other Init classes
- * ({@link Items}, {@link wd40.vaakx.cog.server.entities.Entities}, etc.) only
+ * ({@link Items}, {@link Entities}, etc., living in {@code common/}) only
  * <i>declare</i> things (registry entries, data keys); behavior - event
  * subscribers, listener bodies - lives here.
  *
@@ -44,9 +46,9 @@ public final class Server implements Init {
         PlayerEvents.JOIN.register(player -> {
             Cog.LOG.info("player joined: {}", player.getScoreboardName());
 
-            UUID stored = EntityData.get(player, wd40.vaakx.cog.server.entities.Entities.OWNER);
+            UUID stored = EntityData.get(player, Entities.OWNER);
             if (stored == null) {
-                EntityData.set(player, wd40.vaakx.cog.server.entities.Entities.OWNER, player.getUUID());
+                EntityData.set(player, Entities.OWNER, player.getUUID());
                 Cog.LOG.info("first join, OWNER set to {}", player.getUUID());
             } else {
                 Cog.LOG.info("welcome back, OWNER={}", stored);
@@ -74,7 +76,7 @@ public final class Server implements Init {
         ServerEvents.TICK.register(server -> {
             int tick = server.getTickCount();
             if (tick % 20 != 0) return;
-            Channel.HELLO.sendToAll(server, new Channel.HelloPayload(tick));
+            Channel.HELLO.sendToAll(server, new HelloPayload(tick));
         });
     }
 

@@ -12,18 +12,19 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
- * Client-side particle provider registration. Same short-circuit contract as
- * {@link Renderers} - safe to call on dedicated server / datagen JVM.
+ * Client-side particle rendering registration. Same short-circuit contract as
+ * {@link EntityRenderers} - safe to call on dedicated server / datagen JVM.
  *
  * <p>Pair with {@link wd40.lubricant.api.registry.ParticleRegistry} for the
  * data side: register the {@link ParticleType} once on both sides via
- * {@code ParticleRegistry}, then on the client side register a provider for
- * it here. The {@link SpriteSet} is loaded from the {@code .json} file at
+ * {@code ParticleRegistry}, then on the client side register a renderer
+ * (vanilla calls it {@link ParticleProvider}) for it here. The
+ * {@link SpriteSet} is loaded from the {@code .json} file at
  * {@code assets/<modid>/particles/<path>.json}.</p>
  */
-public final class Particles {
+public final class ParticleRenderers {
 
-    private Particles() {}
+    private ParticleRenderers() {}
 
     public static <T extends ParticleOptions> void register(
             Supplier<? extends ParticleType<T>> type,

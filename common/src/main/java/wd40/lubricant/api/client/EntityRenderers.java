@@ -16,9 +16,9 @@ import java.util.function.Supplier;
  * regular {@link wd40.lubricant.api.Init} static blocks without guarding by
  * side; the loader handles the plumbing.
  */
-public final class Renderers {
+public final class EntityRenderers {
 
-    private Renderers() {}
+    private EntityRenderers() {}
 
     /**
      * Register a built-in invisible renderer for {@code type}. The entity

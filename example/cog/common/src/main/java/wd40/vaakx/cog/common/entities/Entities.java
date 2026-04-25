@@ -1,4 +1,4 @@
-package wd40.vaakx.cog.server.entities;
+package wd40.vaakx.cog.common.entities;
 
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.world.entity.EntityType;
