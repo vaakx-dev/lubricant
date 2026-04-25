@@ -46,4 +46,22 @@ public final class EntityRenderers {
         if (helper == null) return;
         helper.entity(type, provider);
     }
+
+    /**
+     * Replace the default renderer for a vanilla {@link EntityType}. Mechanically
+     * the same as {@link #entity}; both sides happily overwrite. The separate
+     * method documents intent at the call site (reviewers see "this is overriding
+     * vanilla", not "this looks like a new entity registration with no entity class").
+     *
+     * <p>Takes a concrete {@link EntityType} (not {@link Supplier}) since vanilla
+     * types are static fields safe to reference at any time.</p>
+     */
+    public static <T extends Entity> void entityReplace(
+            EntityType<T> type,
+            EntityRendererProvider<T> provider) {
+        if (Datagen.IS_DATAGEN) return;
+        RendererHelper helper = Services.renderers();
+        if (helper == null) return;
+        helper.entity(() -> type, provider);
+    }
 }

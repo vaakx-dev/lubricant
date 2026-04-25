@@ -1,5 +1,7 @@
 package wd40.lubricant.core.client;
 
+import net.minecraft.client.model.geom.ModelLayerLocation;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -7,6 +9,8 @@ import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.level.block.Block;
+import wd40.lubricant.api.client.BlockRenderers;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -59,4 +63,18 @@ public interface RendererHelper {
     <T extends ParticleOptions> void particle(
             Supplier<? extends ParticleType<T>> type,
             Function<SpriteSet, ParticleProvider<T>> factory);
+
+    /**
+     * Assign a non-default render type to a block. Fabric:
+     * {@code BlockRenderLayerMap.INSTANCE.putBlock}. NeoForge:
+     * {@code ItemBlockRenderTypes.setRenderLayer} via the client init phase.
+     */
+    void blockRenderType(Supplier<? extends Block> block, BlockRenderers.Layer layer);
+
+    /**
+     * Register an entity model layer definition under {@code location}. Fabric:
+     * {@code EntityModelLayerRegistry.registerModelLayer}. NeoForge:
+     * {@code EntityRenderersEvent.RegisterLayerDefinitions.registerLayerDefinition}.
+     */
+    void modelLayer(ModelLayerLocation location, Supplier<LayerDefinition> definition);
 }

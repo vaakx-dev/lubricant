@@ -1,9 +1,13 @@
 package wd40.lubricant.neoforge.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.model.geom.ModelLayerLocation;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.SpriteSet;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.core.particles.ParticleOptions;
@@ -11,12 +15,14 @@ import net.minecraft.core.particles.ParticleType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.level.block.Block;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
+import wd40.lubricant.api.client.BlockRenderers;
 import wd40.lubricant.core.client.RendererHelper;
 
 import java.util.ArrayList;
@@ -45,6 +51,8 @@ public final class Renderers implements RendererHelper {
 
     final List<Pending<?>> pending = new ArrayList<>();
     final List<PendingParticle<?>> pendingParticles = new ArrayList<>();
+    final List<PendingBlockLayer> pendingBlockLayers = new ArrayList<>();
+    final List<PendingModelLayer> pendingModelLayers = new ArrayList<>();
 
     public Renderers() {
         INSTANCE = this;
@@ -69,6 +77,16 @@ public final class Renderers implements RendererHelper {
         pendingParticles.add(new PendingParticle<>(type, factory));
     }
 
+    @Override
+    public void blockRenderType(Supplier<? extends Block> block, BlockRenderers.Layer layer) {
+        pendingBlockLayers.add(new PendingBlockLayer(block, layer));
+    }
+
+    @Override
+    public void modelLayer(ModelLayerLocation location, Supplier<LayerDefinition> definition) {
+        pendingModelLayers.add(new PendingModelLayer(location, definition));
+    }
+
     /** Called from {@code neoforge.Entry} - delegates to client-only wiring iff on client. */
     public static void attachListenerIfClient(IEventBus modBus) {
         if (FMLEnvironment.dist == Dist.CLIENT) {
@@ -84,6 +102,10 @@ public final class Renderers implements RendererHelper {
             Supplier<? extends ParticleType<T>> type,
             Function<SpriteSet, ParticleProvider<T>> factory) {}
 
+    record PendingBlockLayer(Supplier<? extends Block> block, BlockRenderers.Layer layer) {}
+
+    record PendingModelLayer(ModelLayerLocation location, Supplier<LayerDefinition> definition) {}
+
     /**
      * Client-only wiring. References {@link EntityRenderersEvent} (stripped
      * on dedicated servers). Loaded only when {@link #attachListenerIfClient}
@@ -94,6 +116,13 @@ public final class Renderers implements RendererHelper {
         static void attach(IEventBus modBus) {
             modBus.addListener(ClientWiring::onRegister);
             modBus.addListener(ClientWiring::onRegisterParticles);
+            modBus.addListener(ClientWiring::onRegisterLayers);
+            // Block render type is a mutable static (ItemBlockRenderTypes); apply
+            // synchronously here. All registry binding is done by this point.
+            for (PendingBlockLayer p : INSTANCE.pendingBlockLayers) {
+                ItemBlockRenderTypes.setRenderLayer(p.block().get(), toRenderType(p.layer()));
+            }
+            INSTANCE.pendingBlockLayers.clear();
         }
 
         static void onRegister(EntityRenderersEvent.RegisterRenderers event) {
@@ -115,6 +144,21 @@ public final class Renderers implements RendererHelper {
         static <T extends ParticleOptions> void registerOneParticle(
                 RegisterParticleProvidersEvent event, PendingParticle<T> p) {
             event.registerSpriteSet(p.type().get(), p.factory()::apply);
+        }
+
+        static void onRegisterLayers(EntityRenderersEvent.RegisterLayerDefinitions event) {
+            for (PendingModelLayer p : INSTANCE.pendingModelLayers) {
+                event.registerLayerDefinition(p.location(), p.definition()::get);
+            }
+            INSTANCE.pendingModelLayers.clear();
+        }
+
+        static RenderType toRenderType(BlockRenderers.Layer layer) {
+            return switch (layer) {
+                case CUTOUT -> RenderType.cutout();
+                case CUTOUT_MIPPED -> RenderType.cutoutMipped();
+                case TRANSLUCENT -> RenderType.translucent();
+            };
         }
     }
 
