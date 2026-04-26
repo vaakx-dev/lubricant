@@ -6,6 +6,7 @@ import wd40.lubricant.api.common.CommonInit;
 import wd40.lubricant.api.common.data.DataKey;
 import wd40.lubricant.api.common.data.DataKeys;
 import wd40.lubricant.api.common.registry.ItemRegistry;
+import wd40.lubricant.api.common.registry.RegistrySupplier;
 import wd40.vaakx.cog.Cog;
 
 /**
@@ -20,11 +21,11 @@ public final class Items implements CommonInit {
     public static final ItemRegistry ITEMS = ItemRegistry.create(Cog.ID);
 
     /** A regular item, max stack 64. Resource id: {@code cog:cog}. */
-    public static final Item COG = ITEMS.register("cog",
+    public static final RegistrySupplier<Item> COG = ITEMS.register("cog",
             props -> new Item(props.stacksTo(64)));
 
     /** A "tool" style item: stacks to 1, doesn't burn in lava. Resource id: {@code cog:greased_cog}. */
-    public static final Item GREASED_COG = ITEMS.register("greased_cog",
+    public static final RegistrySupplier<Item> GREASED_COG = ITEMS.register("greased_cog",
             props -> new Item(props.stacksTo(1).fireResistant()));
 
     private static final DataKeys KEYS = DataKeys.create(Cog.ID);

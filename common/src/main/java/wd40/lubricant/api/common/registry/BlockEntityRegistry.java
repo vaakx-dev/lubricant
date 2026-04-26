@@ -39,7 +39,7 @@ public final class BlockEntityRegistry {
     public record Entry<T extends BlockEntity>(
             String path,
             BiFunction<BlockPos, BlockState, T> factory,
-            List<Block> validBlocks,
+            List<Supplier<? extends Block>> validBlocks,
             AtomicReference<BlockEntityType<T>> ref) {}
 
     public static BlockEntityRegistry create(String modId) {
@@ -57,12 +57,13 @@ public final class BlockEntityRegistry {
      *
      * @param path         path under the mod's namespace, e.g. {@code "counter"}
      * @param factory      constructor reference (e.g. {@code CounterBE::new})
-     * @param validBlocks  blocks (typically the {@link Block} fields returned by {@link BlockRegistry#register})
+     * @param validBlocks  blocks (typically the {@link RegistrySupplier} fields returned by {@link BlockRegistry#register})
      */
-    public <T extends BlockEntity> Supplier<BlockEntityType<T>> register(
+    @SafeVarargs
+    public final <T extends BlockEntity> Supplier<BlockEntityType<T>> register(
             String path,
             BiFunction<BlockPos, BlockState, T> factory,
-            Block... validBlocks) {
+            Supplier<? extends Block>... validBlocks) {
         Entry<T> entry = new Entry<>(path, factory, List.of(validBlocks), new AtomicReference<>());
         entries.add(entry);
         return () -> {

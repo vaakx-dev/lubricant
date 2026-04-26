@@ -22,7 +22,7 @@ public final class Tabs implements CommonInit {
     /** Resource id: {@code cog:cog}. */
     public static final Supplier<CreativeModeTab> COG_TAB = TABS.register("cog", builder -> builder
             .title(Component.literal("Cog"))
-            .icon(() -> new ItemStack(Items.COG))
+            .icon(() -> new ItemStack(Items.COG.get()))
             .displayItems((params, output) -> {
                 for (var entry : Items.ITEMS.entries()) {
                     output.accept(entry.bound());

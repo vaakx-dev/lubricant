@@ -40,7 +40,7 @@ public final class SpinningCogRenderer extends EntityRenderer<SpinningCog> {
         // Spin on Y axis - 4 degrees per tick = ~80 degrees/sec.
         pose.mulPose(Axis.YP.rotationDegrees(age * 4.0f));
 
-        ItemStack stack = new ItemStack(Items.COG);
+        ItemStack stack = new ItemStack(Items.COG.get());
         itemRenderer.renderStatic(stack, ItemDisplayContext.GROUND, packedLight,
                 OverlayTexture.NO_OVERLAY, pose, buffer, entity.level(), entity.getId());
 

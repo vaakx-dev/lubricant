@@ -16,6 +16,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import wd40.lubricant.api.common.registry.BlockEntityRegistry;
@@ -37,25 +38,16 @@ public final class Entry implements ModInitializer {
         Bootstrap.loadCommon();
         Bootstrap.loadServer();
 
-        // Items/Blocks are constructed eagerly inside the registry's register() call (during
-        // consumer Init class load, fired by Bootstrap.loadAllInit above). Here we just commit
-        // the already-built instances into vanilla registries.
+        // Construct + register Items/Blocks here (deferred from consumer Init class load).
+        // Fabric doesn't freeze BLOCK/ITEM during mod init; createIntrusiveHolder works.
         for (BlockRegistry registry : BlockRegistry.ALL) {
-            String modId = registry.modId();
             for (BlockRegistry.Entry<?> entry : registry.entries()) {
-                ResourceLocation id = ResourceLocation.fromNamespaceAndPath(modId, entry.path());
-                Block block = entry.bound();
-                Registry.register(BuiltInRegistries.BLOCK, id, block);
-                if (!registry.isNoItem(entry.path())) {
-                    Registry.register(BuiltInRegistries.ITEM, id, new BlockItem(block, new Item.Properties()));
-                }
+                bindBlock(entry, registry.isNoItem(entry.path()));
             }
         }
         for (ItemRegistry registry : ItemRegistry.ALL) {
-            String modId = registry.modId();
             for (ItemRegistry.Entry<?> entry : registry.entries()) {
-                ResourceLocation id = ResourceLocation.fromNamespaceAndPath(modId, entry.path());
-                Registry.register(BuiltInRegistries.ITEM, id, entry.bound());
+                bindItem(entry);
             }
         }
         // Block entities require their valid blocks to already exist - depends on the block loop above.
@@ -112,9 +104,26 @@ public final class Entry implements ModInitializer {
                 SoundRegistry.ALL.size(), ParticleRegistry.ALL.size(), CreativeTabRegistry.ALL.size());
     }
 
+    private static <B extends Block> void bindBlock(BlockRegistry.Entry<B> entry, boolean noItem) {
+        BlockBehaviour.Properties props = BlockBehaviour.Properties.of();
+        B block = entry.factory().apply(props);
+        entry.setBound(block);
+        Registry.register(BuiltInRegistries.BLOCK, entry.id(), block);
+        if (!noItem) {
+            Registry.register(BuiltInRegistries.ITEM, entry.id(), new BlockItem(block, new Item.Properties()));
+        }
+    }
+
+    private static <I extends Item> void bindItem(ItemRegistry.Entry<I> entry) {
+        Item.Properties props = new Item.Properties();
+        I item = entry.factory().apply(props);
+        entry.setBound(item);
+        Registry.register(BuiltInRegistries.ITEM, entry.id(), item);
+    }
+
     @SuppressWarnings("DataFlowIssue")  // BlockEntityType.Builder.build accepts null DataFixerType
     private static <T extends BlockEntity> void bindBlockEntity(BlockEntityRegistry.Entry<T> entry, String modId) {
-        Block[] blocks = entry.validBlocks().toArray(new Block[0]);
+        Block[] blocks = entry.validBlocks().stream().map(java.util.function.Supplier::get).toArray(Block[]::new);
         BlockEntityType<T> type = BlockEntityType.Builder.of(entry.factory()::apply, blocks).build(null);
         Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE,
                 ResourceLocation.fromNamespaceAndPath(modId, entry.path()), type);

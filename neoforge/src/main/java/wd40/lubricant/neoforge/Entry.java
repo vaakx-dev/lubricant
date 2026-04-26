@@ -12,6 +12,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
@@ -96,14 +97,13 @@ public final class Entry {
     }
 
     private static void attachBlocks(BlockRegistry registry, IEventBus bus) {
-        // Items/Blocks are constructed eagerly inside the registry's register() call (during
-        // consumer Init class load). Here we just register the already-built instances with
-        // NeoForge's DeferredRegister, which then commits them at RegisterEvent time.
+        // The user factory runs INSIDE the DeferredRegister supplier, which fires inside
+        // RegisterEvent for BLOCK - the only window NeoForge unfreezes the registry, letting
+        // Block.<init>'s createIntrusiveHolder call succeed.
         DeferredRegister.Blocks blocks = DeferredRegister.createBlocks(registry.modId());
         DeferredRegister.Items blockItems = DeferredRegister.createItems(registry.modId());
         for (BlockRegistry.Entry<?> entry : registry.entries()) {
-            Block block = entry.bound();
-            var deferred = blocks.register(entry.path(), () -> block);
+            var deferred = registerOneBlock(blocks, entry);
             if (!registry.isNoItem(entry.path())) {
                 blockItems.registerSimpleBlockItem(deferred);
             }
@@ -112,13 +112,30 @@ public final class Entry {
         blockItems.register(bus);
     }
 
+    private static <B extends Block> net.neoforged.neoforge.registries.DeferredBlock<B> registerOneBlock(
+            DeferredRegister.Blocks blocks, BlockRegistry.Entry<B> entry) {
+        return blocks.register(entry.path(), () -> {
+            B block = entry.factory().apply(BlockBehaviour.Properties.of());
+            entry.setBound(block);
+            return block;
+        });
+    }
+
     private static void attachItems(ItemRegistry registry, IEventBus bus) {
         DeferredRegister.Items items = DeferredRegister.createItems(registry.modId());
         for (ItemRegistry.Entry<?> entry : registry.entries()) {
-            Item item = entry.bound();
-            items.register(entry.path(), () -> item);
+            registerOneItem(items, entry);
         }
         items.register(bus);
+    }
+
+    private static <I extends Item> void registerOneItem(
+            DeferredRegister.Items items, ItemRegistry.Entry<I> entry) {
+        items.register(entry.path(), () -> {
+            I item = entry.factory().apply(new Item.Properties());
+            entry.setBound(item);
+            return item;
+        });
     }
 
     private static void attachBlockEntities(BlockEntityRegistry registry, IEventBus bus) {
@@ -133,7 +150,7 @@ public final class Entry {
     private static <T extends BlockEntity> void registerOneBlockEntity(
             DeferredRegister<BlockEntityType<?>> types, BlockEntityRegistry.Entry<T> entry) {
         types.register(entry.path(), () -> {
-            Block[] blocks = entry.validBlocks().toArray(new Block[0]);
+            Block[] blocks = entry.validBlocks().stream().map(java.util.function.Supplier::get).toArray(Block[]::new);
             BlockEntityType<T> type = BlockEntityType.Builder.of(entry.factory()::apply, blocks).build(null);
             entry.ref().set(type);
             return type;
