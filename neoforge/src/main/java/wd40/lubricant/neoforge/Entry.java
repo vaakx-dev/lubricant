@@ -21,20 +21,24 @@ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.registries.DeferredRegister;
-import wd40.lubricant.api.common.registry.BlockEntityRegistry;
-import wd40.lubricant.api.common.registry.BlockRegistry;
-import wd40.lubricant.api.common.registry.CreativeTabRegistry;
-import wd40.lubricant.api.common.registry.EntityRegistry;
-import wd40.lubricant.api.common.registry.ItemRegistry;
-import wd40.lubricant.api.common.registry.ParticleRegistry;
-import wd40.lubricant.api.common.registry.SoundRegistry;
-import wd40.lubricant.core.Bootstrap;
-import wd40.lubricant.core.Services;
+import wd40.lubricant.api.block.entity.BlockEntityRegistry;
+import wd40.lubricant.api.block.BlockRegistry;
+import wd40.lubricant.api.item.CreativeTabRegistry;
+import wd40.lubricant.api.entity.EntityRegistry;
+import wd40.lubricant.api.item.ItemRegistry;
+import wd40.lubricant.api.particle.ParticleRegistry;
+import net.minecraft.world.flag.FeatureFlags;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.MenuType;
+import wd40.lubricant.api.inventory.MenuRegistry;
+import wd40.lubricant.api.sounds.SoundRegistry;
+import wd40.lubricant.internal.Bootstrap;
+import wd40.lubricant.internal.Services;
 import wd40.lubricant.neoforge.client.Renderers;
-import wd40.lubricant.neoforge.common.data.BlockEntities;
-import wd40.lubricant.neoforge.common.data.Entities;
-import wd40.lubricant.neoforge.common.data.Stacks;
-import wd40.lubricant.neoforge.common.net.Net;
+import wd40.lubricant.neoforge.data.BlockEntities;
+import wd40.lubricant.neoforge.data.Entities;
+import wd40.lubricant.neoforge.data.Stacks;
+import wd40.lubricant.neoforge.network.Network;
 
 @Mod("lubricant")
 public final class Entry {
@@ -46,11 +50,11 @@ public final class Entry {
             Bootstrap.loadClient();
         }
 
-        Services.net();
+        Services.network();
         Services.stacks();
         Services.blockEntities();
         Services.entities();
-        lubricantBus.addListener(Net.INSTANCE::onRegister);
+        lubricantBus.addListener(Network.INSTANCE::onRegister);
         lubricantBus.addListener(Stacks.INSTANCE::onRegister);
         lubricantBus.addListener(BlockEntities.INSTANCE::onRegister);
         lubricantBus.addListener(Entities.INSTANCE::onRegister);
@@ -82,14 +86,17 @@ public final class Entry {
         for (CreativeTabRegistry registry : CreativeTabRegistry.ALL) {
             attachCreativeTabs(registry, busFor(registry.modId(), lubricantBus));
         }
+        for (MenuRegistry registry : MenuRegistry.ALL) {
+            attachMenus(registry, busFor(registry.modId(), lubricantBus));
+        }
 
-        // Fire ServerEvents.SETUP listeners during FMLCommonSetupEvent. enqueueWork moves
+        // Fire ServerEvent.SETUP listeners during FMLCommonSetupEvent. enqueueWork moves
         // the call onto the main thread - any listener that touches a non-thread-safe vanilla
         // map (e.g. FlowerPotBlock.POTTED_BY_CONTENT via FlowerPotBlock.addPlant) is safe.
         lubricantBus.addListener((FMLCommonSetupEvent event) ->
                 event.enqueueWork(() -> Services.events().fireServerSetup()));
 
-        // Fire ClientEvents.SETUP during FMLClientSetupEvent on client only.
+        // Fire ClientEvent.SETUP during FMLClientSetupEvent on client only.
         if (FMLEnvironment.dist.isClient()) {
             lubricantBus.addListener((FMLClientSetupEvent event) ->
                     event.enqueueWork(() -> Services.events().fireClientSetup()));
@@ -211,6 +218,25 @@ public final class Entry {
             });
         }
         tabs.register(bus);
+    }
+
+    private static void attachMenus(MenuRegistry registry, IEventBus bus) {
+        DeferredRegister<MenuType<?>> menus = DeferredRegister.create(Registries.MENU, registry.modId());
+        for (MenuRegistry.Entry<?> entry : registry.entries()) {
+            registerOneMenu(menus, entry);
+        }
+        menus.register(bus);
+    }
+
+    private static <T extends AbstractContainerMenu> void registerOneMenu(
+            DeferredRegister<MenuType<?>> menus, MenuRegistry.Entry<T> entry) {
+        menus.register(entry.path(), () -> {
+            MenuType<T> type = new MenuType<>(
+                    (containerId, inv) -> entry.factory().create(containerId, inv),
+                    FeatureFlags.VANILLA_SET);
+            entry.setBound(type);
+            return type;
+        });
     }
 
     private static IEventBus busFor(String modId, IEventBus lubricantBus) {

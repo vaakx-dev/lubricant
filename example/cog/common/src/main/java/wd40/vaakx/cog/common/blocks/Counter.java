@@ -9,7 +9,7 @@ import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
-import wd40.lubricant.api.common.data.BlockEntityData;
+import wd40.lubricant.api.block.entity.BlockEntityData;
 import wd40.vaakx.cog.Cog;
 
 import static wd40.vaakx.cog.common.blockentities.BlockEntities.COUNTER_CLICKS;

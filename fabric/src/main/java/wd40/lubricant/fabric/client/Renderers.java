@@ -5,9 +5,15 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.particle.ParticleProvider;
@@ -21,20 +27,27 @@ import net.minecraft.core.particles.ParticleType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.level.block.Block;
-import wd40.lubricant.api.client.BlockRenderers;
-import wd40.lubricant.core.Bootstrap;
-import wd40.lubricant.core.Services;
-import wd40.lubricant.core.client.RendererHelper;
+import wd40.lubricant.api.client.renderer.block.BlockRenderers;
+import wd40.lubricant.api.client.gui.render.HudLayer;
+import wd40.lubricant.api.client.gui.render.HudRenderers;
+import wd40.lubricant.api.event.Event;
+import wd40.lubricant.internal.Bootstrap;
+import wd40.lubricant.internal.Services;
+import wd40.lubricant.internal.event.BridgedEvent;
+import wd40.lubricant.internal.rendering.RendererHelper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 // Fabric impl of RendererHelper. Wears two hats:
 //
-// 1. JDK ServiceLoader instantiates one copy via META-INF/services/wd40.lubricant.core.client.RendererHelper.
+// 1. JDK ServiceLoader instantiates one copy via META-INF/services/wd40.lubricant.internal.rendering.RendererHelper.
 //    Public API calls (entityInvisible / entity) go to that instance, which queues into PENDING.
 //
 // 2. fabric.mod.json's "client" entrypoint instantiates a second copy via fabric-loader.
@@ -48,6 +61,11 @@ public final class Renderers implements RendererHelper, ClientModInitializer {
     private static final List<PendingParticle<?>> PENDING_PARTICLES = new ArrayList<>();
     private static final List<PendingBlockLayer> PENDING_BLOCK_LAYERS = new ArrayList<>();
     private static final List<PendingModelLayer> PENDING_MODEL_LAYERS = new ArrayList<>();
+    private static final List<PendingHud> PENDING_HUDS = new ArrayList<>();
+    private static final List<PendingMenuScreen<?, ?>> PENDING_MENU_SCREENS = new ArrayList<>();
+
+    private static final Event<Consumer<Minecraft>> CLIENT_TICK = new BridgedEvent<>(
+            l -> ClientTickEvents.END_CLIENT_TICK.register(l::accept));
 
     public Renderers() {}
 
@@ -81,11 +99,40 @@ public final class Renderers implements RendererHelper, ClientModInitializer {
     }
 
     @Override
+    public Event<Consumer<Minecraft>> clientTick() {
+        return CLIENT_TICK;
+    }
+
+    @Override
+    public void hudLayerTop(ResourceLocation name, HudLayer layer) {
+        PENDING_HUDS.add(new PendingHud(name, layer));
+    }
+
+    @Override
+    public void hudLayerAbove(ResourceLocation name, HudLayer layer, HudRenderers.Anchor anchor) {
+        // Fabric API 0.115 has no LayeredDraw-aware registration; fall back to HudRenderCallback,
+        // which renders after all vanilla layers. Anchor positioning is NeoForge-only for now.
+        PENDING_HUDS.add(new PendingHud(name, layer));
+    }
+
+    @Override
+    public void hudLayerBelow(ResourceLocation name, HudLayer layer, HudRenderers.Anchor anchor) {
+        PENDING_HUDS.add(new PendingHud(name, layer));
+    }
+
+    @Override
+    public <M extends AbstractContainerMenu, S extends Screen & MenuAccess<M>> void menuScreen(
+            Supplier<? extends MenuType<? extends M>> type,
+            MenuScreens.ScreenConstructor<M, S> screen) {
+        PENDING_MENU_SCREENS.add(new PendingMenuScreen<>(type, screen));
+    }
+
+    @Override
     public void onInitializeClient() {
         // Pulls double duty: this class IS the SPI impl for renderers, AND fabric's
         // single client entrypoint. Sequence: load ClientInit classes (their static
         // blocks queue renderers/particles into PENDING), drain the queues into
-        // fabric registries, then fire ClientEvents.SETUP for any one-time wiring.
+        // fabric registries, then fire ClientEvent.SETUP for any one-time wiring.
         Bootstrap.loadClient();
         for (Pending<?> p : PENDING) p.register();
         PENDING.clear();
@@ -95,6 +142,10 @@ public final class Renderers implements RendererHelper, ClientModInitializer {
         PENDING_BLOCK_LAYERS.clear();
         for (PendingModelLayer p : PENDING_MODEL_LAYERS) p.register();
         PENDING_MODEL_LAYERS.clear();
+        for (PendingHud p : PENDING_HUDS) p.register();
+        PENDING_HUDS.clear();
+        for (PendingMenuScreen<?, ?> p : PENDING_MENU_SCREENS) p.register();
+        PENDING_MENU_SCREENS.clear();
         Services.events().fireClientSetup();
     }
 
@@ -126,6 +177,22 @@ public final class Renderers implements RendererHelper, ClientModInitializer {
     private record PendingModelLayer(ModelLayerLocation location, Supplier<LayerDefinition> definition) {
         void register() {
             EntityModelLayerRegistry.registerModelLayer(location, definition::get);
+        }
+    }
+
+    private record PendingHud(ResourceLocation name, HudLayer layer) {
+        void register() {
+            HudRenderCallback.EVENT.register(layer::render);
+        }
+    }
+
+    private record PendingMenuScreen<M extends AbstractContainerMenu, S extends Screen & MenuAccess<M>>(
+            Supplier<? extends MenuType<? extends M>> type,
+            MenuScreens.ScreenConstructor<M, S> screen) {
+        @SuppressWarnings("unchecked")
+        void register() {
+            MenuType<M> bound = (MenuType<M>) type.get();
+            MenuScreens.register(bound, screen);
         }
     }
 

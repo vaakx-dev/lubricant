@@ -1,9 +1,9 @@
 package wd40.vaakx.cog.common.blocks;
 
 import net.minecraft.world.level.block.Block;
-import wd40.lubricant.api.common.CommonInit;
-import wd40.lubricant.api.common.registry.BlockRegistry;
-import wd40.lubricant.api.common.registry.RegistrySupplier;
+import wd40.lubricant.api.init.CommonInit;
+import wd40.lubricant.api.block.BlockRegistry;
+import wd40.lubricant.api.registry.RegistrySupplier;
 import wd40.vaakx.cog.Cog;
 
 /**

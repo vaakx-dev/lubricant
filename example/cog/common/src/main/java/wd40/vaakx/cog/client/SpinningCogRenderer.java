@@ -16,7 +16,7 @@ import wd40.vaakx.cog.common.items.Items;
 /**
  * Draws {@link SpinningCog} as the cog item, floating + spinning around the
  * Y axis. Pure cog code - lubricant doesn't ship this; cog registers it via
- * {@link wd40.lubricant.api.client.EntityRenderers#entity}.
+ * {@link wd40.lubricant.api.client.renderer.entity.EntityRenderers#entity}.
  */
 public final class SpinningCogRenderer extends EntityRenderer<SpinningCog> {
 

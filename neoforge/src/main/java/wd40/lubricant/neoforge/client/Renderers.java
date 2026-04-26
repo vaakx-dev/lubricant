@@ -1,6 +1,11 @@
 package wd40.lubricant.neoforge.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.LayeredDraw;
+import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.particle.ParticleProvider;
@@ -15,18 +20,29 @@ import net.minecraft.core.particles.ParticleType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
-import wd40.lubricant.api.client.BlockRenderers;
-import wd40.lubricant.core.client.RendererHelper;
+import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import wd40.lubricant.api.client.renderer.block.BlockRenderers;
+import wd40.lubricant.api.client.gui.render.HudLayer;
+import wd40.lubricant.api.client.gui.render.HudRenderers;
+import wd40.lubricant.api.event.Event;
+import wd40.lubricant.internal.rendering.RendererHelper;
+import wd40.lubricant.internal.event.BridgedEvent;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -53,6 +69,12 @@ public final class Renderers implements RendererHelper {
     final List<PendingParticle<?>> pendingParticles = new ArrayList<>();
     final List<PendingBlockLayer> pendingBlockLayers = new ArrayList<>();
     final List<PendingModelLayer> pendingModelLayers = new ArrayList<>();
+    final List<PendingHud> pendingHuds = new ArrayList<>();
+    final List<PendingMenuScreen<?, ?>> pendingMenuScreens = new ArrayList<>();
+
+    private final Event<Consumer<Minecraft>> clientTick = new BridgedEvent<>(
+            l -> NeoForge.EVENT_BUS.addListener(
+                    (ClientTickEvent.Post e) -> l.accept(Minecraft.getInstance())));
 
     public Renderers() {
         INSTANCE = this;
@@ -87,6 +109,33 @@ public final class Renderers implements RendererHelper {
         pendingModelLayers.add(new PendingModelLayer(location, definition));
     }
 
+    @Override
+    public Event<Consumer<Minecraft>> clientTick() {
+        return clientTick;
+    }
+
+    @Override
+    public void hudLayerTop(ResourceLocation name, HudLayer layer) {
+        pendingHuds.add(new PendingHud(name, layer, null, false));
+    }
+
+    @Override
+    public void hudLayerAbove(ResourceLocation name, HudLayer layer, HudRenderers.Anchor anchor) {
+        pendingHuds.add(new PendingHud(name, layer, anchor, true));
+    }
+
+    @Override
+    public void hudLayerBelow(ResourceLocation name, HudLayer layer, HudRenderers.Anchor anchor) {
+        pendingHuds.add(new PendingHud(name, layer, anchor, false));
+    }
+
+    @Override
+    public <M extends AbstractContainerMenu, S extends Screen & MenuAccess<M>> void menuScreen(
+            Supplier<? extends MenuType<? extends M>> type,
+            MenuScreens.ScreenConstructor<M, S> screen) {
+        pendingMenuScreens.add(new PendingMenuScreen<>(type, screen));
+    }
+
     /** Called from {@code neoforge.Entry} - delegates to client-only wiring iff on client. */
     public static void attachListenerIfClient(IEventBus modBus) {
         if (FMLEnvironment.dist == Dist.CLIENT) {
@@ -106,6 +155,12 @@ public final class Renderers implements RendererHelper {
 
     record PendingModelLayer(ModelLayerLocation location, Supplier<LayerDefinition> definition) {}
 
+    record PendingHud(ResourceLocation name, HudLayer layer, HudRenderers.Anchor anchor, boolean above) {}
+
+    record PendingMenuScreen<M extends AbstractContainerMenu, S extends Screen & MenuAccess<M>>(
+            Supplier<? extends MenuType<? extends M>> type,
+            MenuScreens.ScreenConstructor<M, S> screen) {}
+
     /**
      * Client-only wiring. References {@link EntityRenderersEvent} (stripped
      * on dedicated servers). Loaded only when {@link #attachListenerIfClient}
@@ -117,12 +172,31 @@ public final class Renderers implements RendererHelper {
             modBus.addListener(ClientWiring::onRegister);
             modBus.addListener(ClientWiring::onRegisterParticles);
             modBus.addListener(ClientWiring::onRegisterLayers);
+            modBus.addListener(ClientWiring::onRegisterGuiLayers);
+            modBus.addListener(ClientWiring::onClientSetup);
             // Block render type is a mutable static (ItemBlockRenderTypes); apply
             // synchronously here. All registry binding is done by this point.
             for (PendingBlockLayer p : INSTANCE.pendingBlockLayers) {
                 ItemBlockRenderTypes.setRenderLayer(p.block().get(), toRenderType(p.layer()));
             }
             INSTANCE.pendingBlockLayers.clear();
+        }
+
+        // MenuScreens.register must run after MenuTypes are registered. Drain in
+        // FMLClientSetupEvent (fired after all RegisterEvent waves complete).
+        static void onClientSetup(net.neoforged.fml.event.lifecycle.FMLClientSetupEvent event) {
+            event.enqueueWork(() -> {
+                for (PendingMenuScreen<?, ?> p : INSTANCE.pendingMenuScreens) registerOneMenuScreen(p);
+                INSTANCE.pendingMenuScreens.clear();
+            });
+        }
+
+        @SuppressWarnings("unchecked")
+        static <M extends AbstractContainerMenu, S extends Screen & MenuAccess<M>> void registerOneMenuScreen(
+                PendingMenuScreen<?, ?> raw) {
+            PendingMenuScreen<M, S> p = (PendingMenuScreen<M, S>) raw;
+            MenuType<M> bound = (MenuType<M>) p.type().get();
+            MenuScreens.register(bound, p.screen());
         }
 
         static void onRegister(EntityRenderersEvent.RegisterRenderers event) {
@@ -151,6 +225,37 @@ public final class Renderers implements RendererHelper {
                 event.registerLayerDefinition(p.location(), p.definition()::get);
             }
             INSTANCE.pendingModelLayers.clear();
+        }
+
+        static void onRegisterGuiLayers(RegisterGuiLayersEvent event) {
+            for (PendingHud p : INSTANCE.pendingHuds) {
+                LayeredDraw.Layer adapted = (graphics, tracker) -> p.layer().render(graphics, tracker);
+                if (p.anchor() == null) {
+                    event.registerAboveAll(p.name(), adapted);
+                } else if (p.above()) {
+                    event.registerAbove(toAnchor(p.anchor()), p.name(), adapted);
+                } else {
+                    event.registerBelow(toAnchor(p.anchor()), p.name(), adapted);
+                }
+            }
+            INSTANCE.pendingHuds.clear();
+        }
+
+        static ResourceLocation toAnchor(HudRenderers.Anchor anchor) {
+            return switch (anchor) {
+                case CROSSHAIR -> VanillaGuiLayers.CROSSHAIR;
+                case HOTBAR -> VanillaGuiLayers.HOTBAR;
+                case HEALTH -> VanillaGuiLayers.PLAYER_HEALTH;
+                case ARMOR -> VanillaGuiLayers.ARMOR_LEVEL;
+                case FOOD -> VanillaGuiLayers.FOOD_LEVEL;
+                case AIR_LEVEL -> VanillaGuiLayers.AIR_LEVEL;
+                case EXPERIENCE -> VanillaGuiLayers.EXPERIENCE_BAR;
+                case BOSS_BAR -> VanillaGuiLayers.BOSS_OVERLAY;
+                case EFFECTS -> VanillaGuiLayers.EFFECTS;
+                case CHAT -> VanillaGuiLayers.CHAT;
+                case TITLE -> VanillaGuiLayers.TITLE;
+                case DEBUG -> VanillaGuiLayers.DEBUG_OVERLAY;
+            };
         }
 
         static RenderType toRenderType(BlockRenderers.Layer layer) {

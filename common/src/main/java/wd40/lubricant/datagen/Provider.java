@@ -7,7 +7,7 @@ import net.minecraft.data.PackOutput;
 import wd40.lubricant.api.datagen.DataGenerator;
 import wd40.lubricant.api.datagen.DataOutput;
 import wd40.lubricant.api.datagen.DataProvider;
-import wd40.lubricant.api.datagen.DatagenInit;
+import wd40.lubricant.api.init.DatagenInit;
 import wd40.lubricant.api.datagen.Pack;
 
 import java.nio.file.Files;

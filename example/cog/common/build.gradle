@@ -10,6 +10,8 @@ tasks.register('setupVanillaMinecraft', SetupVanillaMinecraftTask) {
     mcVersion = project.minecraft_version
     parchmentVersion = project.parchment_mappings_version
     parchmentMcVersion = project.parchment_minecraft_version
+    // Apply lubricant's access widener so cog sees the same widened classes lubricant exposes.
+    accessWideners.from(rootProject.fileTree('common/src/main/resources') { include '*.accesswidener' })
     outputJar = vanillaMcJar
 }
 

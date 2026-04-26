@@ -6,7 +6,7 @@ import net.minecraft.resources.ResourceLocation;
 import wd40.lubricant.api.datagen.DataOutput;
 import wd40.lubricant.api.datagen.DataProvider;
 import wd40.lubricant.api.datagen.providers.support.Names;
-import wd40.lubricant.api.common.registry.SoundRegistry;
+import wd40.lubricant.api.sounds.SoundRegistry;
 
 /**
  * Writes a {@code sounds.json} entry per sound (subtitle key + ogg path in the

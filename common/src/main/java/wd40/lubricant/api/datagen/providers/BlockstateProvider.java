@@ -5,7 +5,7 @@ import net.minecraft.resources.ResourceLocation;
 import wd40.lubricant.api.datagen.DataOutput;
 import wd40.lubricant.api.datagen.DataProvider;
 import wd40.lubricant.api.datagen.providers.support.Names;
-import wd40.lubricant.api.common.registry.BlockRegistry;
+import wd40.lubricant.api.block.BlockRegistry;
 
 import java.util.Set;
 

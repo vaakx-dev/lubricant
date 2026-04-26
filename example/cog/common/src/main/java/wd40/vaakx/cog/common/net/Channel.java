@@ -1,8 +1,8 @@
 package wd40.vaakx.cog.common.net;
 
-import wd40.lubricant.api.common.CommonInit;
-import wd40.lubricant.api.common.net.Payloads;
-import wd40.lubricant.api.common.net.S2CPayload;
+import wd40.lubricant.api.init.CommonInit;
+import wd40.lubricant.api.network.Payloads;
+import wd40.lubricant.api.network.payload.S2CPayload;
 import wd40.vaakx.cog.Cog;
 import wd40.vaakx.cog.client.net.HelloHandler;
 import wd40.vaakx.cog.server.net.HelloPayload;

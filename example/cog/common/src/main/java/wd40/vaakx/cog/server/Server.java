@@ -6,12 +6,12 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import wd40.lubricant.api.server.ServerInit;
-import wd40.lubricant.api.common.data.EntityData;
-import wd40.lubricant.api.common.data.StackData;
-import wd40.lubricant.api.server.events.ItemEvents;
-import wd40.lubricant.api.server.events.PlayerEvents;
-import wd40.lubricant.api.server.events.ServerEvents;
+import wd40.lubricant.api.init.ServerInit;
+import wd40.lubricant.api.entity.EntityData;
+import wd40.lubricant.api.item.StackData;
+import wd40.lubricant.api.event.ItemEvent;
+import wd40.lubricant.api.event.PlayerEvent;
+import wd40.lubricant.api.event.ServerEvent;
 import wd40.vaakx.cog.Cog;
 import wd40.vaakx.cog.common.entities.Entities;
 import wd40.vaakx.cog.common.items.Items;
@@ -37,13 +37,13 @@ import java.util.UUID;
 public final class Server implements ServerInit {
 
     static {
-        ServerEvents.START.register(server ->
+        ServerEvent.START.register(server ->
                 Cog.LOG.info("server starting: {}", server.getServerVersion()));
 
-        ServerEvents.STOP.register(server ->
+        ServerEvent.STOP.register(server ->
                 Cog.LOG.info("server stopping"));
 
-        PlayerEvents.JOIN.register(player -> {
+        PlayerEvent.JOIN.register(player -> {
             Cog.LOG.info("player joined: {}", player.getScoreboardName());
 
             UUID stored = EntityData.get(player, Entities.OWNER);
@@ -55,11 +55,11 @@ public final class Server implements ServerInit {
             }
         });
 
-        PlayerEvents.LEAVE.register(player ->
+        PlayerEvent.LEAVE.register(player ->
                 Cog.LOG.info("player left: {}", player.getScoreboardName()));
 
-        ItemEvents.USE.register((player, level, hand) -> {
-            // ItemEvents.USE fires on both sides; mutate only on server. Vanilla syncs the new
+        ItemEvent.USE.register((player, level, hand) -> {
+            // ItemEvent.USE fires on both sides; mutate only on server. Vanilla syncs the new
             // component back to the client.
             if (level.isClientSide()) return InteractionResult.PASS;
             ItemStack held = player.getItemInHand(hand);
@@ -73,7 +73,7 @@ public final class Server implements ServerInit {
             return InteractionResult.PASS;
         });
 
-        ServerEvents.TICK.register(server -> {
+        ServerEvent.TICK.register(server -> {
             int tick = server.getTickCount();
             if (tick % 20 != 0) return;
             Channel.HELLO.sendToAll(server, new HelloPayload(tick));

@@ -9,3 +9,9 @@ accessWidener v2 named
 #   mutable    field  net/minecraft/world/entity/Entity removalReason Lnet/minecraft/world/entity/Entity$RemovalReason;
 #
 # When this file changes, run :common:setupVanillaMinecraft (or any compile task) to re-apply.
+
+# MenuScreens.ScreenConstructor is package-private in vanilla; lubricant exposes
+# screen registration in api.client.gui.screens.MenuRenderers which references this
+# type in its public method signature. The register method is also package-private.
+accessible class net/minecraft/client/gui/screens/MenuScreens$ScreenConstructor
+accessible method net/minecraft/client/gui/screens/MenuScreens register (Lnet/minecraft/world/inventory/MenuType;Lnet/minecraft/client/gui/screens/MenuScreens$ScreenConstructor;)V

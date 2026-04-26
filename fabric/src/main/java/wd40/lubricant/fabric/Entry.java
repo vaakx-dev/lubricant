@@ -16,18 +16,22 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.flag.FeatureFlags;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import wd40.lubricant.api.common.registry.BlockEntityRegistry;
-import wd40.lubricant.api.common.registry.BlockRegistry;
-import wd40.lubricant.api.common.registry.CreativeTabRegistry;
-import wd40.lubricant.api.common.registry.EntityRegistry;
-import wd40.lubricant.api.common.registry.ItemRegistry;
-import wd40.lubricant.api.common.registry.ParticleRegistry;
-import wd40.lubricant.api.common.registry.SoundRegistry;
-import wd40.lubricant.core.Bootstrap;
-import wd40.lubricant.core.Services;
+import wd40.lubricant.api.block.entity.BlockEntityRegistry;
+import wd40.lubricant.api.block.BlockRegistry;
+import wd40.lubricant.api.item.CreativeTabRegistry;
+import wd40.lubricant.api.entity.EntityRegistry;
+import wd40.lubricant.api.inventory.MenuRegistry;
+import wd40.lubricant.api.item.ItemRegistry;
+import wd40.lubricant.api.particle.ParticleRegistry;
+import wd40.lubricant.api.sounds.SoundRegistry;
+import wd40.lubricant.internal.Bootstrap;
+import wd40.lubricant.internal.Services;
 
 public final class Entry implements ModInitializer {
 
@@ -92,8 +96,14 @@ public final class Entry implements ModInitializer {
                 entry.ref().set(tab);
             }
         }
+        for (MenuRegistry registry : MenuRegistry.ALL) {
+            String modId = registry.modId();
+            for (MenuRegistry.Entry<?> entry : registry.entries()) {
+                bindMenu(entry, modId);
+            }
+        }
 
-        // Fire ServerEvents.SETUP listeners now that every registry binding is done. Modders
+        // Fire ServerEvent.SETUP listeners now that every registry binding is done. Modders
         // can safely touch Items/Blocks/etc. .get() inside these callbacks (e.g. to call
         // FlowerPotBlock.addPlant(...) which mutates a static map after both blocks exist).
         Services.events().fireServerSetup();
@@ -135,5 +145,14 @@ public final class Entry implements ModInitializer {
         EntityType<T> type = entry.builder().build(id.toString());
         Registry.register(BuiltInRegistries.ENTITY_TYPE, id, type);
         entry.ref().set(type);
+    }
+
+    private static <T extends AbstractContainerMenu> void bindMenu(MenuRegistry.Entry<T> entry, String modId) {
+        ResourceLocation id = ResourceLocation.fromNamespaceAndPath(modId, entry.path());
+        MenuType<T> type = new MenuType<>(
+                (containerId, inv) -> entry.factory().create(containerId, inv),
+                FeatureFlags.VANILLA_SET);
+        Registry.register(BuiltInRegistries.MENU, id, type);
+        entry.setBound(type);
     }
 }

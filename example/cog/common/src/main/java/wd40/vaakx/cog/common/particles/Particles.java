@@ -1,8 +1,8 @@
 package wd40.vaakx.cog.common.particles;
 
 import net.minecraft.core.particles.SimpleParticleType;
-import wd40.lubricant.api.common.CommonInit;
-import wd40.lubricant.api.common.registry.ParticleRegistry;
+import wd40.lubricant.api.init.CommonInit;
+import wd40.lubricant.api.particle.ParticleRegistry;
 import wd40.vaakx.cog.Cog;
 
 import java.util.function.Supplier;

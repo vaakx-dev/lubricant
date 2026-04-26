@@ -6,6 +6,10 @@ base {
     archivesName = "cog-fabric"
 }
 
+loom {
+    accessWidenerPath.set(project.rootProject.file('common/src/main/resources/lubricant.accesswidener'))
+}
+
 // Pull cog/common's sources + resources (incl. lubricant-generated assets) into this build.
 sourceSets.main.java.srcDir rootProject.file('example/cog/common/src/main/java')
 sourceSets.main.resources.srcDir rootProject.file('example/cog/common/src/main/resources')

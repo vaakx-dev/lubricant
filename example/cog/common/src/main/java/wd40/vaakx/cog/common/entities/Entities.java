@@ -3,10 +3,10 @@ package wd40.vaakx.cog.common.entities;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
-import wd40.lubricant.api.common.CommonInit;
-import wd40.lubricant.api.common.data.DataKey;
-import wd40.lubricant.api.common.data.DataKeys;
-import wd40.lubricant.api.common.registry.EntityRegistry;
+import wd40.lubricant.api.init.CommonInit;
+import wd40.lubricant.api.data.DataKey;
+import wd40.lubricant.api.data.DataKeys;
+import wd40.lubricant.api.entity.EntityRegistry;
 import wd40.vaakx.cog.Cog;
 
 import java.util.UUID;

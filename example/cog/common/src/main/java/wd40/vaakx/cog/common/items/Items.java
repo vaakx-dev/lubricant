@@ -2,11 +2,11 @@ package wd40.vaakx.cog.common.items;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.world.item.Item;
-import wd40.lubricant.api.common.CommonInit;
-import wd40.lubricant.api.common.data.DataKey;
-import wd40.lubricant.api.common.data.DataKeys;
-import wd40.lubricant.api.common.registry.ItemRegistry;
-import wd40.lubricant.api.common.registry.RegistrySupplier;
+import wd40.lubricant.api.init.CommonInit;
+import wd40.lubricant.api.data.DataKey;
+import wd40.lubricant.api.data.DataKeys;
+import wd40.lubricant.api.item.ItemRegistry;
+import wd40.lubricant.api.registry.RegistrySupplier;
 import wd40.vaakx.cog.Cog;
 
 /**

@@ -1,8 +1,8 @@
 package wd40.vaakx.cog.common.sounds;
 
 import net.minecraft.sounds.SoundEvent;
-import wd40.lubricant.api.common.CommonInit;
-import wd40.lubricant.api.common.registry.SoundRegistry;
+import wd40.lubricant.api.init.CommonInit;
+import wd40.lubricant.api.sounds.SoundRegistry;
 import wd40.vaakx.cog.Cog;
 
 import java.util.function.Supplier;
