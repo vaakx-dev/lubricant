@@ -29,3 +29,6 @@ description = '''Example mod for the Lubricant platform.'''
     versionRange = "[1.0.0,)"
     ordering = "AFTER"
     side = "BOTH"
+
+[[mixins]]
+config = "cog.mixins.json"

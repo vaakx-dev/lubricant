@@ -20,6 +20,8 @@ tasks.named('compileJava').configure {
 repositories {
     // Mojang's own Maven - hosts brigadier, DFU, authlib, logging.
     maven { url = "https://libraries.minecraft.net" }
+    // SpongePowered - hosts the mixin annotation jar (compileOnly only; both loaders ship mixin at runtime).
+    maven { url = "https://repo.spongepowered.org/repository/maven-public/" }
     mavenCentral()
 }
 
@@ -50,6 +52,8 @@ dependencies {
     // Brigadier - Component extends com.mojang.brigadier.Message; CreativeModeTab.Builder.title()
     // requires the full Component type to compile. Both loaders ship brigadier at runtime via MC.
     compileOnly "com.mojang:brigadier:1.2.9"
+    // Mixin annotations for the @Mixin smoke test. Both loaders ship mixin at runtime.
+    compileOnly "org.spongepowered:mixin:0.8.5"
 
     // Datagen runtime classpath: vanilla MC + lubricant common + every library
     // Mojang's launcher pairs with this MC version (resolved above). One coord
