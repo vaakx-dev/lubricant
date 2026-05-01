@@ -1,12 +1,14 @@
 package wd40.vaakx.cog.common.items;
 
 import com.mojang.serialization.Codec;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import wd40.lubricant.api.init.CommonInit;
 import wd40.lubricant.api.data.DataKey;
 import wd40.lubricant.api.data.DataKeys;
 import wd40.lubricant.api.item.ItemRegistry;
 import wd40.lubricant.api.registry.RegistrySupplier;
+import wd40.lubricant.api.tags.Tags;
 import wd40.vaakx.cog.Cog;
 
 /**
@@ -32,6 +34,9 @@ public final class Items implements CommonInit {
 
     /** Click-counter on a greased_cog ItemStack. Persists across logout/world reload. */
     public static final DataKey<Integer> CHARGE = KEYS.stack("charge", Codec.INT, 0);
+
+    /** All cog-flavored items. Populated via the datagen tags provider. */
+    public static final TagKey<Item> COGS = Tags.item(Cog.ID, "cogs");
 
     public Items() {}
 }

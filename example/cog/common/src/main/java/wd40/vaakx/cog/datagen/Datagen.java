@@ -8,6 +8,7 @@ import wd40.lubricant.api.datagen.providers.ItemModelProvider;
 import wd40.lubricant.api.datagen.providers.ParticlesProvider;
 import wd40.lubricant.api.datagen.providers.SoundsProvider;
 import wd40.lubricant.api.datagen.providers.TabProvider;
+import wd40.lubricant.api.datagen.providers.TagsProvider;
 import wd40.vaakx.cog.common.blocks.Blocks;
 import wd40.vaakx.cog.common.items.Items;
 import wd40.vaakx.cog.common.particles.Particles;
@@ -34,6 +35,8 @@ public final class Datagen implements DatagenInit {
         pack.addProvider(out -> new SoundsProvider(out, Sounds.SOUNDS));
         pack.addProvider(out -> new ParticlesProvider(out, Particles.PARTICLES));
         pack.addProvider(out -> new TabProvider(out, Tabs.TABS));
+        pack.addProvider(out -> new TagsProvider(out, builder ->
+                builder.addItem(Items.COGS, Items.COG, Items.GREASED_COG)));
     }
 
     public Datagen() {}
