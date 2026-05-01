@@ -21,6 +21,14 @@ public interface DataOutput {
     void writeJson(String relPath, JsonElement json);
 
     /**
+     * Write a JSON file at {@code <data-root>/<relPath>} (i.e. under
+     * {@code data/} rather than {@code assets/}). For tag JSONs, recipes,
+     * loot tables, advancements, and similar datapack-side files. Skipped
+     * if {@link #isHandAuthoredData} reports the file is already present.
+     */
+    void writeData(String relPath, JsonElement json);
+
+    /**
      * Add a translation key under {@code <modId>}'s {@code en_us.json}.
      * Aggregated per modid - one lang file per mod.
      */
@@ -34,4 +42,7 @@ public interface DataOutput {
 
     /** True if {@code <handAuthoredRoot>/assets/<relPath>} exists. */
     boolean isHandAuthored(String relPath);
+
+    /** True if {@code <handAuthoredRoot>/data/<relPath>} exists. */
+    boolean isHandAuthoredData(String relPath);
 }

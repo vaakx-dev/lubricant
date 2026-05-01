@@ -44,6 +44,7 @@ public final class Provider implements net.minecraft.data.DataProvider {
     @Override
     public CompletableFuture<?> run(CachedOutput cache) {
         Path assetsRoot = output.getOutputFolder(PackOutput.Target.RESOURCE_PACK);
+        Path dataRoot = output.getOutputFolder(PackOutput.Target.DATA_PACK);
         Sink sink = new Sink(handAuthoredRoot);
         Generator gen = new Generator(sink);
 
@@ -55,6 +56,9 @@ public final class Provider implements net.minecraft.data.DataProvider {
         List<CompletableFuture<?>> writes = new ArrayList<>();
         for (Sink.Entry e : sink.entries) {
             writes.add(net.minecraft.data.DataProvider.saveStable(cache, e.json, assetsRoot.resolve(e.relPath)));
+        }
+        for (Sink.Entry e : sink.dataEntries) {
+            writes.add(net.minecraft.data.DataProvider.saveStable(cache, e.json, dataRoot.resolve(e.relPath)));
         }
         for (var sounds : sink.soundsByModId.entrySet()) {
             String relPath = sounds.getKey() + "/sounds.json";
@@ -117,6 +121,7 @@ public final class Provider implements net.minecraft.data.DataProvider {
         record Entry(String relPath, JsonElement json) {}
 
         final List<Entry> entries = new ArrayList<>();
+        final List<Entry> dataEntries = new ArrayList<>();
         final TreeMap<String, TreeMap<String, String>> langByModId = new TreeMap<>();
         final TreeMap<String, TreeMap<String, JsonObject>> soundsByModId = new TreeMap<>();
 
@@ -133,6 +138,12 @@ public final class Provider implements net.minecraft.data.DataProvider {
         }
 
         @Override
+        public void writeData(String relPath, JsonElement json) {
+            if (isHandAuthoredData(relPath)) return;
+            dataEntries.add(new Entry(relPath, json));
+        }
+
+        @Override
         public void addLang(String modId, String key, String value) {
             langByModId.computeIfAbsent(modId, k -> new TreeMap<>()).put(key, value);
         }
@@ -146,6 +157,12 @@ public final class Provider implements net.minecraft.data.DataProvider {
         public boolean isHandAuthored(String relPath) {
             if (handAuthoredRoot == null) return false;
             return Files.exists(handAuthoredRoot.resolve("assets").resolve(relPath));
+        }
+
+        @Override
+        public boolean isHandAuthoredData(String relPath) {
+            if (handAuthoredRoot == null) return false;
+            return Files.exists(handAuthoredRoot.resolve("data").resolve(relPath));
         }
     }
 }
