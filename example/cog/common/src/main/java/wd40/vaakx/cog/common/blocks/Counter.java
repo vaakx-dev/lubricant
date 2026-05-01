@@ -14,9 +14,11 @@ import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.server.level.ServerLevel;
 import wd40.lubricant.api.block.entity.BlockEntityData;
 import wd40.vaakx.cog.Cog;
 import wd40.vaakx.cog.common.menus.CounterMenu;
+import wd40.vaakx.cog.common.saveddata.Worlds;
 
 import static wd40.vaakx.cog.common.blockentities.BlockEntities.COUNTER_CLICKS;
 
@@ -64,7 +66,9 @@ public final class Counter extends Block implements EntityBlock {
         if (!(be instanceof CounterBE counter)) return InteractionResult.PASS;
         int next = BlockEntityData.get(counter, COUNTER_CLICKS) + 1;
         BlockEntityData.set(counter, COUNTER_CLICKS, next);
-        Cog.LOG.info("counter @ {} -> {}", pos, next);
+        ServerLevel serverLevel = (ServerLevel) level;
+        Worlds.COUNTER_TOTAL.update(serverLevel, total -> total + 1);
+        Cog.LOG.info("counter @ {} -> {} (world total {})", pos, next, Worlds.COUNTER_TOTAL.get(serverLevel));
         return InteractionResult.SUCCESS;
     }
 }
