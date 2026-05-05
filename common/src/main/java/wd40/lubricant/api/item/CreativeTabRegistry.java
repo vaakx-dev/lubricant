@@ -20,7 +20,7 @@ import java.util.function.Supplier;
  * <p>Plain data - see {@link ItemRegistry} for the lifecycle. Loader entry
  * points read {@link #ALL} and commit to the creative-mode-tab registry.</p>
  *
- * <p><a href="https://github.com/vaakxxx/lubricant/wiki/CreativeTabs">CreativeTabs wiki</a></p>
+ * <p><a href="https://github.com/vaakx-dev/lubricant/wiki/CreativeTabs">CreativeTabs wiki</a></p>
  */
 public final class CreativeTabRegistry {
 

@@ -25,7 +25,7 @@ import net.minecraft.world.level.material.Fluid;
  * <p>Multiple mods can mint a {@link TagKey} with the same id and extend the
  * same logical tag - the loader merges all matching JSONs at world load.</p>
  *
- * <p><a href="https://github.com/vaakxxx/lubricant/wiki/Tags">Tags wiki</a></p>
+ * <p><a href="https://github.com/vaakx-dev/lubricant/wiki/Tags">Tags wiki</a></p>
  */
 public final class Tags {
 

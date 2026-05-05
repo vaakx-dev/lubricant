@@ -10,7 +10,7 @@ import wd40.lubricant.api.datagen.DataGenerator;
  * <p>Discovery: list the FQN under
  * {@code META-INF/services/wd40.lubricant.api.init.DatagenInit}.</p>
  *
- * <p><a href="https://github.com/vaakxxx/lubricant/wiki/Datagen">Datagen wiki</a></p>
+ * <p><a href="https://github.com/vaakx-dev/lubricant/wiki/Datagen">Datagen wiki</a></p>
  */
 public interface DatagenInit {
     void onDatagen(DataGenerator gen);

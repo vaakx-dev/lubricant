@@ -42,7 +42,7 @@ import java.util.function.Supplier;
  * <p>During datagen no file is touched - the held value is the supplied
  * default and {@code save}/{@code reload} are no-ops.</p>
  *
- * <p><a href="https://github.com/vaakxxx/lubricant/wiki/Config">Config wiki</a></p>
+ * <p><a href="https://github.com/vaakx-dev/lubricant/wiki/Config">Config wiki</a></p>
  *
  * @param <T> the POJO type holding the config fields
  */

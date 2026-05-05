@@ -24,7 +24,7 @@ import wd40.vaakx.cog.server.net.HelloPayload;
  *       has its handler in client/net).</li>
  * </ul></p>
  *
- * <p><a href="https://github.com/vaakxxx/lubricant/wiki/Networking">Networking wiki</a></p>
+ * <p><a href="https://github.com/vaakx-dev/lubricant/wiki/Networking">Networking wiki</a></p>
  */
 public final class Channel implements CommonInit {
 

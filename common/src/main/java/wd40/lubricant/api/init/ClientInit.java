@@ -11,7 +11,7 @@ package wd40.lubricant.api.init;
  * skips this list on dedicated server; on client, every listed class loads
  * once during client init.</p>
  *
- * <p><a href="https://github.com/vaakxxx/lubricant/wiki/How-It-Works">How It Works wiki</a></p>
+ * <p><a href="https://github.com/vaakx-dev/lubricant/wiki/How-It-Works">How It Works wiki</a></p>
  */
 public interface ClientInit {
 }

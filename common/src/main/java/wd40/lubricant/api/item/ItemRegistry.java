@@ -27,7 +27,7 @@ import java.util.function.Function;
  *         props -> new Item(props.stacksTo(64)));
  * }</pre>
  *
- * <p><a href="https://github.com/vaakxxx/lubricant/wiki/Items">Items wiki</a></p>
+ * <p><a href="https://github.com/vaakx-dev/lubricant/wiki/Items">Items wiki</a></p>
  */
 public final class ItemRegistry {
 

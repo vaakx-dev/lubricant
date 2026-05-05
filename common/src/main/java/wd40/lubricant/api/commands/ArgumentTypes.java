@@ -26,7 +26,7 @@ import java.util.List;
  * declarations: {@code argument("amount", CogCountArgument.cogCount())}. The
  * sync layer handles the rest.</p>
  *
- * <p><a href="https://github.com/vaakxxx/lubricant/wiki/ArgumentTypes">ArgumentTypes wiki</a></p>
+ * <p><a href="https://github.com/vaakx-dev/lubricant/wiki/ArgumentTypes">ArgumentTypes wiki</a></p>
  */
 public final class ArgumentTypes {
 

@@ -13,7 +13,7 @@ import wd40.vaakx.cog.Cog;
  * <p>{@code register} adds a matching BlockItem; {@code registerNoItem} doesn't
  * (use for multi-block halves, technical blocks, anything you shouldn't hold).</p>
  *
- * <p><a href="https://github.com/vaakxxx/lubricant/wiki/Blocks">Blocks wiki</a></p>
+ * <p><a href="https://github.com/vaakx-dev/lubricant/wiki/Blocks">Blocks wiki</a></p>
  */
 public final class Blocks implements CommonInit {
 

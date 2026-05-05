@@ -21,7 +21,7 @@ import java.util.function.Supplier;
  * with category, size, factory, and any other fluent options. Lubricant calls
  * {@code .build(id)} at bind time using the modId + path.</p>
  *
- * <p><a href="https://github.com/vaakxxx/lubricant/wiki/Entities">Entities wiki</a></p>
+ * <p><a href="https://github.com/vaakx-dev/lubricant/wiki/Entities">Entities wiki</a></p>
  */
 public final class EntityRegistry {
 

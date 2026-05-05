@@ -20,7 +20,7 @@ import java.util.function.Supplier;
  * <p>Plain data - see {@link ItemRegistry} for the lifecycle. Loader entry
  * points read {@link #ALL} and commit to the particle-type registry.</p>
  *
- * <p><a href="https://github.com/vaakxxx/lubricant/wiki/Particles">Particles wiki</a></p>
+ * <p><a href="https://github.com/vaakx-dev/lubricant/wiki/Particles">Particles wiki</a></p>
  */
 public final class ParticleRegistry {
 

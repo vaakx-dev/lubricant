@@ -12,7 +12,7 @@ package wd40.lubricant.api.init;
  * Implementations need a public no-arg constructor (ServiceLoader requirement);
  * the body stays empty since work happens in {@code <clinit>} before it runs.</p>
  *
- * <p><a href="https://github.com/vaakxxx/lubricant/wiki/How-It-Works">How It Works wiki</a></p>
+ * <p><a href="https://github.com/vaakx-dev/lubricant/wiki/How-It-Works">How It Works wiki</a></p>
  */
 public interface CommonInit {
 }

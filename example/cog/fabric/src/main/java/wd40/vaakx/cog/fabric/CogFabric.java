@@ -24,7 +24,7 @@ import net.fabricmc.api.ModInitializer;
  * registered is registered. There's nothing for this method to do unless you
  * add Fabric-specific code (key bindings, custom renderers, etc).</p>
  *
- * <p>See <a href="https://github.com/vaakxxx/lubricant/wiki/How-It-Works">How
+ * <p>See <a href="https://github.com/vaakx-dev/lubricant/wiki/How-It-Works">How
  * It Works</a> for the full pipeline.</p>
  */
 public final class CogFabric implements ModInitializer {

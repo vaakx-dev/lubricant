@@ -29,7 +29,7 @@ import java.util.function.Function;
  *         props -> new Block(props.strength(2.0f)));
  * }</pre>
  *
- * <p><a href="https://github.com/vaakxxx/lubricant/wiki/Blocks">Blocks wiki</a></p>
+ * <p><a href="https://github.com/vaakx-dev/lubricant/wiki/Blocks">Blocks wiki</a></p>
  */
 public final class BlockRegistry {
 

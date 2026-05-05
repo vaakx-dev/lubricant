@@ -22,7 +22,7 @@ import wd40.vaakx.cog.Cog;
  * NeoForge-specific listeners (capabilities, custom payloads if not using
  * lubricant's {@code Net}, GUI events) here.</p>
  *
- * <p>See <a href="https://github.com/vaakxxx/lubricant/wiki/How-It-Works">How
+ * <p>See <a href="https://github.com/vaakx-dev/lubricant/wiki/How-It-Works">How
  * It Works</a> for the full pipeline.</p>
  */
 @Mod(Cog.ID)

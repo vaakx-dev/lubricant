@@ -9,7 +9,7 @@ import wd40.vaakx.cog.Cog;
  * Per-world totals persisted via {@link WorldData}. Same lifecycle as
  * {@link wd40.vaakx.cog.common.items.Items} - see Items.java.
  *
- * <p><a href="https://github.com/vaakxxx/lubricant/wiki/WorldData">WorldData wiki</a></p>
+ * <p><a href="https://github.com/vaakx-dev/lubricant/wiki/WorldData">WorldData wiki</a></p>
  */
 public final class Worlds implements CommonInit {
 

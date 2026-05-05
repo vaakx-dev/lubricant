@@ -27,7 +27,7 @@ import java.util.function.Supplier;
  * {@code validBlocks} varargs lists the {@link Block}s that may instantiate
  * this BE; pass the {@link Block} fields returned by {@link BlockRegistry#register}.</p>
  *
- * <p><a href="https://github.com/vaakxxx/lubricant/wiki/Block-Entities">Block Entities wiki</a></p>
+ * <p><a href="https://github.com/vaakx-dev/lubricant/wiki/Block-Entities">Block Entities wiki</a></p>
  */
 public final class BlockEntityRegistry {
 

@@ -19,7 +19,7 @@ import java.util.function.Supplier;
  * <p>Plain data - see {@link ItemRegistry} for the lifecycle. Loader entry
  * points read {@link #ALL} and commit to the sound-event registry.</p>
  *
- * <p><a href="https://github.com/vaakxxx/lubricant/wiki/Sounds">Sounds wiki</a></p>
+ * <p><a href="https://github.com/vaakx-dev/lubricant/wiki/Sounds">Sounds wiki</a></p>
  */
 public final class SoundRegistry {
 

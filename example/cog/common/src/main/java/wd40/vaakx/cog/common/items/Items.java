@@ -16,7 +16,7 @@ import wd40.vaakx.cog.Cog;
  * Behavior subscribers (e.g. itemUse handlers) live in
  * {@link wd40.vaakx.cog.server.Server} - this file declares; that file acts.
  *
- * <p>See <a href="https://github.com/vaakxxx/lubricant/wiki/Items">Items wiki</a>.</p>
+ * <p>See <a href="https://github.com/vaakx-dev/lubricant/wiki/Items">Items wiki</a>.</p>
  */
 public final class Items implements CommonInit {
 

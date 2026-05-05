@@ -15,7 +15,7 @@ import wd40.lubricant.internal.Services;
  *
  * <p>Receive handlers run on the main game thread on both loaders.</p>
  *
- * <p><a href="https://github.com/vaakxxx/lubricant/wiki/Networking">Networking wiki</a></p>
+ * <p><a href="https://github.com/vaakx-dev/lubricant/wiki/Networking">Networking wiki</a></p>
  */
 public final class Network {
 

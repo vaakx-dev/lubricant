@@ -45,7 +45,7 @@ import java.util.function.UnaryOperator;
  * {@link HolderLookup.Provider}, so registry-bearing types (e.g. {@code ItemStack})
  * round-trip correctly.</p>
  *
- * <p><a href="https://github.com/vaakxxx/lubricant/wiki/WorldData">WorldData wiki</a></p>
+ * <p><a href="https://github.com/vaakx-dev/lubricant/wiki/WorldData">WorldData wiki</a></p>
  *
  * @param <T> the value type
  */
