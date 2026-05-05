@@ -7,10 +7,13 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
@@ -29,11 +32,14 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import wd40.lubricant.api.client.renderer.block.BlockRenderers;
 import wd40.lubricant.api.client.gui.render.HudLayer;
 import wd40.lubricant.api.client.gui.render.HudRenderers;
 import wd40.lubricant.api.event.Event;
+import wd40.lubricant.api.event.ScreenLifecycleListener;
+import wd40.lubricant.api.event.ScreenRenderListener;
 import wd40.lubricant.internal.Bootstrap;
 import wd40.lubricant.internal.Services;
 import wd40.lubricant.internal.event.BridgedEvent;
@@ -63,9 +69,24 @@ public final class Renderers implements RendererHelper, ClientModInitializer {
     private static final List<PendingModelLayer> PENDING_MODEL_LAYERS = new ArrayList<>();
     private static final List<PendingHud> PENDING_HUDS = new ArrayList<>();
     private static final List<PendingMenuScreen<?, ?>> PENDING_MENU_SCREENS = new ArrayList<>();
+    private static final List<PendingItemColor> PENDING_ITEM_COLORS = new ArrayList<>();
 
     private static final Event<Consumer<Minecraft>> CLIENT_TICK = new BridgedEvent<>(
             l -> ClientTickEvents.END_CLIENT_TICK.register(l::accept));
+
+    private static final Event<ScreenLifecycleListener> SCREEN_OPEN = new BridgedEvent<>(
+            listener -> ScreenEvents.AFTER_INIT.register((client, screen, width, height) ->
+                    listener.on(client, screen)));
+
+    private static final Event<ScreenLifecycleListener> SCREEN_CLOSE = new BridgedEvent<>(
+            listener -> ScreenEvents.AFTER_INIT.register((client, screen, width, height) ->
+                    ScreenEvents.remove(screen).register(removed ->
+                            listener.on(client, removed))));
+
+    private static final Event<ScreenRenderListener> SCREEN_RENDER = new BridgedEvent<>(
+            listener -> ScreenEvents.AFTER_INIT.register((client, screen, width, height) ->
+                    ScreenEvents.afterRender(screen).register((rendered, graphics, mouseX, mouseY, partialTick) ->
+                            listener.render(client, rendered, graphics, mouseX, mouseY, partialTick))));
 
     public Renderers() {}
 
@@ -101,6 +122,20 @@ public final class Renderers implements RendererHelper, ClientModInitializer {
     @Override
     public Event<Consumer<Minecraft>> clientTick() {
         return CLIENT_TICK;
+    }
+
+    @Override
+    public Event<ScreenLifecycleListener> screenOpen() { return SCREEN_OPEN; }
+
+    @Override
+    public Event<ScreenLifecycleListener> screenClose() { return SCREEN_CLOSE; }
+
+    @Override
+    public Event<ScreenRenderListener> screenRender() { return SCREEN_RENDER; }
+
+    @Override
+    public void itemColor(Supplier<? extends Item> item, ItemColor handler) {
+        PENDING_ITEM_COLORS.add(new PendingItemColor(item, handler));
     }
 
     @Override
@@ -146,6 +181,8 @@ public final class Renderers implements RendererHelper, ClientModInitializer {
         PENDING_HUDS.clear();
         for (PendingMenuScreen<?, ?> p : PENDING_MENU_SCREENS) p.register();
         PENDING_MENU_SCREENS.clear();
+        for (PendingItemColor p : PENDING_ITEM_COLORS) p.register();
+        PENDING_ITEM_COLORS.clear();
         Services.events().fireClientSetup();
     }
 
@@ -193,6 +230,12 @@ public final class Renderers implements RendererHelper, ClientModInitializer {
         void register() {
             MenuType<M> bound = (MenuType<M>) type.get();
             MenuScreens.register(bound, screen);
+        }
+    }
+
+    private record PendingItemColor(Supplier<? extends Item> item, ItemColor handler) {
+        void register() {
+            ColorProviderRegistry.ITEM.register(handler, item.get());
         }
     }
 

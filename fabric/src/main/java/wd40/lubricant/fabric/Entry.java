@@ -1,6 +1,7 @@
 package wd40.lubricant.fabric;
 
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.command.v2.ArgumentTypeRegistry;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
 import net.minecraft.core.Registry;
@@ -22,8 +23,11 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.mojang.brigadier.arguments.ArgumentType;
+import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import wd40.lubricant.api.block.entity.BlockEntityRegistry;
 import wd40.lubricant.api.block.BlockRegistry;
+import wd40.lubricant.api.commands.ArgumentTypes;
 import wd40.lubricant.api.item.CreativeTabRegistry;
 import wd40.lubricant.api.entity.EntityRegistry;
 import wd40.lubricant.api.inventory.MenuRegistry;
@@ -102,6 +106,12 @@ public final class Entry implements ModInitializer {
                 bindMenu(entry, modId);
             }
         }
+        for (ArgumentTypes registry : ArgumentTypes.ALL) {
+            String modId = registry.modId();
+            for (ArgumentTypes.Entry<?, ?> entry : registry.entries()) {
+                bindArgumentType(modId, entry);
+            }
+        }
 
         // Fire ServerEvent.SETUP listeners now that every registry binding is done. Modders
         // can safely touch Items/Blocks/etc. .get() inside these callbacks (e.g. to call
@@ -145,6 +155,13 @@ public final class Entry implements ModInitializer {
         EntityType<T> type = entry.builder().build(id.toString());
         Registry.register(BuiltInRegistries.ENTITY_TYPE, id, type);
         entry.ref().set(type);
+    }
+
+    private static <A extends ArgumentType<?>, T extends ArgumentTypeInfo.Template<A>> void bindArgumentType(
+            String modId, ArgumentTypes.Entry<A, T> entry) {
+        ArgumentTypeRegistry.registerArgumentType(
+                ResourceLocation.fromNamespaceAndPath(modId, entry.path()),
+                entry.argClass(), entry.info());
     }
 
     private static <T extends AbstractContainerMenu> void bindMenu(MenuRegistry.Entry<T> entry, String modId) {

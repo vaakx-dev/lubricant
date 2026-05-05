@@ -2,6 +2,7 @@ package wd40.lubricant.neoforge.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.client.gui.LayeredDraw;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.Screen;
@@ -22,21 +23,26 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.ScreenEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import wd40.lubricant.api.client.renderer.block.BlockRenderers;
 import wd40.lubricant.api.client.gui.render.HudLayer;
 import wd40.lubricant.api.client.gui.render.HudRenderers;
 import wd40.lubricant.api.event.Event;
+import wd40.lubricant.api.event.ScreenLifecycleListener;
+import wd40.lubricant.api.event.ScreenRenderListener;
 import wd40.lubricant.internal.rendering.RendererHelper;
 import wd40.lubricant.internal.event.BridgedEvent;
 
@@ -71,10 +77,26 @@ public final class Renderers implements RendererHelper {
     final List<PendingModelLayer> pendingModelLayers = new ArrayList<>();
     final List<PendingHud> pendingHuds = new ArrayList<>();
     final List<PendingMenuScreen<?, ?>> pendingMenuScreens = new ArrayList<>();
+    final List<PendingItemColor> pendingItemColors = new ArrayList<>();
 
     private final Event<Consumer<Minecraft>> clientTick = new BridgedEvent<>(
             l -> NeoForge.EVENT_BUS.addListener(
                     (ClientTickEvent.Post e) -> l.accept(Minecraft.getInstance())));
+
+    private final Event<ScreenLifecycleListener> screenOpen = new BridgedEvent<>(
+            listener -> NeoForge.EVENT_BUS.addListener(
+                    (ScreenEvent.Init.Post event) -> listener.on(Minecraft.getInstance(), event.getScreen())));
+
+    private final Event<ScreenLifecycleListener> screenClose = new BridgedEvent<>(
+            listener -> NeoForge.EVENT_BUS.addListener(
+                    (ScreenEvent.Closing event) -> listener.on(Minecraft.getInstance(), event.getScreen())));
+
+    private final Event<ScreenRenderListener> screenRender = new BridgedEvent<>(
+            listener -> NeoForge.EVENT_BUS.addListener(
+                    (ScreenEvent.Render.Post event) -> listener.render(
+                            Minecraft.getInstance(), event.getScreen(),
+                            event.getGuiGraphics(), event.getMouseX(), event.getMouseY(),
+                            event.getPartialTick())));
 
     public Renderers() {
         INSTANCE = this;
@@ -112,6 +134,20 @@ public final class Renderers implements RendererHelper {
     @Override
     public Event<Consumer<Minecraft>> clientTick() {
         return clientTick;
+    }
+
+    @Override
+    public Event<ScreenLifecycleListener> screenOpen() { return screenOpen; }
+
+    @Override
+    public Event<ScreenLifecycleListener> screenClose() { return screenClose; }
+
+    @Override
+    public Event<ScreenRenderListener> screenRender() { return screenRender; }
+
+    @Override
+    public void itemColor(Supplier<? extends Item> item, ItemColor handler) {
+        pendingItemColors.add(new PendingItemColor(item, handler));
     }
 
     @Override
@@ -161,6 +197,8 @@ public final class Renderers implements RendererHelper {
             Supplier<? extends MenuType<? extends M>> type,
             MenuScreens.ScreenConstructor<M, S> screen) {}
 
+    record PendingItemColor(Supplier<? extends Item> item, ItemColor handler) {}
+
     /**
      * Client-only wiring. References {@link EntityRenderersEvent} (stripped
      * on dedicated servers). Loaded only when {@link #attachListenerIfClient}
@@ -173,6 +211,7 @@ public final class Renderers implements RendererHelper {
             modBus.addListener(ClientWiring::onRegisterParticles);
             modBus.addListener(ClientWiring::onRegisterLayers);
             modBus.addListener(ClientWiring::onRegisterGuiLayers);
+            modBus.addListener(ClientWiring::onRegisterItemColors);
             modBus.addListener(ClientWiring::onClientSetup);
             // Block render type is a mutable static (ItemBlockRenderTypes); apply
             // synchronously here. All registry binding is done by this point.
@@ -225,6 +264,13 @@ public final class Renderers implements RendererHelper {
                 event.registerLayerDefinition(p.location(), p.definition()::get);
             }
             INSTANCE.pendingModelLayers.clear();
+        }
+
+        static void onRegisterItemColors(RegisterColorHandlersEvent.Item event) {
+            for (PendingItemColor p : INSTANCE.pendingItemColors) {
+                event.register(p.handler(), p.item().get());
+            }
+            INSTANCE.pendingItemColors.clear();
         }
 
         static void onRegisterGuiLayers(RegisterGuiLayersEvent event) {

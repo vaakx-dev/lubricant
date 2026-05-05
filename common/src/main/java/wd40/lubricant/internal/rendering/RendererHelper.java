@@ -1,6 +1,7 @@
 package wd40.lubricant.internal.rendering;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
@@ -16,11 +17,14 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import wd40.lubricant.api.client.renderer.block.BlockRenderers;
 import wd40.lubricant.api.client.gui.render.HudLayer;
 import wd40.lubricant.api.client.gui.render.HudRenderers;
 import wd40.lubricant.api.event.Event;
+import wd40.lubricant.api.event.ScreenLifecycleListener;
+import wd40.lubricant.api.event.ScreenRenderListener;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -109,4 +113,16 @@ public interface RendererHelper {
     <M extends AbstractContainerMenu, S extends Screen & MenuAccess<M>> void menuScreen(
             Supplier<? extends MenuType<? extends M>> type,
             MenuScreens.ScreenConstructor<M, S> screen);
+
+    /** Fires after a screen's {@code init()} completes. */
+    Event<ScreenLifecycleListener> screenOpen();
+
+    /** Fires when a screen is being removed (close, replaced, etc.). */
+    Event<ScreenLifecycleListener> screenClose();
+
+    /** Fires every frame after a screen finishes drawing. */
+    Event<ScreenRenderListener> screenRender();
+
+    /** Register a per-item tint handler. */
+    void itemColor(Supplier<? extends Item> item, ItemColor handler);
 }

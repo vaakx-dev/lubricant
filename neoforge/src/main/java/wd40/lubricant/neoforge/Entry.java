@@ -1,5 +1,8 @@
 package wd40.lubricant.neoforge;
 
+import com.mojang.brigadier.arguments.ArgumentType;
+import net.minecraft.commands.synchronization.ArgumentTypeInfo;
+import net.minecraft.commands.synchronization.ArgumentTypeInfos;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.core.particles.SimpleParticleType;
@@ -23,6 +26,7 @@ import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import wd40.lubricant.api.block.entity.BlockEntityRegistry;
 import wd40.lubricant.api.block.BlockRegistry;
+import wd40.lubricant.api.commands.ArgumentTypes;
 import wd40.lubricant.api.item.CreativeTabRegistry;
 import wd40.lubricant.api.entity.EntityRegistry;
 import wd40.lubricant.api.item.ItemRegistry;
@@ -88,6 +92,9 @@ public final class Entry {
         }
         for (MenuRegistry registry : MenuRegistry.ALL) {
             attachMenus(registry, busFor(registry.modId(), lubricantBus));
+        }
+        for (ArgumentTypes registry : ArgumentTypes.ALL) {
+            attachArgumentTypes(registry, busFor(registry.modId(), lubricantBus));
         }
 
         // Fire ServerEvent.SETUP listeners during FMLCommonSetupEvent. enqueueWork moves
@@ -218,6 +225,47 @@ public final class Entry {
             });
         }
         tabs.register(bus);
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static void attachArgumentTypes(ArgumentTypes registry, IEventBus bus) {
+        DeferredRegister<ArgumentTypeInfo<?, ?>> argTypes =
+                (DeferredRegister) DeferredRegister.create(Registries.COMMAND_ARGUMENT_TYPE, registry.modId());
+        for (ArgumentTypes.Entry<?, ?> entry : registry.entries()) {
+            registerOneArgumentType(argTypes, entry);
+        }
+        argTypes.register(bus);
+    }
+
+    private static <A extends ArgumentType<?>, T extends ArgumentTypeInfo.Template<A>> void registerOneArgumentType(
+            DeferredRegister<ArgumentTypeInfo<?, ?>> argTypes, ArgumentTypes.Entry<?, ?> raw) {
+        @SuppressWarnings("unchecked")
+        ArgumentTypes.Entry<A, T> entry = (ArgumentTypes.Entry<A, T>) raw;
+        argTypes.register(entry.path(), () -> {
+            ArgumentTypesByClass.put(entry.argClass(), entry.info());
+            return entry.info();
+        });
+    }
+
+    /** Reflective accessor for the private vanilla {@code ArgumentTypeInfos.BY_CLASS} map. */
+    private static final class ArgumentTypesByClass {
+        private static final java.util.Map<Class<?>, ArgumentTypeInfo<?, ?>> MAP;
+        static {
+            try {
+                java.lang.reflect.Field field = ArgumentTypeInfos.class.getDeclaredField("BY_CLASS");
+                field.setAccessible(true);
+                @SuppressWarnings("unchecked")
+                java.util.Map<Class<?>, ArgumentTypeInfo<?, ?>> map =
+                        (java.util.Map<Class<?>, ArgumentTypeInfo<?, ?>>) field.get(null);
+                MAP = map;
+            } catch (ReflectiveOperationException error) {
+                throw new IllegalStateException("lubricant: failed to access ArgumentTypeInfos.BY_CLASS", error);
+            }
+        }
+
+        static void put(Class<?> argClass, ArgumentTypeInfo<?, ?> info) {
+            MAP.put(argClass, info);
+        }
     }
 
     private static void attachMenus(MenuRegistry registry, IEventBus bus) {
