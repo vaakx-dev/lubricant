@@ -13,6 +13,7 @@ import wd40.lubricant.api.event.ItemEvent;
 import wd40.lubricant.api.event.PlayerEvent;
 import wd40.lubricant.api.event.ServerEvent;
 import wd40.vaakx.cog.Cog;
+import wd40.vaakx.cog.common.config.Configs;
 import wd40.vaakx.cog.common.entities.Entities;
 import wd40.vaakx.cog.common.items.Items;
 import wd40.vaakx.cog.common.net.Channel;
@@ -63,7 +64,7 @@ public final class Server implements ServerInit {
             // component back to the client.
             if (level.isClientSide()) return InteractionResult.PASS;
             ItemStack held = player.getItemInHand(hand);
-            if (held.is(Items.COGS)) {
+            if (held.is(Items.COGS) && Configs.COG.get().logTagUses) {
                 Cog.LOG.info("used a cog-tagged item: {}", held.getItem());
             }
             if (held.is(Items.GREASED_COG.get())) {
