@@ -1,5 +1,6 @@
 package wd40.lubricant.internal;
 
+import wd40.lubricant.internal.config.ConfigHelper;
 import wd40.lubricant.internal.rendering.RendererHelper;
 import wd40.lubricant.internal.data.BlockEntityHelper;
 import wd40.lubricant.internal.data.EntityHelper;
@@ -34,6 +35,7 @@ public final class Services {
     private static volatile EntityHelper ENTITIES;
     private static volatile RendererHelper RENDERERS;
     private static volatile boolean RENDERERS_LOADED;
+    private static volatile ConfigHelper CONFIG;
 
     /** The loader-specific {@link EventHelper}, used by {@code Events}. */
     public static EventHelper events() {
@@ -114,6 +116,18 @@ public final class Services {
             RENDERERS_LOADED = true;
             return RENDERERS;
         }
+    }
+
+    /** The loader-specific {@link ConfigHelper}, used by {@code Config}. */
+    public static ConfigHelper config() {
+        ConfigHelper local = CONFIG;
+        if (local == null) {
+            local = ServiceLoader.load(ConfigHelper.class).findFirst()
+                    .orElseThrow(() -> new IllegalStateException(
+                            "No lubricant ConfigHelper service found - is the lubricant loader module on the classpath?"));
+            CONFIG = local;
+        }
+        return local;
     }
 
     private Services() {}
