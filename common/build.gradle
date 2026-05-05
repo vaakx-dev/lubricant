@@ -1,5 +1,7 @@
 import wd40.lubricant.buildscript.SetupVanillaMinecraftTask
 
+apply plugin: 'maven-publish'
+
 // The 'common' module compiles against vanilla Minecraft only.
 // Loader-specific code lives in :fabric, :forge, :neoforge.
 
@@ -56,5 +58,58 @@ configurations {
 artifacts {
     vanillaMc(vanillaMcJar) {
         builtBy tasks.named('setupVanillaMinecraft')
+    }
+}
+
+// Bundle: single jar that loads on both Fabric and NeoForge.
+// Wraps :fabric:remapJar and :neoforge:jar as nested jars (JIJ).
+// Metadata templates live in common/bundle/ - kept outside src/main/resources
+// so they don't leak into the per-loader jars.
+tasks.register('bundle', Jar) {
+    group = 'lubricant'
+    description = 'Build one jar that works on both fabric and neoforge'
+    dependsOn ':fabric:remapJar', ':neoforge:jar'
+
+    archiveBaseName = mod_id
+    archiveVersion  = mod_version
+    destinationDirectory = layout.buildDirectory.dir('libs')
+
+    inputs.property 'version', mod_version
+
+    from(file('bundle')) {
+        filesMatching(['fabric.mod.json', 'META-INF/neoforge.mods.toml', 'META-INF/jarjar/metadata.json']) {
+            expand(version: mod_version)
+        }
+    }
+    from(tasks.getByPath(':fabric:remapJar').archiveFile) {
+        into 'META-INF/jars'
+        rename { "${mod_id}-fabric.jar" }
+    }
+    from(tasks.getByPath(':neoforge:jar').archiveFile) {
+        into 'META-INF/jars'
+        rename { "${mod_id}-neoforge.jar" }
+    }
+}
+
+// Publish the bundle as a maven artifact so downstream mods can pull it
+// from a static maven (GitHub Pages). Version is per-MC-branch SNAPSHOT
+// so the same coordinates always resolve to the latest build for that MC version.
+// Publications go to maven local (~/.m2/repository) only - the artifact is
+// dev/internal, not for public distribution. -DEV suffix on the version keeps
+// the filename literal (no SNAPSHOT timestamping) so updates overwrite in place.
+publishing {
+    publications {
+        common(MavenPublication) {
+            groupId    = 'wd40.lubricant'
+            artifactId = 'common'
+            version    = "${minecraft_version}-DEV"
+            artifact tasks.named('jar')
+        }
+        bundle(MavenPublication) {
+            groupId    = 'wd40.lubricant'
+            artifactId = mod_id
+            version    = "${minecraft_version}-DEV"
+            artifact tasks.named('bundle')
+        }
     }
 }

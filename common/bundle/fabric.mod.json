@@ -1,0 +1,13 @@
+{
+    "schemaVersion": 1,
+    "id": "lubricant_bundle",
+    "version": "${version}",
+    "name": "Lubricant Bundle",
+    "description": "Loader-agnostic wrapper. Fabric and NeoForge each load their nested jar from this single artifact.",
+    "authors": ["vaakx"],
+    "license": "MIT",
+    "environment": "*",
+    "jars": [
+        {"file": "META-INF/jars/lubricant-fabric.jar"}
+    ]
+}

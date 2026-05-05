@@ -1,0 +1,10 @@
+modLoader = "lowcodefml"
+loaderVersion = "[4,)"
+license = "MIT"
+
+[[mods]]
+modId = "lubricant_bundle"
+version = "${version}"
+displayName = "Lubricant Bundle"
+authors = "vaakx"
+description = '''Loader-agnostic wrapper. The real mod ships as a nested jar; NeoForge picks it up via JIJ metadata.'''

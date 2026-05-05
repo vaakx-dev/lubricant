@@ -2,10 +2,22 @@ import wd40.lubricant.buildscript.AccessWidenerToTransformerConverter
 
 plugins {
     id 'net.neoforged.moddev' version '2.0.141'
+    id 'maven-publish'
 }
 
 base {
     archivesName = "${mod_id}-neoforge"
+}
+
+publishing {
+    publications {
+        neoforge(MavenPublication) {
+            groupId    = 'wd40.lubricant'
+            artifactId = 'neoforge'
+            version    = "${minecraft_version}-DEV"
+            artifact tasks.named('jar')
+        }
+    }
 }
 
 // Share common's source + resource dirs.

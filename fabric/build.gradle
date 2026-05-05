@@ -1,9 +1,21 @@
 plugins {
     id 'fabric-loom' version '1.7.4'
+    id 'maven-publish'
 }
 
 base {
     archivesName = "${mod_id}-fabric"
+}
+
+publishing {
+    publications {
+        fabric(MavenPublication) {
+            groupId    = 'wd40.lubricant'
+            artifactId = 'fabric'
+            version    = "${minecraft_version}-DEV"
+            artifact tasks.named('remapJar')
+        }
+    }
 }
 
 // Pull common's sources + resources into this project's source set so they're compiled

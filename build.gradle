@@ -39,3 +39,20 @@ tasks.register('runAllServers') {
     description = 'Run fabric and neoforge dev servers sequentially'
     dependsOn ':fabric:runServer', ':neoforge:runServer'
 }
+
+// :common owns the bundle task. Use ./gradlew bundle (or :common:bundle).
+tasks.register('bundle') {
+    group = 'lubricant'
+    description = 'Build one jar that works on both fabric and neoforge'
+    dependsOn ':common:bundle'
+}
+
+// Publish all four artifacts (common, fabric, neoforge, bundle) to ~/.m2/repository
+// for downstream mods to consume via mavenLocal(). Internal/dev only.
+tasks.register('publish') {
+    group = 'lubricant'
+    description = 'Publish lubricant artifacts (common/fabric/neoforge/bundle) to maven local'
+    dependsOn ':common:publishToMavenLocal',
+              ':fabric:publishToMavenLocal',
+              ':neoforge:publishToMavenLocal'
+}

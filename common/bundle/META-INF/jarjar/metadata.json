@@ -1,0 +1,10 @@
+{
+    "jars": [
+        {
+            "identifier": {"group": "wd40.lubricant", "artifact": "lubricant-neoforge"},
+            "version": {"range": "[1.0.0,)", "artifactVersion": "${version}"},
+            "path": "META-INF/jars/lubricant-neoforge.jar",
+            "isObfuscated": false
+        }
+    ]
+}
