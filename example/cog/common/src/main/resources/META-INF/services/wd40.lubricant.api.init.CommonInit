@@ -8,4 +8,5 @@ wd40.vaakx.cog.common.tabs.Tabs
 wd40.vaakx.cog.common.menus.Menus
 wd40.vaakx.cog.common.saveddata.Worlds
 wd40.vaakx.cog.common.config.Configs
+wd40.vaakx.cog.common.commands.ArgTypes
 wd40.vaakx.cog.common.net.Channel

@@ -9,10 +9,14 @@ import net.minecraft.world.level.Level;
 import wd40.lubricant.api.init.ServerInit;
 import wd40.lubricant.api.entity.EntityData;
 import wd40.lubricant.api.item.StackData;
+import wd40.lubricant.api.event.CommandEvent;
 import wd40.lubricant.api.event.ItemEvent;
 import wd40.lubricant.api.event.PlayerEvent;
 import wd40.lubricant.api.event.ServerEvent;
+import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.Component;
 import wd40.vaakx.cog.Cog;
+import wd40.vaakx.cog.common.commands.CogCountArgument;
 import wd40.vaakx.cog.common.config.Configs;
 import wd40.vaakx.cog.common.entities.Entities;
 import wd40.vaakx.cog.common.items.Items;
@@ -82,6 +86,16 @@ public final class Server implements ServerInit {
             if (tick % 20 != 0) return;
             Channel.HELLO.sendToAll(server, new HelloPayload(tick));
         });
+
+        CommandEvent.REGISTER.register(dispatcher ->
+                dispatcher.register(Commands.literal("cogcount")
+                        .then(Commands.argument("amount", CogCountArgument.cogCount())
+                                .executes(context -> {
+                                    int amount = CogCountArgument.getCogCount(context, "amount");
+                                    context.getSource().sendSystemMessage(
+                                            Component.literal("cog count: " + amount));
+                                    return amount;
+                                }))));
     }
 
     private static void playFeedback(Player player, Level level) {

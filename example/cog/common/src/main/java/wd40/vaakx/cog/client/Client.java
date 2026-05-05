@@ -5,13 +5,17 @@ import net.minecraft.client.particle.EndRodParticle;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import wd40.lubricant.api.init.ClientInit;
+import wd40.lubricant.api.client.color.item.ItemColors;
 import wd40.lubricant.api.client.renderer.entity.EntityRenderers;
 import wd40.lubricant.api.client.gui.render.HudRenderers;
 import wd40.lubricant.api.client.gui.screens.MenuRenderers;
 import wd40.lubricant.api.client.renderer.particle.ParticleRenderers;
+import wd40.lubricant.api.item.StackData;
 import wd40.lubricant.api.event.ClientEvent;
+import wd40.lubricant.api.event.ScreenEvent;
 import wd40.vaakx.cog.Cog;
 import wd40.vaakx.cog.common.entities.Entities;
+import wd40.vaakx.cog.common.items.Items;
 import wd40.vaakx.cog.common.menus.Menus;
 import wd40.vaakx.cog.common.particles.Particles;
 
@@ -50,6 +54,22 @@ public final class Client implements ClientInit {
         ClientEvent.TICK.register(client -> tickCounter++);
 
         MenuRenderers.register(Menus.COUNTER, CounterScreen::new);
+
+        ScreenEvent.OPEN.register((client, screen) -> {
+            if (screen instanceof CounterScreen) Cog.LOG.info("counter screen opened");
+        });
+        ScreenEvent.CLOSE.register((client, screen) -> {
+            if (screen instanceof CounterScreen) Cog.LOG.info("counter screen closed");
+        });
+
+        // GREASED_COG layer0 tint: green when uncharged, red as CHARGE climbs.
+        ItemColors.register(Items.GREASED_COG, (stack, tintIndex) -> {
+            if (tintIndex != 0) return -1;
+            int charge = StackData.get(stack, Items.CHARGE);
+            int red = Math.min(255, charge * 12);
+            int green = 255 - red;
+            return 0xFF000000 | (red << 16) | (green << 8);
+        });
     }
 
     public Client() {}
