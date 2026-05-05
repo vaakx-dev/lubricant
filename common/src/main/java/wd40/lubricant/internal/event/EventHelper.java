@@ -4,9 +4,9 @@ import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import wd40.lubricant.api.event.EntityInteractListener;
+import wd40.lubricant.api.event.events.common.EntityInteractListener;
 import wd40.lubricant.api.event.Event;
-import wd40.lubricant.api.event.ItemUseListener;
+import wd40.lubricant.api.event.events.common.ItemUseListener;
 
 import java.util.function.Consumer;
 

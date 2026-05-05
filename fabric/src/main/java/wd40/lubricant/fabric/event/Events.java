@@ -12,9 +12,9 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
-import wd40.lubricant.api.event.EntityInteractListener;
+import wd40.lubricant.api.event.events.common.EntityInteractListener;
 import wd40.lubricant.api.event.Event;
-import wd40.lubricant.api.event.ItemUseListener;
+import wd40.lubricant.api.event.events.common.ItemUseListener;
 import wd40.lubricant.internal.event.BridgedEvent;
 import wd40.lubricant.internal.event.EventHelper;
 

@@ -12,9 +12,9 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
-import wd40.lubricant.api.event.EntityInteractListener;
+import wd40.lubricant.api.event.events.common.EntityInteractListener;
 import wd40.lubricant.api.event.Event;
-import wd40.lubricant.api.event.ItemUseListener;
+import wd40.lubricant.api.event.events.common.ItemUseListener;
 import wd40.lubricant.internal.event.BridgedEvent;
 import wd40.lubricant.internal.event.EventHelper;
 

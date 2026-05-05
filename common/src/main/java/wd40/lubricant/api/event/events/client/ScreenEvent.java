@@ -1,5 +1,6 @@
-package wd40.lubricant.api.event;
+package wd40.lubricant.api.event.events.client;
 
+import wd40.lubricant.api.event.Event;
 import wd40.lubricant.internal.Datagen;
 import wd40.lubricant.internal.Services;
 import wd40.lubricant.internal.rendering.RendererHelper;

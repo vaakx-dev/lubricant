@@ -23,8 +23,8 @@ import wd40.lubricant.api.client.renderer.block.BlockRenderers;
 import wd40.lubricant.api.client.gui.render.HudLayer;
 import wd40.lubricant.api.client.gui.render.HudRenderers;
 import wd40.lubricant.api.event.Event;
-import wd40.lubricant.api.event.ScreenLifecycleListener;
-import wd40.lubricant.api.event.ScreenRenderListener;
+import wd40.lubricant.api.event.events.client.ScreenLifecycleListener;
+import wd40.lubricant.api.event.events.client.ScreenRenderListener;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
